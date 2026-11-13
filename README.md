@@ -21,3 +21,13 @@ SINGLE=1 npx vite build   # one self-contained HTML file in dist-single/
 - **Live season** (`seasonSimulator.ts`): minute-by-minute Poisson sim, a 20-team table, a results ticker and Golden Boot / Playmaker / Golden Glove leaderboards. Tactical pauses come at MW19 (against your closest rival) and at MW38 when something is at stake.
 - **Review card**: grades from F to S+ with a stamp reveal, the Scout's Verdict, awards and a copyable emoji share grid.
 - **Trophy Vault**: S, S+ and unbeaten squads plus career stats, saved in `localStorage`.
+
+## Editing players in a spreadsheet
+
+```bash
+python3 scripts/export_players.py PackDraft38_Players.xlsx   # database → Excel
+python3 scripts/import_players.py PackDraft38_Players.xlsx --dry-run   # check and preview changes
+python3 scripts/import_players.py PackDraft38_Players.xlsx   # Excel → src/data/players.ts
+```
+
+The workbook has dropdowns for every fixed field, a Summary tab counting cards per tier and position, and a Guide tab. The import checks every row and changes nothing if any row has a problem.
