@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Check, Copy, Crown, Medal, RotateCcw, Shield, Target, Trophy, Footprints } from 'lucide-react';
-import { FORMATIONS } from '../data/formations';
+import { FORMATIONS, pitchY } from '../data/formations';
 import { MANAGERS_BY_ID } from '../data/managers';
 import type { FormationId, Grade, Lineup, ManagerId, SeasonSummary, TeamRating } from '../types/game';
 import { GRADE_INFO, ordinal } from '../engine/seasonSimulator';
@@ -111,7 +111,7 @@ export function SeasonReviewCard({ summary, teamName, formationId, lineup, manag
       <div className={highlight ? 'text-yellow-300' : 'text-white/50'}>{icon}</div>
       <div className="min-w-0">
         <div className="text-[10px] font-black uppercase tracking-widest text-white/50">{label}</div>
-        <div className="truncate text-sm font-bold text-white">{value}</div>
+        <div className="text-sm font-bold leading-snug text-white">{value}</div>
       </div>
     </div>
   );
@@ -179,7 +179,7 @@ export function SeasonReviewCard({ summary, teamName, formationId, lineup, manag
               {f.slots.map((s) => {
                 const c = lineup[s.id];
                 return c ? (
-                  <div key={s.id} className="absolute -translate-x-1/2 -translate-y-1/2" style={{ left: `${s.x}%`, top: `${s.y}%` }}>
+                  <div key={s.id} className="absolute -translate-x-1/2 -translate-y-1/2 max-sm:scale-[0.8]" style={{ left: `${s.x}%`, top: `${pitchY(s.y)}%` }}>
                     <PlayerCardUI card={c} size="xs" tilt={false} />
                   </div>
                 ) : null;

@@ -102,6 +102,7 @@ export function PackOpener({ packNumber, cards, packKey, selectedId, onSelect, r
       later(350, () => {
         setStage('tell');
         setFlash({ key: Date.now(), tier: top });
+        later(1700, () => setFlash(null));
         sfx.stinger(top);
         shakeScreen('heavy');
         goldConfetti(1);
@@ -117,6 +118,7 @@ export function PackOpener({ packNumber, cards, packKey, selectedId, onSelect, r
 
     setStage('tell');
     setFlash({ key: Date.now(), tier: top });
+    later(1400, () => setFlash(null));
     sfx.stinger(top);
     if (top === 'RISING_WORLD') {
       shakeScreen('micro');

@@ -57,10 +57,10 @@ function userPlayers(formationId: FormationId, lineup: Lineup): LeaguePlayer[] {
       const c = lineup[s.id]!;
       const g = positionGroup(s.label);
       const baseScore =
-        s.label === 'ST' ? 6.2 : s.label === 'RW' || s.label === 'LW' ? 4.2 : s.label === 'CAM' ? 3.2 : s.label === 'RM' || s.label === 'LM' ? 2.6 : s.label === 'CM' ? 1.8 : s.label === 'CDM' ? 0.8 : g === 'DEF' ? (s.label === 'CB' ? 0.55 : 0.6) : 0;
+        s.label === 'ST' ? 4.6 : s.label === 'RW' || s.label === 'LW' ? 4.2 : s.label === 'CAM' ? 3.2 : s.label === 'RM' || s.label === 'LM' ? 2.6 : s.label === 'CM' ? 1.8 : s.label === 'CDM' ? 0.8 : g === 'DEF' ? (s.label === 'CB' ? 0.55 : 0.6) : 0;
       const baseAssist =
         s.label === 'CAM' ? 4 : s.label === 'RW' || s.label === 'LW' ? 3.2 : s.label === 'RM' || s.label === 'LM' ? 3 : s.label === 'CM' ? 2.6 : s.label === 'ST' ? 1.7 : s.label === 'CDM' ? 1 : s.label === 'RB' || s.label === 'LB' ? 1.7 : s.label === 'CB' ? 0.3 : 0.1;
-      const shoMul = Math.pow(c.stats.sho / 78, 2.4);
+      const shoMul = Math.pow(c.stats.sho / 78, 1.6);
       const pasMul = Math.pow(c.stats.pas / 78, 2.2);
       const archScore = ['Poacher', 'Complete Forward', 'Target Man', 'Inside Forward'].includes(c.archetype) ? 1.2 : 1;
       const archAssist = ['Advanced Playmaker', 'Winger', 'Regista', 'Wing-Back'].includes(c.archetype) ? 1.25 : 1;
@@ -71,7 +71,7 @@ function userPlayers(formationId: FormationId, lineup: Lineup): LeaguePlayer[] {
         pos: s.label,
         isUser: true,
         card: c,
-        scoreWeight: s.label === 'GK' ? 0 : baseScore * shoMul * archScore,
+        scoreWeight: s.label === 'GK' ? 0 : Math.pow(baseScore * shoMul * archScore, 0.75),
         assistWeight: baseAssist * pasMul * archAssist,
       };
     });
@@ -92,8 +92,8 @@ function rivalPlayers(code: string, roster: RivalPlayer[], reserves: RivalPlayer
     teamId: code,
     pos: p.pos,
     isUser: false,
-    scoreWeight: p.sw,
-    assistWeight: p.aw,
+    scoreWeight: Math.pow(p.sw, 0.6),
+    assistWeight: Math.pow(p.aw, 0.7),
   }));
 }
 
@@ -287,7 +287,7 @@ export class SeasonSim {
 
   private lambda(att: SimTeam, def: SimTeam, home: boolean) {
     const diff = att.attack - def.defence;
-    return 1.32 * Math.exp(diff * 0.09) * (home ? 1.1 : 0.92);
+    return 1.2 * Math.exp(diff * 0.07) * (home ? 1.1 : 0.92);
   }
 
   private playMatch(mw: number, homeId: string, awayId: string, shout?: TacticalShout): MatchResult {

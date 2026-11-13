@@ -123,7 +123,7 @@ export function PlayerCardUI({ card, size = 'md', onClick, selected, dimmed, sho
       {/* top-right: season era badge */}
       <div className="absolute right-1 top-1 z-10 flex flex-col items-end gap-0.5">
         <span className={`rounded px-1 py-[1px] font-black ${d.small} uppercase tracking-wider bg-black/45 backdrop-blur-sm`}>
-          {card.season} {card.era}
+          {size === 'xs' ? card.season : `${card.season} ${card.era}`}
         </span>
         {!tiny && (
           <span className="rounded px-1 text-[9px] font-black" style={{ background: club.primary, color: club.secondary === club.primary ? '#fff' : club.secondary, border: `1px solid ${club.accent}` }}>
@@ -133,7 +133,7 @@ export function PlayerCardUI({ card, size = 'md', onClick, selected, dimmed, sho
       </div>
 
       {/* portrait */}
-      <div className="absolute left-1/2 z-[2] -translate-x-1/2" style={{ top: tiny ? d.h * 0.1 : d.h * 0.09 }}>
+      <div className="absolute left-1/2 z-[5] -translate-x-1/2" style={{ top: tiny ? d.h * 0.1 : d.h * 0.09 }}>
         <PlayerCaricature traits={card.traits} kitPrimaryColor={club.primary} kitSecondaryColor={club.secondary} seed={card.id} size={d.face} />
       </div>
 

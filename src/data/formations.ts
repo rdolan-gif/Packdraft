@@ -124,3 +124,8 @@ export function slotAccepts(slot: Position): Position[] {
   const extra: Partial<Record<Position, Position[]>> = { RM: ['RW'], LM: ['LW'], RW: ['RM'], LW: ['LM'] };
   return [slot, ...(extra[slot] ?? [])];
 }
+
+/** Map a slot's 0..100 y onto a pitch so edge cards never clip. */
+export function pitchY(y: number) {
+  return 9 + y * 0.83;
+}

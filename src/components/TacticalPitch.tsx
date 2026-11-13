@@ -1,5 +1,5 @@
 import { AlertTriangle, ArrowLeftRight, Link2, RefreshCw } from 'lucide-react';
-import { FORMATIONS } from '../data/formations';
+import { FORMATIONS, pitchY } from '../data/formations';
 import { MANAGERS_BY_ID } from '../data/managers';
 import { fitFor } from '../engine/chemistry';
 import type { FormationId, Lineup, ManagerId, PlayerCard, TeamRating } from '../types/game';
@@ -89,9 +89,9 @@ export function TacticalPitch({ formationId, lineup, rating, managerId, pendingC
               <line
                 key={`${l.a}-${l.b}`}
                 x1={a.x}
-                y1={a.y}
+                y1={pitchY(a.y)}
                 x2={b.x}
-                y2={b.y}
+                y2={pitchY(b.y)}
                 stroke={LINK_COLOR[l.kind]}
                 strokeWidth={0.35 + l.strength * 0.18}
                 strokeLinecap="round"
@@ -113,8 +113,8 @@ export function TacticalPitch({ formationId, lineup, rating, managerId, pendingC
             <button
               key={slot.id}
               onClick={() => onSlotClick(slot.id)}
-              className="absolute -translate-x-1/2 -translate-y-1/2 transition-transform hover:z-20 hover:scale-105 focus:outline-none"
-              style={{ left: `${slot.x}%`, top: `${slot.y}%` }}
+              className="absolute -translate-x-1/2 -translate-y-1/2 transition-transform max-sm:scale-[0.8] hover:z-20 hover:scale-105 focus:outline-none"
+              style={{ left: `${slot.x}%`, top: `${pitchY(slot.y)}%` }}
               aria-label={`${slot.label} slot${card ? `: ${card.name}` : ''}`}
             >
               {card ? (

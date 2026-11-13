@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { ArrowLeft, Check, Copy, Crown, Trash2, Trophy, X } from 'lucide-react';
 import type { CareerStats, VaultEntry } from '../types/game';
-import { FORMATIONS } from '../data/formations';
+import { FORMATIONS, pitchY } from '../data/formations';
 import { MANAGERS_BY_ID } from '../data/managers';
 import { PLAYERS_BY_ID } from '../data/players';
 import { ordinal } from '../engine/seasonSimulator';
@@ -142,7 +142,7 @@ export function TrophyVaultModal({ vault, career, onClose, onDelete }: Props) {
                 const ref = open.lineup.find((l) => l.slotId === s.id);
                 const c = ref ? PLAYERS_BY_ID[ref.cardId] : undefined;
                 return c ? (
-                  <div key={s.id} className="absolute -translate-x-1/2 -translate-y-1/2" style={{ left: `${s.x}%`, top: `${s.y}%` }}>
+                  <div key={s.id} className="absolute -translate-x-1/2 -translate-y-1/2 max-sm:scale-[0.8]" style={{ left: `${s.x}%`, top: `${pitchY(s.y)}%` }}>
                     <PlayerCardUI card={c} size="xs" />
                   </div>
                 ) : null;

@@ -129,7 +129,7 @@ function evalManager(managerId: ManagerId | null, formation: Formation, lineup: 
       return { bonus: 0, active: true, note: 'Late-goal probability ×2 when level or 1 down after 75\'' };
     case 'galactico': {
       const stars = cards.filter((c) => c.tier === 'RISING_WORLD' || c.tier === 'PRIME_ICON').length;
-      return { bonus: Math.round(stars * 0.6 * 10) / 10, active: stars > 0, note: `${stars} Galácticos × +0.6` };
+      return { bonus: Math.round(stars * 0.6 * 10) / 10, active: stars > 0, note: `${stars} Galáctico${stars === 1 ? '' : 's'} (World Class / Prime) at +0.6 each` };
     }
     default:
       return { bonus: 0, active: false, note: '' };

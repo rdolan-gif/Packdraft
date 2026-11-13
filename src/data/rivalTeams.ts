@@ -23,18 +23,18 @@ const P = (id: string, name: string, pos: Position, sw: number, aw: number): Riv
 // An "all-eras" league: every rival is a greatest-hits version of the club.
 export const RIVAL_TEAMS: RivalTeam[] = [
   {
-    code: 'MCI', name: 'Manchester City', short: 'MCI', strength: 88.5, style: 'attack',
-    players: [P('ederson_ederson', 'Ederson', 'GK', 0, 0.2), P('dias_ruben', 'Rúben Dias', 'CB', 0.5, 0.3), P('rodri_rodri', 'Rodri', 'CDM', 1.2, 1.5), P('silva_david', 'David Silva', 'CAM', 1.6, 4), P('foden_phil', 'Phil Foden', 'RW', 3, 2.4), P('aguero_sergio', 'Sergio Agüero', 'ST', 5.5, 1.2), P('haaland_erling', 'Erling Haaland', 'ST', 7.5, 1)],
+    code: 'MCI', name: 'Manchester City', short: 'MCI', strength: 87.5, style: 'attack',
+    players: [P('ederson_ederson', 'Ederson', 'GK', 0, 0.2), P('dias_ruben', 'Rúben Dias', 'CB', 0.5, 0.3), P('rodri_rodri', 'Rodri', 'CDM', 1.2, 1.5), P('silva_david', 'David Silva', 'CAM', 1.6, 4), P('foden_phil', 'Phil Foden', 'RW', 3, 2.4), P('aguero_sergio', 'Sergio Agüero', 'ST', 5.5, 1.2), P('haaland_erling', 'Erling Haaland', 'ST', 5.6, 1)],
     reserves: [P('ortega_stefan', 'Stefan Ortega', 'GK', 0, 0), P('bernardo_silva', 'Bernardo Silva', 'CM', 1.8, 2.4), P('doku_jeremy', 'Jérémy Doku', 'LW', 1.8, 2.2)],
   },
   {
     code: 'ARS', name: 'Arsenal', short: 'ARS', strength: 87.5, style: 'attack',
-    players: [P('seaman_david', 'David Seaman', 'GK', 0, 0), P('saliba_william', 'William Saliba', 'CB', 0.6, 0.2), P('vieira_patrick', 'Patrick Vieira', 'CM', 1.4, 1.6), P('bergkamp_dennis', 'Dennis Bergkamp', 'CAM', 3, 4.2), P('saka_bukayo', 'Bukayo Saka', 'RW', 3.6, 3.2), P('pires_robert', 'Robert Pirès', 'LW', 3, 2.8), P('henry_thierry', 'Thierry Henry', 'ST', 7.2, 2.4)],
+    players: [P('seaman_david', 'David Seaman', 'GK', 0, 0), P('saliba_william', 'William Saliba', 'CB', 0.6, 0.2), P('vieira_patrick', 'Patrick Vieira', 'CM', 1.4, 1.6), P('bergkamp_dennis', 'Dennis Bergkamp', 'CAM', 3, 4.2), P('saka_bukayo', 'Bukayo Saka', 'RW', 3.6, 3.2), P('pires_robert', 'Robert Pirès', 'LW', 3, 2.8), P('henry_thierry', 'Thierry Henry', 'ST', 5.6, 2.4)],
     reserves: [P('raya_david', 'David Raya', 'GK', 0, 0), P('odegaard_martin', 'Martin Ødegaard', 'CAM', 2.2, 3.4), P('havertz_kai', 'Kai Havertz', 'ST', 3.6, 1.2)],
   },
   {
     code: 'LIV', name: 'Liverpool', short: 'LIV', strength: 87, style: 'attack',
-    players: [P('alisson_alisson', 'Alisson', 'GK', 0, 0.1), P('vandijk_virgil', 'Virgil van Dijk', 'CB', 0.9, 0.2), P('alexanderarnold_trent', 'Trent Alexander-Arnold', 'RB', 0.6, 3.6), P('gerrard_steven', 'Steven Gerrard', 'CM', 2.6, 2.4), P('suarez_luis', 'Luis Suárez', 'ST', 5.8, 2.6), P('salah_mohamed', 'Mohamed Salah', 'RW', 6.8, 2.8), P('mane_sadio', 'Sadio Mané', 'LW', 4, 1.8)],
+    players: [P('alisson_alisson', 'Alisson', 'GK', 0, 0.1), P('vandijk_virgil', 'Virgil van Dijk', 'CB', 0.9, 0.2), P('alexanderarnold_trent', 'Trent Alexander-Arnold', 'RB', 0.6, 3.6), P('gerrard_steven', 'Steven Gerrard', 'CM', 2.6, 2.4), P('suarez_luis', 'Luis Suárez', 'ST', 5.8, 2.6), P('salah_mohamed', 'Mohamed Salah', 'RW', 5.4, 2.8), P('mane_sadio', 'Sadio Mané', 'LW', 4, 1.8)],
     reserves: [P('kelleher_caoimhin', 'Caoimhín Kelleher', 'GK', 0, 0), P('firmino_roberto', 'Roberto Firmino', 'ST', 3, 2.8), P('diaz_luis', 'Luis Díaz', 'LW', 3, 1.6)],
   },
   {
@@ -49,7 +49,7 @@ export const RIVAL_TEAMS: RivalTeam[] = [
   },
   {
     code: 'TOT', name: 'Tottenham Hotspur', short: 'TOT', strength: 83, style: 'attack',
-    players: [P('lloris_hugo', 'Hugo Lloris', 'GK', 0, 0), P('king_ledley', 'Ledley King', 'CB', 0.4, 0.1), P('modric_luka', 'Luka Modrić', 'CM', 1.2, 3), P('eriksen_christian', 'Christian Eriksen', 'CAM', 2.6, 3.8), P('son_heungmin', 'Son Heung-min', 'LW', 4.6, 2.4), P('bale_gareth', 'Gareth Bale', 'RW', 4, 2.2), P('kane_harry', 'Harry Kane', 'ST', 7.4, 2.4)],
+    players: [P('lloris_hugo', 'Hugo Lloris', 'GK', 0, 0), P('king_ledley', 'Ledley King', 'CB', 0.4, 0.1), P('modric_luka', 'Luka Modrić', 'CM', 1.2, 3), P('eriksen_christian', 'Christian Eriksen', 'CAM', 2.6, 3.8), P('son_heungmin', 'Son Heung-min', 'LW', 4.6, 2.4), P('bale_gareth', 'Gareth Bale', 'RW', 4, 2.2), P('kane_harry', 'Harry Kane', 'ST', 5.8, 2.4)],
     reserves: [P('vicario_guglielmo', 'Guglielmo Vicario', 'GK', 0, 0), P('vandervaart_rafael', 'Rafael van der Vaart', 'CAM', 2.4, 3), P('defoe_jermain', 'Jermain Defoe', 'ST', 4.4, 0.8)],
   },
   {
