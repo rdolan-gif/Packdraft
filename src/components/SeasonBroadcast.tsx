@@ -114,7 +114,10 @@ export function SeasonBroadcast({ sim, onFinish }: Props) {
     setDecision(null);
     step(false, shout);
     bump();
-    if (speed !== 'instant') setPlaying(true);
+    // Carry on at the chosen speed. (Instant Sim used to stop here and look frozen.)
+    if (sim.done) return;
+    if (speed === 'instant') setInstantRun(true);
+    else setPlaying(true);
   };
 
   const leaders = useMemo(() => sim.leaders(tab, 10), [sim, tab, sim.matchweek]);
@@ -130,7 +133,7 @@ export function SeasonBroadcast({ sim, onFinish }: Props) {
   return (
     <div className="mx-auto flex max-w-7xl flex-col gap-3 px-3 py-4 sm:px-4">
       {/* Broadcast header */}
-      <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-r from-emerald-950 via-black to-emerald-950">
+      <div data-shake-zone className="relative overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-r from-emerald-950 via-black to-emerald-950">
         <div className="flex flex-wrap items-center gap-3 px-4 py-3">
           <div className="flex items-center gap-2">
             <span className="flex items-center gap-1 rounded bg-red-600 px-2 py-0.5 text-[10px] font-black uppercase tracking-widest text-white">
@@ -447,7 +450,9 @@ function DecisionOverlay({ d, sim, onChoose }: { d: DecisionContext; sim: Season
     { id: 'bus', icon: Shield, emoji: '🛡️', title: 'Park the Bus', desc: '−35% xG against · −25% xG for you', cls: 'from-sky-700 to-indigo-900 border-sky-300' },
   ];
   return (
-    <div className="fixed inset-0 z-[90] flex items-center justify-center bg-black/85 p-4 backdrop-blur-sm">
+    // Scrollable so every choice stays reachable on short screens or with enlarged text.
+    <div className="fixed inset-0 z-[90] overflow-y-auto overscroll-contain bg-black/85 backdrop-blur-sm">
+      <div className="flex min-h-full items-center justify-center p-3 sm:p-4">
       <div className="w-full max-w-3xl animate-pop overflow-hidden rounded-3xl border-2 border-yellow-300/70 bg-gradient-to-b from-zinc-900 to-black shadow-[0_0_80px_rgba(250,204,21,.25)]">
         <div className="bg-yellow-300 px-5 py-2 text-center text-xs font-black uppercase tracking-[0.35em] text-black">Touchline Tactical Decision</div>
         <div className="p-5 text-center sm:p-7">
@@ -467,21 +472,24 @@ function DecisionOverlay({ d, sim, onChoose }: { d: DecisionContext; sim: Season
               </div>
             ))}
           </div>
-          <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-3">
+          <div className="mt-4 grid grid-cols-1 gap-2 sm:mt-6 sm:grid-cols-3 sm:gap-3">
             {options.map((o) => (
               <button
                 key={o.id}
                 onClick={() => onChoose(o.id)}
                 onMouseEnter={() => sfx.hover()}
-                className={`group rounded-2xl border-2 bg-gradient-to-br ${o.cls} p-4 text-left transition hover:-translate-y-1 hover:shadow-xl active:scale-95`}
+                className={`group flex items-center gap-3 rounded-2xl border-2 bg-gradient-to-br ${o.cls} p-3 text-left transition hover:-translate-y-1 hover:shadow-xl active:scale-95 sm:block sm:p-4`}
               >
                 <div className="text-3xl">{o.emoji}</div>
-                <div className="mt-1 font-display text-2xl leading-none text-white">{o.title}</div>
-                <div className="mt-1 text-xs font-semibold text-white/80">{o.desc}</div>
+                <div>
+                  <div className="font-display text-2xl leading-none text-white sm:mt-1">{o.title}</div>
+                  <div className="mt-1 text-xs font-semibold text-white/80">{o.desc}</div>
+                </div>
               </button>
             ))}
           </div>
         </div>
+      </div>
       </div>
     </div>
   );

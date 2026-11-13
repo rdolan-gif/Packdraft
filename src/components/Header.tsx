@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
-import { RotateCcw, Trophy, Volume2, VolumeX } from 'lucide-react';
+import { Gauge, RotateCcw, Sparkles, Trophy, Volume2, VolumeX } from 'lucide-react';
 import { isMuted, onMuteChange, setMuted, sfx } from '../engine/soundEffects';
+import { isLite, onLiteChange, setLite } from '../engine/perf';
 import { TOTAL_PACKS } from '../engine/packGenerator';
 
 interface Props {
@@ -15,6 +16,8 @@ interface Props {
 export function Header({ phase, packNumber, picksMade, vaultCount, onOpenVault, onNewRun }: Props) {
   const [muted, setM] = useState(isMuted());
   const [armed, setArmed] = useState(false);
+  const [lite, setL] = useState(isLite());
+  useEffect(() => onLiteChange(setL), []);
   useEffect(() => {
     if (!armed) return;
     const t = window.setTimeout(() => setArmed(false), 3000);
@@ -65,6 +68,19 @@ export function Header({ phase, packNumber, picksMade, vaultCount, onOpenVault, 
           <Trophy className="h-4 w-4" />
           <span className="hidden sm:inline">Trophy Vault</span>
           {vaultCount > 0 && <span className="rounded-full bg-yellow-400 px-1.5 text-[10px] text-black">{vaultCount}</span>}
+        </button>
+        <button
+          onClick={() => {
+            setLite(!lite);
+            sfx.click();
+          }}
+          className={`flex items-center gap-1 rounded-lg border p-2 text-xs font-black uppercase transition ${lite ? 'border-sky-400/50 bg-sky-500/15 text-sky-200' : 'border-white/15 bg-white/5 text-white/80 hover:bg-white/10'}`}
+          aria-label={lite ? 'Lite effects on: tap for full effects' : 'Full effects on: tap for lite effects'}
+          aria-pressed={lite}
+          title={lite ? 'Lite effects (smoother on some phones)' : 'Full effects'}
+        >
+          {lite ? <Gauge className="h-4 w-4" /> : <Sparkles className="h-4 w-4" />}
+          <span className="hidden md:inline">{lite ? 'Lite FX' : 'Full FX'}</span>
         </button>
         <button
           onClick={() => {

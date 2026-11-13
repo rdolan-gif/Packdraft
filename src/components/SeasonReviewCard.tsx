@@ -118,7 +118,7 @@ export function SeasonReviewCard({ summary, teamName, formationId, lineup, manag
 
   return (
     <div className="mx-auto max-w-6xl px-3 py-6 sm:px-4">
-      <div className={`relative overflow-hidden rounded-3xl border-2 bg-gradient-to-br from-zinc-900 via-black to-emerald-950 p-4 sm:p-6 ${g === 'S+' ? 'border-yellow-300' : 'border-white/15'}`}>
+      <div data-shake-zone className={`relative overflow-hidden rounded-3xl border-2 bg-gradient-to-br from-zinc-900 via-black to-emerald-950 p-4 sm:p-6 ${g === 'S+' ? 'border-yellow-300' : 'border-white/15'}`}>
         {g === 'S+' && <div className="holo opacity-30" />}
         <div className="relative grid grid-cols-1 gap-6 lg:grid-cols-[1fr_1.1fr]">
           {/* left: grade + verdict */}

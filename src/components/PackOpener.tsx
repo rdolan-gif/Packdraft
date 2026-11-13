@@ -4,6 +4,7 @@ import type { PlayerCard, Tier } from '../types/game';
 import { highestTier, TIER_RANK, TOTAL_PACKS, tierRates } from '../engine/packGenerator';
 import { sfx } from '../engine/soundEffects';
 import { burstAt, goldConfetti, shakeScreen } from '../engine/fx';
+import { isLite } from '../engine/perf';
 import { CardBack, PlayerCardUI, TIER_TEXT } from './PlayerCardUI';
 
 type Stage = 'sealed' | 'dimming' | 'tell' | 'fanned' | 'revealed';
@@ -186,7 +187,7 @@ export function PackOpener({ packNumber, cards, packKey, selectedId, onSelect, r
   };
 
   const onPackMove = (e: RPointerEvent<HTMLDivElement>) => {
-    if (dragging.current) return;
+    if (dragging.current || e.pointerType !== 'mouse') return;
     const r = e.currentTarget.getBoundingClientRect();
     const px = (e.clientX - r.left) / r.width;
     const py = (e.clientY - r.top) / r.height;
@@ -213,12 +214,12 @@ export function PackOpener({ packNumber, cards, packKey, selectedId, onSelect, r
           />
           {(flash.tier === 'RISING_WORLD' || flash.tier === 'PRIME_ICON') && (
             <div className="absolute inset-0 overflow-hidden">
-              {Array.from({ length: flash.tier === 'PRIME_ICON' ? 18 : 10 }).map((_, i) => (
+              {Array.from({ length: flash.tier === 'PRIME_ICON' ? (isLite() ? 8 : 18) : isLite() ? 6 : 10 }).map((_, i) => (
                 <div
                   key={i}
                   className="light-beam animate-flash"
                   style={{
-                    transform: `rotate(${(360 / (flash.tier === 'PRIME_ICON' ? 18 : 10)) * i}deg)`,
+                    transform: `rotate(${(360 / (flash.tier === 'PRIME_ICON' ? (isLite() ? 8 : 18) : isLite() ? 6 : 10)) * i}deg)`,
                     background:
                       flash.tier === 'PRIME_ICON'
                         ? `linear-gradient(180deg, hsla(${(i * 40) % 360},100%,75%,.95), transparent)`
@@ -281,7 +282,7 @@ export function PackOpener({ packNumber, cards, packKey, selectedId, onSelect, r
       </div>
 
       {!showCards && (
-        <div className={`relative flex flex-1 flex-col items-center justify-center ${stage === 'tell' && top === 'CULT_VETERAN' ? 'animate-pop' : ''}`}>
+        <div data-shake-zone className={`relative flex flex-1 flex-col items-center justify-center ${stage === 'tell' && top === 'CULT_VETERAN' ? 'animate-pop' : ''}`}>
           {/* The foil pack */}
           <div
             ref={packRef}
@@ -375,7 +376,7 @@ export function PackOpener({ packNumber, cards, packKey, selectedId, onSelect, r
       )}
 
       {showCards && (
-        <div className="flex w-full flex-1 flex-col items-center">
+        <div data-shake-zone className="flex w-full flex-1 flex-col items-center">
           <div className="flex w-full flex-wrap items-start justify-center gap-2 sm:gap-3">
             {cards.map((card, i) => {
               const isFlipped = flipped.has(i);

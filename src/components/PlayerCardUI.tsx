@@ -1,4 +1,4 @@
-import { useRef, type CSSProperties, type MouseEvent } from 'react';
+import { useRef, type CSSProperties, type PointerEvent } from 'react';
 import { Crown, Star } from 'lucide-react';
 import type { PlayerCard, Tier } from '../types/game';
 import { getClub } from '../data/clubs';
@@ -66,8 +66,8 @@ export function PlayerCardUI({ card, size = 'md', onClick, selected, dimmed, sho
   const isGK = card.positions[0] === 'GK';
   const tiny = size === 'xs' || size === 'sm';
 
-  const onMove = (e: MouseEvent) => {
-    if (!tilt || !ref.current) return;
+  const onMove = (e: PointerEvent) => {
+    if (!tilt || !ref.current || e.pointerType !== 'mouse') return;
     const r = ref.current.getBoundingClientRect();
     const px = (e.clientX - r.left) / r.width;
     const py = (e.clientY - r.top) / r.height;
@@ -90,9 +90,10 @@ export function PlayerCardUI({ card, size = 'md', onClick, selected, dimmed, sho
       tabIndex={onClick ? 0 : undefined}
       onClick={onClick}
       onKeyDown={(e) => onClick && (e.key === 'Enter' || e.key === ' ') && (e.preventDefault(), onClick())}
-      onMouseMove={onMove}
-      onMouseEnter={() => onClick && sfx.hover()}
-      onMouseLeave={onLeave}
+      onPointerMove={onMove}
+      onPointerEnter={(e) => onClick && e.pointerType === 'mouse' && sfx.hover()}
+      onPointerLeave={onLeave}
+      onPointerCancel={onLeave}
       className={`card-base tier-${card.tier} ${card.tier === 'CULT_VETERAN' ? 'sweep' : ''} ${prime ? 'animate-aura' : ''} ${
         selected ? 'ring-4 ring-emerald-400 ring-offset-2 ring-offset-black' : ''
       } ${dimmed ? 'opacity-40 grayscale' : ''} ${onClick ? 'cursor-pointer' : ''} select-none shrink-0 ${className}`}
