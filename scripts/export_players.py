@@ -15,7 +15,7 @@ from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
 from openpyxl.utils import get_column_letter as L
 from openpyxl.worksheet.datavalidation import DataValidation
 
-from pd38_schema import (ACCESSORIES, ARCHETYPES, CLUBS, COL, ERAS, EXPRESSIONS, FACIAL_HAIR, HAIR_COLOURS, HAIR_STYLES, HEAD_SHAPES, HEADERS,
+from pd38_schema import (ACCESSORIES, ARCHETYPES, CLUB_HEADERS, CLUB_ROWS, CLUBS, COL, ERAS, EXPRESSIONS, FACIAL_HAIR, HAIR_COLOURS, HAIR_STYLES, HEAD_SHAPES, HEADERS,
                          OVR_MAX, OVR_MIN, POSITION_GROUP, POSITIONS, ROOT, SKIN, STAT_KEYS, STAT_MAX, STAT_MIN, TIERS, TRAIT_COLS)
 
 OUT = sys.argv[1] if len(sys.argv) > 1 else str(ROOT / "PackDraft38_Players.xlsx")
@@ -60,7 +60,7 @@ for code, name, lo, hi in TIERS:
     guide.append((f"{name} ({code}): OVR {lo}–{hi}", ""))
 guide += [
     ("To move a card to a different tier, change its OVR. The Tier column updates automatically.", ""),
-    ("Drop rates: Squad 63.5% · Cult 26% · World Class 8.5% · Prime 2% (4% in pack 11).", ""),
+    ("Drop rates: Squad 63.5% · Cult Hero 15% · Veteran 11% · World Class 8.5% · Prime 2% (4% in pack 11).", ""),
     ("", ""),
     ("ADDING, REMOVING, RENAMING", "h"),
     ("Add a card: copy an existing row to a new row at the bottom, then edit it. Keep the formulas in the grey columns.", ""),
@@ -74,6 +74,9 @@ guide += [
     ("The import checks every row and lists any problems by row number before anything changes in the game.", ""),
     ("", ""),
     ("The Summary tab counts cards per tier and position, so you can keep every tier stocked for every position.", ""),
+    ("", ""),
+    ("KIT COLOURS", "h"),
+    ("Clubs tab: change Shirt, Trim and Badge Edge with hex colour codes like #DA291C. Every card for that club updates.", ""),
 ]
 for i, (text, kind) in enumerate(guide, start=1):
     c = g.cell(row=i, column=1, value=text)
@@ -190,12 +193,36 @@ ws.add_data_validation(posv)
 
 # Tier colours (cards' own palette)
 tcol = L(COL["Tier (auto)"])
-for code, colour, fg in [("PRIME_ICON", "FACC15", "000000"), ("RISING_WORLD", "059669", "FFFFFF"), ("CULT_VETERAN", "1E40AF", "FFFFFF"), ("STANDARD", "6B7280", "FFFFFF")]:
+for code, colour, fg in [("PRIME_ICON", "F8FAFC", "0F172A"), ("RISING_WORLD", "F59E0B", "000000"), ("VETERAN", "7C3AED", "FFFFFF"), ("CULT_HERO", "DC2626", "FFFFFF"), ("STANDARD", "374151", "FFFFFF")]:
     ws.conditional_formatting.add(f"{tcol}2:{tcol}{LAST_ROW}", FormulaRule(formula=[f'${tcol}2="{code}"'], fill=PatternFill("solid", fgColor=colour), font=Font(name=FONT, color=fg, bold=True)))
 
 ws.cell(row=1, column=COL["Card ID"]).comment = Comment("Calculated from Player ID + Season. This is the card's unique ID in the game.", "PackDraft 38")
 ws.cell(row=1, column=COL["Player ID"]).comment = Comment("Shared by all eras of the same player. Drafting one era removes the others from the pool.", "PackDraft 38")
 ws.cell(row=1, column=COL["OVR"]).comment = Comment(f"{OVR_MIN}–{OVR_MAX}. Sets the tier (rarity) automatically.", "PackDraft 38")
+
+# ───────────────────────── Clubs (kit colours) ─────────────────────────
+cs = wb.create_sheet("Clubs", 2)
+for ci, h in enumerate(CLUB_HEADERS, start=1):
+    c = cs.cell(row=1, column=ci, value=h)
+    c.font, c.fill = f_head, fill_head
+    c.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+cs.row_dimensions[1].height = 30
+for r, (code, name, short, prim, sec, acc) in enumerate(CLUB_ROWS, start=2):
+    cs.cell(row=r, column=1, value=code).font = Font(name=FONT, size=10, bold=True)
+    for ci, v in enumerate([name, short, prim, sec, acc], start=2):
+        c = cs.cell(row=r, column=ci, value=v)
+        c.font = f_input
+    sw = cs.cell(row=r, column=7, value="shirt / trim (as exported)")
+    sw.fill = PatternFill("solid", fgColor=prim.lstrip("#").upper())
+    sw.font = Font(name=FONT, size=9, bold=True, color=sec.lstrip("#").upper())
+    sw.alignment = Alignment(horizontal="center")
+hexv = DataValidation(type="custom", formula1='AND(LEN(D2)=7,LEFT(D2,1)="#")', showErrorMessage=True, errorTitle="Colour code", error="Use a 6-digit hex colour like #DA291C.", showInputMessage=True, promptTitle="Colour", prompt="Hex colour, e.g. #DA291C. Find codes by searching 'colour picker'.")
+hexv.add(f"D2:F{len(CLUB_ROWS) + 60}")
+cs.add_data_validation(hexv)
+for col, w in zip("ABCDEFG", [8, 26, 8, 16, 16, 18, 24]):
+    cs.column_dimensions[col].width = w
+cs.freeze_panes = "B2"
+cs.cell(row=len(CLUB_ROWS) + 3, column=1, value="Shirt = main kit colour (shirt, card sash, table chip). Trim = collar, sleeves, sash stripe. Badge Edge = outline on the club badge. The Preview column shows the colours as exported; it doesn't update as you type.").font = Font(name=FONT, size=9, italic=True)
 
 # ───────────────────────── Summary ─────────────────────────
 sm = wb.create_sheet("Summary", 2)

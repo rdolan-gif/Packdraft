@@ -21,9 +21,10 @@ interface Props {
 
 const FLASH: Record<Tier, { color: string; max: number }> = {
   STANDARD: { color: '#ffffff', max: 0.7 },
-  CULT_VETERAN: { color: '#2563eb', max: 0.85 },
-  RISING_WORLD: { color: 'radial-gradient(circle, #fde68a 0%, #a855f7 45%, #4c1d95 100%)', max: 0.9 },
-  PRIME_ICON: { color: 'radial-gradient(circle, #ffffff 0%, #fde047 30%, #f59e0b 60%, #7c2d12 100%)', max: 1 },
+  CULT_HERO: { color: 'radial-gradient(circle, #fecaca 0%, #dc2626 45%, #450a0a 100%)', max: 0.85 },
+  VETERAN: { color: 'radial-gradient(circle, #ede9fe 0%, #7c3aed 45%, #2e1065 100%)', max: 0.85 },
+  RISING_WORLD: { color: 'radial-gradient(circle, #fffbeb 0%, #facc15 35%, #b45309 70%, #451a03 100%)', max: 0.9 },
+  PRIME_ICON: { color: 'radial-gradient(circle, #ffffff 0%, #ffffff 30%, #e0f2fe 55%, #94a3b8 100%)', max: 1 },
 };
 
 function raysFor(tier: Tier) {
@@ -33,7 +34,7 @@ function raysFor(tier: Tier) {
   const stops: string[] = [];
   for (let i = 0; i < n; i++) {
     const a = i * step;
-    const c = prime ? `hsla(${(i * 40) % 360},100%,75%,.85)` : i % 2 ? 'rgba(250,204,21,.8)' : 'rgba(216,180,254,.85)';
+    const c = prime ? `hsla(${(i * 40) % 360},100%,75%,.85)` : i % 2 ? 'rgba(250,204,21,.85)' : 'rgba(255,247,194,.85)';
     stops.push(`transparent ${a}deg`, `${c} ${a + 1}deg`, `${c} ${a + 2.2}deg`, `transparent ${a + 3.4}deg`);
   }
   return `conic-gradient(from 0deg at 50% 50%, ${stops.join(', ')}, transparent 360deg)`;
@@ -135,7 +136,7 @@ export function PackOpener({ packNumber, cards, packKey, selectedId, onSelect, r
         sfx.stinger(top);
         shakeScreen('heavy');
         goldConfetti(0.7);
-        burstAt(cx, cy + 120, ['#facc15', '#f472b6', '#22d3ee', '#a855f7', '#ffffff'], 60);
+        burstAt(cx, cy + 120, ['#ffffff', '#e0f2fe', '#f472b6', '#22d3ee', '#fde68a'], 60);
       });
       later(350 + 1400, () => {
         setStage('fanned');
@@ -151,9 +152,11 @@ export function PackOpener({ packNumber, cards, packKey, selectedId, onSelect, r
     sfx.stinger(top);
     if (top === 'RISING_WORLD') {
       shakeScreen('micro');
-      burstAt(cx, cy + 100, ['#a855f7', '#facc15', '#ffffff'], 70);
-    } else if (top === 'CULT_VETERAN') {
-      burstAt(cx, cy + 100, ['#93c5fd', '#e5e7eb', '#3b82f6'], 45);
+      burstAt(cx, cy + 100, ['#facc15', '#fde68a', '#ffffff'], 70);
+    } else if (top === 'VETERAN') {
+      burstAt(cx, cy + 100, ['#c4b5fd', '#e5e7eb', '#7c3aed'], 45);
+    } else if (top === 'CULT_HERO') {
+      burstAt(cx, cy + 100, ['#fca5a5', '#e5e7eb', '#dc2626'], 45);
     }
     later(1400, () => {
       setStage('fanned');
@@ -235,7 +238,7 @@ export function PackOpener({ packNumber, cards, packKey, selectedId, onSelect, r
             <div
               className="absolute left-1/2 top-1/2 h-[80vmin] w-[80vmin] rounded-full"
               style={{
-                background: `radial-gradient(circle, transparent 62%, ${flash.tier === 'PRIME_ICON' ? 'rgba(254,240,138,.95)' : 'rgba(196,181,253,.95)'} 66%, transparent 71%)`,
+                background: `radial-gradient(circle, transparent 62%, ${flash.tier === 'PRIME_ICON' ? 'rgba(255,255,255,.95)' : 'rgba(253,224,71,.95)'} 66%, transparent 71%)`,
                 animation: `shock ${flash.tier === 'PRIME_ICON' ? 1.2 : 1}s ease-out forwards`,
               }}
             />
@@ -244,19 +247,19 @@ export function PackOpener({ packNumber, cards, packKey, selectedId, onSelect, r
             <>
               <div className="absolute left-0 right-0 top-[45%] h-4 animate-flash" style={{ background: 'linear-gradient(90deg, transparent, rgba(255,255,255,.95), transparent)', animationDuration: '1.6s' }} />
               <div className="absolute inset-0 flex items-center justify-center">
-                <div className="animate-pop font-display text-6xl text-yellow-200 sm:text-8xl" style={{ textShadow: '0 0 18px rgba(250,204,21,.9), 0 0 4px rgba(0,0,0,.6)' }}>
+                <div className="animate-pop font-display text-6xl text-white sm:text-8xl" style={{ textShadow: '0 0 18px rgba(186,230,253,.95), 0 0 4px rgba(15,23,42,.7)' }}>
                   WALKOUT!
                 </div>
               </div>
             </>
           )}
-          {flash.tier === 'CULT_VETERAN' && (
+          {(flash.tier === 'CULT_HERO' || flash.tier === 'VETERAN') && (
             <div className="absolute inset-0 overflow-hidden">
               {Array.from({ length: 24 }).map((_, i) => (
                 <span
                   key={i}
                   className="particle animate-rise"
-                  style={{ left: `${30 + ((i * 41) % 40)}%`, bottom: `${30 + ((i * 17) % 20)}%`, width: 4, height: 4, background: i % 2 ? '#bfdbfe' : '#e5e7eb', boxShadow: '0 0 8px #60a5fa', animationDelay: `${(i % 6) * 0.08}s` }}
+                  style={{ left: `${30 + ((i * 41) % 40)}%`, bottom: `${30 + ((i * 17) % 20)}%`, width: 4, height: 4, background: i % 2 ? (flash.tier === 'CULT_HERO' ? '#fecaca' : '#ddd6fe') : '#e5e7eb', boxShadow: `0 0 8px ${flash.tier === 'CULT_HERO' ? '#ef4444' : '#8b5cf6'}`, animationDelay: `${(i % 6) * 0.08}s` }}
                 />
               ))}
             </div>
@@ -283,13 +286,14 @@ export function PackOpener({ packNumber, cards, packKey, selectedId, onSelect, r
         <div className="hidden text-right text-[10px] leading-tight text-white/60 sm:block">
           <div className={TIER_TEXT.PRIME_ICON}>Prime {rates.PRIME_ICON}%</div>
           <div className={TIER_TEXT.RISING_WORLD}>World Class {rates.RISING_WORLD}%</div>
-          <div className={TIER_TEXT.CULT_VETERAN}>Cult {rates.CULT_VETERAN}%</div>
+          <div className={TIER_TEXT.VETERAN}>Veteran {rates.VETERAN}%</div>
+          <div className={TIER_TEXT.CULT_HERO}>Cult Hero {rates.CULT_HERO}%</div>
           <div className={TIER_TEXT.STANDARD}>Squad {rates.STANDARD}%</div>
         </div>
       </div>
 
       {!showCards && (
-        <div data-shake-zone className={`relative flex flex-1 flex-col items-center justify-center ${stage === 'tell' && top === 'CULT_VETERAN' ? 'animate-pop' : ''}`}>
+        <div data-shake-zone className={`relative flex flex-1 flex-col items-center justify-center ${stage === 'tell' && (top === 'CULT_HERO' || top === 'VETERAN') ? 'animate-pop' : ''}`}>
           {/* The foil pack */}
           <div
             ref={packRef}
@@ -325,7 +329,7 @@ export function PackOpener({ packNumber, cards, packKey, selectedId, onSelect, r
               {stage === 'tell' && (
                 <div
                   className="absolute inset-x-0 top-0 h-2"
-                  style={{ background: top === 'PRIME_ICON' ? '#fde047' : top === 'RISING_WORLD' ? '#c4b5fd' : top === 'CULT_VETERAN' ? '#60a5fa' : '#fff', boxShadow: '0 0 40px 18px currentColor' }}
+                  style={{ background: top === 'PRIME_ICON' ? '#ffffff' : top === 'RISING_WORLD' ? '#facc15' : top === 'VETERAN' ? '#8b5cf6' : top === 'CULT_HERO' ? '#ef4444' : '#fff', boxShadow: '0 0 40px 18px currentColor' }}
                 />
               )}
             </div>

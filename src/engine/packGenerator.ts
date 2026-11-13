@@ -1,15 +1,17 @@
 import { FORMATIONS, positionGroup, slotAccepts } from '../data/formations';
 import type { FormationId, Lineup, PlayerCard, PositionGroup, Position, Tier } from '../types/game';
 
-export const TIER_ORDER: Tier[] = ['STANDARD', 'CULT_VETERAN', 'RISING_WORLD', 'PRIME_ICON'];
-export const TIER_RANK: Record<Tier, number> = { STANDARD: 0, CULT_VETERAN: 1, RISING_WORLD: 2, PRIME_ICON: 3 };
+export const TIER_ORDER: Tier[] = ['STANDARD', 'CULT_HERO', 'VETERAN', 'RISING_WORLD', 'PRIME_ICON'];
+export const TIER_RANK: Record<Tier, number> = { STANDARD: 0, CULT_HERO: 1, VETERAN: 2, RISING_WORLD: 3, PRIME_ICON: 4 };
+const MAX_RANK = TIER_ORDER.length - 1;
 
 export const TOTAL_PACKS = 11;
 export const PACK_SIZE = 5;
 
 export function tierRates(packNumber: number): Record<Tier, number> {
-  if (packNumber >= TOTAL_PACKS) return { STANDARD: 61.5, CULT_VETERAN: 26, RISING_WORLD: 8.5, PRIME_ICON: 4 };
-  return { STANDARD: 63.5, CULT_VETERAN: 26, RISING_WORLD: 8.5, PRIME_ICON: 2 };
+  // The original 26% Cult Hero / Veteran share is split 15% / 11%.
+  if (packNumber >= TOTAL_PACKS) return { STANDARD: 61.5, CULT_HERO: 15, VETERAN: 11, RISING_WORLD: 8.5, PRIME_ICON: 4 };
+  return { STANDARD: 63.5, CULT_HERO: 15, VETERAN: 11, RISING_WORLD: 8.5, PRIME_ICON: 2 };
 }
 
 const BASE_GROUP_WEIGHTS: Record<PositionGroup, number> = { GK: 10, DEF: 35, MID: 35, FWD: 20 };
@@ -80,7 +82,7 @@ function drawCard(
 ): PlayerCard | undefined {
   const available = ctx.pool.filter((c) => !ctx.draftedBaseIds.has(c.basePlayerId) && !usedBase.has(c.basePlayerId) && filter(c));
   const rank = TIER_RANK[tier];
-  const order = [0, -1, 1, -2, 2, -3, 3].map((d) => rank + d).filter((r) => r >= 0 && r <= 3);
+  const order = [0, -1, 1, -2, 2, -3, 3, -4, 4].map((d) => rank + d).filter((r) => r >= 0 && r <= MAX_RANK);
   for (const r of order) {
     const bucket = available.filter((c) => TIER_RANK[c.tier] === r);
     const pick = pickRandom(bucket, rng);

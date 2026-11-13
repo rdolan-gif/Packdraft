@@ -59,29 +59,47 @@ body {
     color: #e5e7eb;
   }
 
-  .tier-CULT_VETERAN {
+  /* Cult Hero (81–83): brushed crimson */
+  .tier-CULT_HERO {
     background:
       repeating-linear-gradient(100deg, rgba(255, 255, 255, 0.05) 0 2px, transparent 2px 5px),
-      linear-gradient(150deg, #b2753e 0%, #6b3f1d 38%, #1e3a8a 75%, #0f1d4a 100%);
-    border: 1.5px solid #d6a46b;
-    color: #fff7ed;
+      linear-gradient(150deg, #f87171 0%, #dc2626 30%, #991b1b 65%, #450a0a 100%);
+    border: 1.5px solid #fca5a5;
+    color: #fff1f2;
   }
 
+  /* Veteran (84–85): brushed royal purple */
+  .tier-VETERAN {
+    background:
+      repeating-linear-gradient(100deg, rgba(255, 255, 255, 0.05) 0 2px, transparent 2px 5px),
+      linear-gradient(150deg, #c4b5fd 0%, #8b5cf6 30%, #5b21b6 65%, #2e1065 100%);
+    border: 1.5px solid #ddd6fe;
+    color: #faf5ff;
+  }
+
+  /* Rising Star / World Class (86–90): rich gold foil */
   .tier-RISING_WORLD {
     background:
-      radial-gradient(ellipse at 30% 0%, rgba(255, 255, 255, 0.35), transparent 50%),
-      linear-gradient(150deg, #fde68a 0%, #d4a017 30%, #047857 70%, #064e3b 100%);
+      radial-gradient(ellipse at 30% 0%, rgba(255, 255, 255, 0.45), transparent 50%),
+      linear-gradient(150deg, #fff7c2 0%, #facc15 25%, #d97706 60%, #78350f 100%);
     border: 2px solid #fde68a;
     color: #fffbeb;
-    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.35), 0 0 16px rgba(250, 204, 21, 0.35);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.35), 0 0 16px rgba(250, 204, 21, 0.4);
   }
 
+  /* Prime Icon (91–96): gleaming pearl white */
   .tier-PRIME_ICON {
     background:
-      radial-gradient(ellipse at 50% 0%, rgba(255, 255, 255, 0.5), transparent 55%),
-      linear-gradient(155deg, #fff7c2 0%, #facc15 22%, #b45309 55%, #451a03 100%);
-    border: 2px solid #fef08a;
-    color: #fff;
+      radial-gradient(ellipse at 50% 0%, #ffffff 0%, rgba(255, 255, 255, 0) 60%),
+      repeating-linear-gradient(120deg, rgba(148, 163, 184, 0.08) 0 2px, transparent 2px 6px),
+      linear-gradient(155deg, #ffffff 0%, #f8fafc 30%, #e2e8f0 62%, #cbd5e1 100%);
+    border: 2px solid #ffffff;
+    color: #0f172a;
+  }
+  /* On white, colour-dodge shows nothing; multiply leaves a pastel, pearly rainbow. */
+  .tier-PRIME_ICON > .holo {
+    mix-blend-mode: multiply;
+    opacity: 0.32;
   }
 
   /* Prime shimmer. The stripes slide by moving the layer (GPU-only) instead of animating
@@ -112,14 +130,14 @@ body {
 
   /* Prime aura: a static outer glow plus an inner pulse that only changes opacity. */
   .aura {
-    box-shadow: 0 0 22px 5px rgba(250, 204, 21, 0.6);
+    box-shadow: 0 0 22px 5px rgba(255, 255, 255, 0.55), 0 0 44px 12px rgba(186, 230, 253, 0.25);
   }
   .aura::before {
     content: '';
     position: absolute;
     inset: 0;
     border-radius: inherit;
-    box-shadow: inset 0 0 16px 3px rgba(254, 240, 138, 0.9);
+    box-shadow: inset 0 0 16px 3px rgba(255, 255, 255, 0.95);
     pointer-events: none;
     z-index: 7;
     animation: aurapulse 1.6s ease-in-out infinite;

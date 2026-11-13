@@ -4,7 +4,7 @@ export default {
   future: { hoverOnlyWhenSupported: true },
   content: ['./index.html', './src/**/*.{ts,tsx}'],
   // Tier classes are built as `tier-${card.tier}`, so list them for the components layer.
-  safelist: ['tier-STANDARD', 'tier-CULT_VETERAN', 'tier-RISING_WORLD', 'tier-PRIME_ICON', 'holo', 'aura'],
+  safelist: ['tier-STANDARD', 'tier-CULT_HERO', 'tier-VETERAN', 'tier-RISING_WORLD', 'tier-PRIME_ICON', 'holo', 'aura'],
   theme: {
     extend: {
       fontFamily: {

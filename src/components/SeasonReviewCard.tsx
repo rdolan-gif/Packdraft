@@ -52,7 +52,7 @@ export function buildShareText(opts: { summary: SeasonSummary; teamName: string;
     '',
     grid,
     '',
-    '🟨 Prime  🟪 World Class  🟦 Cult  ⬜ Squad',
+    '⬜ Prime  🟨 World Class  🟪 Veteran  🟥 Cult Hero  ⬛ Squad',
   ].join('\n');
 }
 

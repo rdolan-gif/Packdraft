@@ -4,3 +4,4 @@ dist-single
 *.tsbuildinfo
 .DS_Store
 PackDraft38_Players*.xlsx
+__pycache__/

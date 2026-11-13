@@ -29,6 +29,12 @@ HEAD_SHAPES = union("HeadShape")
 EXPRESSIONS = union("Expression")
 ACCESSORIES = union("Accessory")
 CLUBS = re.findall(r"code: '([A-Z]{3})', name: '([^']+)'", CLUBS_TS)  # [(code, name)]
+# Full rows: code, name, short, primary (shirt), secondary (trim), accent (badge outline)
+CLUB_ROWS = re.findall(
+    r"\{ code: '([A-Z]{3})', name: '([^']+)', short: '([^']+)', primary: '(#[0-9a-fA-F]{6})', secondary: '(#[0-9a-fA-F]{6})', accent: '(#[0-9a-fA-F]{6})' \}",
+    CLUBS_TS,
+)
+CLUB_HEADERS = ["Code", "Club Name", "Short", "Shirt (primary)", "Trim (secondary)", "Badge Edge (accent)", "Preview"]
 
 POSITION_GROUP = {p: ("GK" if p == "GK" else "DEF" if p in ("RB", "CB", "LB") else "FWD" if p in ("RW", "LW", "ST") else "MID") for p in POSITIONS}
 
@@ -55,4 +61,4 @@ COL = {h: i + 1 for i, h in enumerate(HEADERS)}  # 1-based column numbers
 
 OVR_MIN, OVR_MAX = 74, 96
 STAT_MIN, STAT_MAX = 30, 99
-TIERS = [("STANDARD", "Squad Regular", 74, 80), ("CULT_VETERAN", "Cult Hero / Veteran", 81, 85), ("RISING_WORLD", "Rising Star / World Class", 86, 90), ("PRIME_ICON", "Prime Icon", 91, 96)]
+TIERS = [("STANDARD", "Squad Regular", 74, 80), ("CULT_HERO", "Cult Hero", 81, 83), ("VETERAN", "Veteran", 84, 85), ("RISING_WORLD", "Rising Star / World Class", 86, 90), ("PRIME_ICON", "Prime Icon", 91, 96)]

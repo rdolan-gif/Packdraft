@@ -7,23 +7,26 @@ import { sfx } from '../engine/soundEffects';
 
 export const TIER_LABEL: Record<Tier, string> = {
   STANDARD: 'Squad Regular',
-  CULT_VETERAN: 'Cult Hero / Veteran',
+  CULT_HERO: 'Cult Hero',
+  VETERAN: 'Veteran',
   RISING_WORLD: 'Rising Star / World Class',
   PRIME_ICON: 'Prime Icon',
 };
 
 export const TIER_EMOJI: Record<Tier, string> = {
-  STANDARD: '⬜',
-  CULT_VETERAN: '🟦',
-  RISING_WORLD: '🟪',
-  PRIME_ICON: '🟨',
+  STANDARD: '⬛',
+  CULT_HERO: '🟥',
+  VETERAN: '🟪',
+  RISING_WORLD: '🟨',
+  PRIME_ICON: '⬜',
 };
 
 export const TIER_TEXT: Record<Tier, string> = {
   STANDARD: 'text-slate-300',
-  CULT_VETERAN: 'text-sky-300',
-  RISING_WORLD: 'text-emerald-300',
-  PRIME_ICON: 'text-yellow-300',
+  CULT_HERO: 'text-red-400',
+  VETERAN: 'text-violet-300',
+  RISING_WORLD: 'text-amber-300',
+  PRIME_ICON: 'text-white',
 };
 
 type Size = 'xs' | 'sm' | 'md' | 'lg';
@@ -94,7 +97,7 @@ export function PlayerCardUI({ card, size = 'md', onClick, selected, dimmed, sho
       onPointerEnter={(e) => onClick && e.pointerType === 'mouse' && sfx.hover()}
       onPointerLeave={onLeave}
       onPointerCancel={onLeave}
-      className={`card-base tier-${card.tier} ${card.tier === 'CULT_VETERAN' ? 'sweep' : ''} ${prime ? 'aura' : ''} ${
+      className={`card-base tier-${card.tier} ${card.tier === 'CULT_HERO' || card.tier === 'VETERAN' ? 'sweep' : ''} ${prime ? 'aura' : ''} ${
         selected ? 'ring-4 ring-emerald-400 ring-offset-2 ring-offset-black' : ''
       } ${dimmed ? 'opacity-40 grayscale' : ''} ${onClick ? 'cursor-pointer' : ''} select-none shrink-0 ${className}`}
       style={{ width: d.w, height: d.h, ...style }}
@@ -113,17 +116,17 @@ export function PlayerCardUI({ card, size = 'md', onClick, selected, dimmed, sho
       <div className="absolute -right-6 top-0 h-full w-10 rotate-12 opacity-40" style={{ background: `linear-gradient(${club.primary}, ${club.secondary})` }} />
 
       {/* top-left: OVR + position */}
-      <div className="absolute left-1.5 top-1 z-10 flex flex-col items-center leading-none text-shadow">
+      <div className={`absolute left-1.5 top-1 z-10 flex flex-col items-center leading-none ${prime ? 'text-slate-900 [text-shadow:0_1px_0_rgba(255,255,255,.9)]' : 'text-shadow'}`}>
         <span className={`font-display ${d.ovr}`}>{card.ovr}</span>
         <span className={`font-bold ${tiny ? 'text-[8px]' : 'text-xs'} tracking-wider`}>{card.positions[0]}</span>
         {!tiny && card.positions.length > 1 && <span className="mt-0.5 text-[8px] opacity-80">{card.positions.slice(1).join('/')}</span>}
-        {prime && <Crown className={`${tiny ? 'h-3 w-3' : 'h-4 w-4'} mt-1 text-yellow-200 drop-shadow`} fill="currentColor" />}
-        {world && !tiny && <Star className="mt-1 h-3.5 w-3.5 text-yellow-100" fill="currentColor" />}
+        {prime && <Crown className={`${tiny ? 'h-3 w-3' : 'h-4 w-4'} mt-1 text-amber-400`} fill="currentColor" />}
+        {world && !tiny && <Star className="mt-1 h-3.5 w-3.5 text-white" fill="currentColor" />}
       </div>
 
       {/* top-right: season era badge */}
       <div className="absolute right-1 top-1 z-10 flex flex-col items-end gap-0.5">
-        <span className={`rounded px-1 py-[1px] font-black ${d.small} uppercase tracking-wider bg-black/60`}>
+        <span className={`rounded px-1 py-[1px] font-black ${d.small} uppercase tracking-wider bg-black/60 text-white`}>
           {size === 'xs' ? card.season : `${card.season} ${card.era}`}
         </span>
         {!tiny && (
@@ -139,7 +142,7 @@ export function PlayerCardUI({ card, size = 'md', onClick, selected, dimmed, sho
       </div>
 
       {/* name panel */}
-      <div className="absolute inset-x-0 bottom-0 z-10 bg-gradient-to-t from-black/85 via-black/65 to-transparent px-1.5 pb-1.5 pt-3 text-center">
+      <div className="absolute inset-x-0 bottom-0 z-10 bg-gradient-to-t from-black/85 via-black/65 to-transparent px-1.5 pb-1.5 pt-3 text-center text-white">
         <div className={`font-display ${d.name} leading-none truncate text-shadow`}>{card.shortName.toUpperCase()}</div>
         {!tiny && (
           <>
@@ -172,7 +175,7 @@ export function CardBack({ size = 'md', glow, className = '', style }: { size?: 
   const d = DIM[size];
   return (
     <div
-      className={`card-base shrink-0 border-2 ${glow ? 'border-yellow-300 aura animate-vibrate' : 'border-emerald-700'} ${className}`}
+      className={`card-base shrink-0 border-2 ${glow ? 'border-white aura animate-vibrate' : 'border-emerald-700'} ${className}`}
       style={{
         width: d.w,
         height: d.h,

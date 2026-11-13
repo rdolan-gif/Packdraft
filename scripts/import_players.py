@@ -13,7 +13,7 @@ from collections import OrderedDict
 
 from openpyxl import load_workbook
 
-from pd38_schema import (TIERS, ARCHETYPES, CLUBS, COL, ERAS, OVR_MAX, OVR_MIN, POSITION_GROUP, POSITIONS, ROOT, STAT_KEYS, STAT_MAX, STAT_MIN, TRAIT_COLS)
+from pd38_schema import (TIERS, ARCHETYPES, CLUB_ROWS, CLUBS, COL, ERAS, OVR_MAX, OVR_MIN, POSITION_GROUP, POSITIONS, ROOT, STAT_KEYS, STAT_MAX, STAT_MIN, TRAIT_COLS)
 
 if len(sys.argv) < 2:
     raise SystemExit(__doc__)
@@ -31,8 +31,34 @@ missing = [h for h in COL if h not in col and "(auto)" not in h and h != "Card I
 if missing:
     raise SystemExit(f"Missing columns on the Players tab: {', '.join(missing)}")
 
-club_codes = {c for c, _ in CLUBS}
 errors: list[str] = []
+
+# ── Clubs tab (kit colours). Optional: older workbooks don't have it.
+HEX = re.compile(r"^#[0-9a-fA-F]{6}$")
+clubs_new = None
+if "Clubs" in wb.sheetnames:
+    clubs_new = []
+    seen_codes = set()
+    for r, row in enumerate(wb["Clubs"].iter_rows(min_row=2, max_col=6, values_only=True), start=2):
+        code = str(row[0]).strip().upper() if row[0] else ""
+        if not code:
+            continue
+        if not re.fullmatch(r"[A-Z]{3}", code):
+            if any(row[1:]):
+                errors.append(f"Clubs row {r}: Code '{code}' must be three capital letters.")
+            continue
+        name, short = (str(row[1] or "").strip(), str(row[2] or "").strip() or code)
+        cols = [str(v or "").strip() for v in row[3:6]]
+        for label, v in zip(("Shirt", "Trim", "Badge Edge"), cols):
+            if not HEX.match(v):
+                errors.append(f"Clubs row {r} ({code}): {label} '{v}' must be a hex colour like #DA291C.")
+        if not name:
+            errors.append(f"Clubs row {r} ({code}): Club Name is empty.")
+        if code in seen_codes:
+            errors.append(f"Clubs row {r}: {code} appears twice.")
+        seen_codes.add(code)
+        clubs_new.append((code, name, short, *[v.lower() for v in cols]))
+club_codes = {c[0] for c in clubs_new} if clubs_new else {c for c, _ in CLUBS}
 cards = []
 
 
@@ -196,8 +222,40 @@ for cid in removed:
 for c in changed:
     print(f"  ~ {c}")
 
+club_changes = []
+if clubs_new is not None:
+    old = {c[0]: c for c in CLUB_ROWS}
+    for c in clubs_new:
+        o = old.get(c[0])
+        if not o:
+            club_changes.append(f"  + club {c[0]} {c[1]}")
+        elif tuple(x.lower() for x in o[3:]) != c[3:] or o[1:3] != c[1:3]:
+            diffs = [f"{lab} {a}→{b}" for lab, a, b in zip(("name", "short", "shirt", "trim", "badge"), o[1:], c[1:]) if a.lower() != b.lower()]
+            club_changes.append(f"  ~ club {c[0]}: " + ", ".join(diffs))
+    for code in old:
+        if code not in club_codes:
+            club_changes.append(f"  - club {code} (no longer listed)")
+    used = {c["club"] for c in cards}
+    missing = sorted(used - club_codes)
+    if missing:
+        print(f"Clubs used by cards but missing from the Clubs tab: {', '.join(missing)}. Nothing was changed.")
+        sys.exit(1)
+print(f"{len(club_changes)} club colour change(s).")
+for c in club_changes:
+    print(c)
+
 if DRY:
-    print("\nDry run: players.ts not written.")
+    print("\nDry run: nothing written.")
 else:
     OUT.write_text("\n".join(lines), encoding="utf-8")
     print(f"\nWrote {OUT.relative_to(ROOT)}")
+    if clubs_new is not None and club_changes:
+        clubs_ts = ROOT / "src/data/clubs.ts"
+        src = clubs_ts.read_text(encoding="utf-8")
+        body = "\n".join(
+            f"  {{ code: {ts(c[0])}, name: {ts(c[1])}, short: {ts(c[2])}, primary: {ts(c[3])}, secondary: {ts(c[4])}, accent: {ts(c[5])} }},"
+            for c in clubs_new
+        )
+        src = re.sub(r"(const list: Club\[\] = \[\n)(.*?)(\n\];)", lambda m: m.group(1) + body + m.group(3), src, flags=re.S)
+        clubs_ts.write_text(src, encoding="utf-8")
+        print(f"Wrote {clubs_ts.relative_to(ROOT)}")

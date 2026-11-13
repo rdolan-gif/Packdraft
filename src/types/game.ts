@@ -3,7 +3,7 @@
 export type Position = 'GK' | 'RB' | 'CB' | 'LB' | 'CDM' | 'CM' | 'CAM' | 'RM' | 'LM' | 'RW' | 'LW' | 'ST';
 export type PositionGroup = 'GK' | 'DEF' | 'MID' | 'FWD';
 
-export type Tier = 'STANDARD' | 'CULT_VETERAN' | 'RISING_WORLD' | 'PRIME_ICON';
+export type Tier = 'STANDARD' | 'CULT_HERO' | 'VETERAN' | 'RISING_WORLD' | 'PRIME_ICON';
 
 export type EraLabel =
   | 'SQUAD'
