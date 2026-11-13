@@ -76,7 +76,7 @@ guide += [
     ("The Summary tab counts cards per tier and position, so you can keep every tier stocked for every position.", ""),
     ("", ""),
     ("KIT COLOURS", "h"),
-    ("Clubs tab: change Shirt, Trim and Badge Edge with hex colour codes like #DA291C. Every card for that club updates.", ""),
+    ("Clubs tab: Shirt, Sleeves, Collar, Secondary and Badge Edge take hex colour codes like #DA291C. Every card for that club updates.", ""),
 ]
 for i, (text, kind) in enumerate(guide, start=1):
     c = g.cell(row=i, column=1, value=text)
@@ -207,22 +207,28 @@ for ci, h in enumerate(CLUB_HEADERS, start=1):
     c.font, c.fill = f_head, fill_head
     c.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
 cs.row_dimensions[1].height = 30
-for r, (code, name, short, prim, sec, acc) in enumerate(CLUB_ROWS, start=2):
+for r, (code, name, short, prim, sec, acc, slv, col) in enumerate(CLUB_ROWS, start=2):
     cs.cell(row=r, column=1, value=code).font = Font(name=FONT, size=10, bold=True)
-    for ci, v in enumerate([name, short, prim, sec, acc], start=2):
-        c = cs.cell(row=r, column=ci, value=v)
-        c.font = f_input
-    sw = cs.cell(row=r, column=7, value="shirt / trim (as exported)")
+    for ci, v in enumerate([name, short, prim, slv, col, sec, acc], start=2):
+        cs.cell(row=r, column=ci, value=v).font = f_input
+    sw = cs.cell(row=r, column=9, value="collar")
     sw.fill = PatternFill("solid", fgColor=prim.lstrip("#").upper())
-    sw.font = Font(name=FONT, size=9, bold=True, color=sec.lstrip("#").upper())
+    sw.font = Font(name=FONT, size=9, bold=True, color=col.lstrip("#").upper())
     sw.alignment = Alignment(horizontal="center")
-hexv = DataValidation(type="custom", formula1='AND(LEN(D2)=7,LEFT(D2,1)="#")', showErrorMessage=True, errorTitle="Colour code", error="Use a 6-digit hex colour like #DA291C.", showInputMessage=True, promptTitle="Colour", prompt="Hex colour, e.g. #DA291C. Find codes by searching 'colour picker'.")
-hexv.add(f"D2:F{len(CLUB_ROWS) + 60}")
+last = len(CLUB_ROWS) + 60
+hexv = DataValidation(type="custom", formula1='AND(LEN(D2)=7,LEFT(D2,1)="#")', showErrorMessage=True, errorTitle="Colour code", error="Use a 6-digit hex colour like #DA291C.", showInputMessage=True, promptTitle="Colour", prompt="Hex colour, e.g. #DA291C. Search 'colour picker' to find codes.")
+hexv.add(f"D2:H{last}")
 cs.add_data_validation(hexv)
-for col, w in zip("ABCDEFG", [8, 26, 8, 16, 16, 18, 24]):
+for col, w in zip("ABCDEFGHI", [8, 26, 8, 11, 11, 11, 12, 12, 12]):
     cs.column_dimensions[col].width = w
 cs.freeze_panes = "B2"
-cs.cell(row=len(CLUB_ROWS) + 3, column=1, value="Shirt = main kit colour (shirt, card sash, table chip). Trim = collar, sleeves, sash stripe. Badge Edge = outline on the club badge. The Preview column shows the colours as exported; it doesn't update as you type.").font = Font(name=FONT, size=9, italic=True)
+notes = [
+    "Shirt: main shirt colour. Sleeves and Collar: the portrait's sleeves and collar (set Sleeves = Shirt for a solid shirt).",
+    "Secondary: the card's diagonal stripe, the club badge text and the league-table chip. Badge Edge: outline on the club badge.",
+    "Preview shows the shirt with the collar colour as exported; it doesn't update as you type.",
+]
+for k, t in enumerate(notes):
+    cs.cell(row=len(CLUB_ROWS) + 3 + k, column=1, value=t).font = Font(name=FONT, size=9, italic=True)
 
 # ───────────────────────── Summary ─────────────────────────
 sm = wb.create_sheet("Summary", 2)

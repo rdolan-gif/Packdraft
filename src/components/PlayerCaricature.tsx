@@ -94,7 +94,9 @@ function Mouth({ expression, skinShade, cx = 50, y }: { expression: Expression; 
   }
 }
 
-function PlayerCaricatureImpl({ traits, kitPrimaryColor, kitSecondaryColor, seed, size = 120, className }: CaricatureProps) {
+function PlayerCaricatureImpl({ traits, kitPrimaryColor, kitSecondaryColor, kitSleeveColor, kitCollarColor, seed, size = 120, className }: CaricatureProps) {
+  const sleeve = kitSleeveColor ?? kitSecondaryColor;
+  const collar = kitCollarColor ?? kitSecondaryColor;
   const h = hash(seed);
   const uid = `pc${h.toString(36)}`;
   const skin = SKIN[traits.skinTone];
@@ -312,17 +314,17 @@ function PlayerCaricatureImpl({ traits, kitPrimaryColor, kitSecondaryColor, seed
 
       {/* shoulders & kit */}
       <path d="M 8 110 C 10 92 24 86 38 84 L 62 84 C 76 86 90 92 92 110 Z" fill={`url(#${uid}-kit)`} stroke="rgba(0,0,0,.35)" strokeWidth="0.8" />
-      <path d="M 8 110 C 9 101 13 95 19 91 L 22 110 Z" fill={kitSecondaryColor} opacity="0.85" />
-      <path d="M 92 110 C 91 101 87 95 81 91 L 78 110 Z" fill={kitSecondaryColor} opacity="0.85" />
+      <path d="M 8 110 C 9 101 13 95 19 91 L 22 110 Z" fill={sleeve} opacity="0.9" />
+      <path d="M 92 110 C 91 101 87 95 81 91 L 78 110 Z" fill={sleeve} opacity="0.9" />
       {acc === 'captainband' && <rect x="12" y="98" width="11" height="5" rx="1" fill="#facc15" stroke="#000" strokeWidth="0.5" transform="rotate(-14 17 100)" />}
 
       {/* neck */}
       <path d="M 41 70 L 41 86 Q 50 92 59 86 L 59 70 Z" fill={skin.shade} />
       {/* collar */}
       {collarV ? (
-        <path d="M 37 84 L 50 97 L 63 84 L 59 83 L 50 92 L 41 83 Z" fill={kitSecondaryColor} stroke="rgba(0,0,0,.25)" strokeWidth="0.5" />
+        <path d="M 37 84 L 50 97 L 63 84 L 59 83 L 50 92 L 41 83 Z" fill={collar} stroke="rgba(0,0,0,.25)" strokeWidth="0.5" />
       ) : (
-        <path d="M 37 84 Q 50 94 63 84 L 61 82 Q 50 90 39 82 Z" fill={kitSecondaryColor} stroke="rgba(0,0,0,.25)" strokeWidth="0.5" />
+        <path d="M 37 84 Q 50 94 63 84 L 61 82 Q 50 90 39 82 Z" fill={collar} stroke="rgba(0,0,0,.25)" strokeWidth="0.5" />
       )}
       {acc === 'snood' && <path d="M 39 76 L 39 88 Q 50 93 61 88 L 61 76 Q 50 80 39 76 Z" fill="#111" />}
 

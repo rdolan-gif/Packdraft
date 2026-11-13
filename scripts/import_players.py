@@ -13,7 +13,7 @@ from collections import OrderedDict
 
 from openpyxl import load_workbook
 
-from pd38_schema import (TIERS, ARCHETYPES, CLUB_ROWS, CLUBS, COL, ERAS, OVR_MAX, OVR_MIN, POSITION_GROUP, POSITIONS, ROOT, STAT_KEYS, STAT_MAX, STAT_MIN, TRAIT_COLS)
+from pd38_schema import (TIERS, ARCHETYPES, CLUB_COLOUR_COLS, CLUB_ROWS, CLUBS, COL, ERAS, OVR_MAX, OVR_MIN, POSITION_GROUP, POSITIONS, ROOT, STAT_KEYS, STAT_MAX, STAT_MIN, TRAIT_COLS)
 
 if len(sys.argv) < 2:
     raise SystemExit(__doc__)
@@ -36,28 +36,43 @@ errors: list[str] = []
 # ── Clubs tab (kit colours). Optional: older workbooks don't have it.
 HEX = re.compile(r"^#[0-9a-fA-F]{6}$")
 clubs_new = None
+FIELDS = ["primary", "secondary", "accent", "sleeve", "collar"]  # order used in CLUB_ROWS after code/name/short
+old_clubs = {c[0]: c for c in CLUB_ROWS}
 if "Clubs" in wb.sheetnames:
     clubs_new = []
     seen_codes = set()
-    for r, row in enumerate(wb["Clubs"].iter_rows(min_row=2, max_col=6, values_only=True), start=2):
-        code = str(row[0]).strip().upper() if row[0] else ""
+    cws = wb["Clubs"]
+    chead = {str(c.value).strip(): i for i, c in enumerate(cws[1]) if c.value}
+    colour_idx = {}
+    for label, field, aliases in CLUB_COLOUR_COLS:
+        idx = next((chead[h] for h in [label, *aliases] if h in chead), None)
+        colour_idx[field] = (label, idx)
+    for r, row in enumerate(cws.iter_rows(min_row=2, values_only=True), start=2):
+        code = str(row[chead.get("Code", 0)] or "").strip().upper()
         if not code:
             continue
         if not re.fullmatch(r"[A-Z]{3}", code):
-            if any(row[1:]):
+            if any(v for v in row[1:6]):
                 errors.append(f"Clubs row {r}: Code '{code}' must be three capital letters.")
             continue
-        name, short = (str(row[1] or "").strip(), str(row[2] or "").strip() or code)
-        cols = [str(v or "").strip() for v in row[3:6]]
-        for label, v in zip(("Shirt", "Trim", "Badge Edge"), cols):
+        name = str(row[chead.get("Club Name", 1)] or "").strip()
+        short = str(row[chead.get("Short", 2)] or "").strip() or code
+        vals = {}
+        for field, (label, idx) in colour_idx.items():
+            if idx is None:  # column not in this (older) workbook: keep the current value
+                prev = old_clubs.get(code)
+                vals[field] = prev[3 + FIELDS.index(field)] if prev else vals.get("secondary", "#e2e8f0")
+                continue
+            v = str(row[idx] or "").strip()
             if not HEX.match(v):
                 errors.append(f"Clubs row {r} ({code}): {label} '{v}' must be a hex colour like #DA291C.")
+            vals[field] = v
         if not name:
             errors.append(f"Clubs row {r} ({code}): Club Name is empty.")
         if code in seen_codes:
             errors.append(f"Clubs row {r}: {code} appears twice.")
         seen_codes.add(code)
-        clubs_new.append((code, name, short, *[v.lower() for v in cols]))
+        clubs_new.append((code, name, short, *[vals[f].lower() for f in FIELDS]))
 club_codes = {c[0] for c in clubs_new} if clubs_new else {c for c, _ in CLUBS}
 cards = []
 
@@ -230,7 +245,7 @@ if clubs_new is not None:
         if not o:
             club_changes.append(f"  + club {c[0]} {c[1]}")
         elif tuple(x.lower() for x in o[3:]) != c[3:] or o[1:3] != c[1:3]:
-            diffs = [f"{lab} {a}→{b}" for lab, a, b in zip(("name", "short", "shirt", "trim", "badge"), o[1:], c[1:]) if a.lower() != b.lower()]
+            diffs = [f"{lab} {a}→{b}" for lab, a, b in zip(("name", "short", "shirt", "secondary", "badge edge", "sleeves", "collar"), o[1:], c[1:]) if a.lower() != b.lower()]
             club_changes.append(f"  ~ club {c[0]}: " + ", ".join(diffs))
     for code in old:
         if code not in club_codes:
@@ -253,7 +268,7 @@ else:
         clubs_ts = ROOT / "src/data/clubs.ts"
         src = clubs_ts.read_text(encoding="utf-8")
         body = "\n".join(
-            f"  {{ code: {ts(c[0])}, name: {ts(c[1])}, short: {ts(c[2])}, primary: {ts(c[3])}, secondary: {ts(c[4])}, accent: {ts(c[5])} }},"
+            f"  {{ code: {ts(c[0])}, name: {ts(c[1])}, short: {ts(c[2])}, primary: {ts(c[3])}, secondary: {ts(c[4])}, accent: {ts(c[5])}, sleeve: {ts(c[6])}, collar: {ts(c[7])} }},"
             for c in clubs_new
         )
         src = re.sub(r"(const list: Club\[\] = \[\n)(.*?)(\n\];)", lambda m: m.group(1) + body + m.group(3), src, flags=re.S)

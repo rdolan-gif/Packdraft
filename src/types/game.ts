@@ -76,6 +76,8 @@ export interface CaricatureProps {
   traits: CaricatureTraits;
   kitPrimaryColor: string;
   kitSecondaryColor: string;
+  kitSleeveColor?: string; // defaults to kitSecondaryColor
+  kitCollarColor?: string; // defaults to kitSecondaryColor
   seed: string;
   size?: number;
   className?: string;
@@ -115,7 +117,9 @@ export interface Club {
   name: string;
   short: string;
   primary: string;
-  secondary: string;
+  secondary: string; // card stripe, badge text, league-table chip
+  sleeve: string; // shirt sleeves on the portrait
+  collar: string; // shirt collar on the portrait
   accent: string;
 }
 

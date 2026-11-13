@@ -248,7 +248,7 @@ export function PackOpener({ packNumber, cards, packKey, selectedId, onSelect, r
               <div className="absolute left-0 right-0 top-[45%] h-4 animate-flash" style={{ background: 'linear-gradient(90deg, transparent, rgba(255,255,255,.95), transparent)', animationDuration: '1.6s' }} />
               <div className="absolute inset-0 flex items-center justify-center">
                 <div className="animate-pop font-display text-6xl text-white sm:text-8xl" style={{ textShadow: '0 0 18px rgba(186,230,253,.95), 0 0 4px rgba(15,23,42,.7)' }}>
-                  WALKOUT!
+                  BOOM!
                 </div>
               </div>
             </>

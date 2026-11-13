@@ -29,12 +29,15 @@ HEAD_SHAPES = union("HeadShape")
 EXPRESSIONS = union("Expression")
 ACCESSORIES = union("Accessory")
 CLUBS = re.findall(r"code: '([A-Z]{3})', name: '([^']+)'", CLUBS_TS)  # [(code, name)]
-# Full rows: code, name, short, primary (shirt), secondary (trim), accent (badge outline)
+# Full rows: code, name, short, primary (shirt), secondary (stripe/badge text/table), accent (badge outline), sleeve, collar
 CLUB_ROWS = re.findall(
-    r"\{ code: '([A-Z]{3})', name: '([^']+)', short: '([^']+)', primary: '(#[0-9a-fA-F]{6})', secondary: '(#[0-9a-fA-F]{6})', accent: '(#[0-9a-fA-F]{6})' \}",
+    r"\{ code: '([A-Z]{3})', name: '([^']+)', short: '([^']+)', primary: '(#[0-9a-fA-F]{6})', secondary: '(#[0-9a-fA-F]{6})', accent: '(#[0-9a-fA-F]{6})', sleeve: '(#[0-9a-fA-F]{6})', collar: '(#[0-9a-fA-F]{6})' \}",
     CLUBS_TS,
 )
-CLUB_HEADERS = ["Code", "Club Name", "Short", "Shirt (primary)", "Trim (secondary)", "Badge Edge (accent)", "Preview"]
+CLUB_HEADERS = ["Code", "Club Name", "Short", "Shirt", "Sleeves", "Collar", "Secondary", "Badge Edge", "Preview"]
+# Spreadsheet colour columns → clubs.ts fields (older workbooks used the names on the right)
+CLUB_COLOUR_COLS = [("Shirt", "primary", ["Shirt (primary)"]), ("Sleeves", "sleeve", []), ("Collar", "collar", []),
+                    ("Secondary", "secondary", ["Trim (secondary)"]), ("Badge Edge", "accent", ["Badge Edge (accent)"])]
 
 POSITION_GROUP = {p: ("GK" if p == "GK" else "DEF" if p in ("RB", "CB", "LB") else "FWD" if p in ("RW", "LW", "ST") else "MID") for p in POSITIONS}
 

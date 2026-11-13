@@ -138,7 +138,7 @@ export function PlayerCardUI({ card, size = 'md', onClick, selected, dimmed, sho
 
       {/* portrait */}
       <div className="absolute left-1/2 z-[5] -translate-x-1/2" style={{ top: tiny ? d.h * 0.1 : d.h * 0.09 }}>
-        <PlayerCaricature traits={card.traits} kitPrimaryColor={club.primary} kitSecondaryColor={club.secondary} seed={card.id} size={d.face} />
+        <PlayerCaricature traits={card.traits} kitPrimaryColor={club.primary} kitSecondaryColor={club.secondary} kitSleeveColor={club.sleeve} kitCollarColor={club.collar} seed={card.id} size={d.face} />
       </div>
 
       {/* name panel */}
