@@ -50,7 +50,7 @@ guide = [
     ("Positions: primary first, extras after a slash, e.g. ST/LW or CB/RB. Valid codes are on the Lists tab.", ""),
     ("Club: three-letter code from the dropdown (names on the Lists tab). It sets kit colours and club chemistry.", ""),
     ("Archetype: from the dropdown. Managers' bonuses look for specific archetypes.", ""),
-    (f"PAC to PHY: {STAT_MIN} to {STAT_MAX}. For goalkeepers they mean DIV, HAN, KIC, REF, SPD, POS.", ""),
+    (f"PAC to PHY: {STAT_MIN} to {STAT_MAX}. Goalkeepers: PAC = speed, SHO = not used (leave 30-40), PAS = kicking, DRI = handling, DEF = shot-stopping, PHY = positioning.", ""),
     ("Look columns (Skin Tone to Accessory): change the caricature. Pick from the dropdowns.", ""),
     ("", ""),
     ("TIER RULES (card type)", "h"),

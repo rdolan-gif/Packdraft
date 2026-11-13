@@ -35,13 +35,21 @@ const FIT_LABEL = {
   oop: { text: 'Out of position', pts: 0, cls: 'text-rose-200 bg-rose-500/15 border-rose-500/40' },
 } as const;
 
-const STATS: [keyof PlayerCard['stats'], string, string][] = [
-  ['pac', 'Pace', 'Diving'],
-  ['sho', 'Shooting', 'Handling'],
-  ['pas', 'Passing', 'Kicking'],
-  ['dri', 'Dribbling', 'Reflexes'],
-  ['def', 'Defending', 'Speed'],
-  ['phy', 'Physical', 'Positioning'],
+const STATS: [keyof PlayerCard['stats'], string][] = [
+  ['pac', 'Pace'],
+  ['sho', 'Shooting'],
+  ['pas', 'Passing'],
+  ['dri', 'Dribbling'],
+  ['def', 'Defending'],
+  ['phy', 'Physical'],
+];
+// Keeper stats live in the same columns with keeper meanings (SHO unused).
+const GK_STATS: [keyof PlayerCard['stats'], string][] = [
+  ['def', 'Shot-stopping'],
+  ['dri', 'Handling'],
+  ['pas', 'Kicking'],
+  ['pac', 'Speed'],
+  ['phy', 'Positioning'],
 ];
 
 function statColor(v: number) {
@@ -108,9 +116,9 @@ export function PlayerInspectPanel({
           </div>
 
           <div className="grid grid-cols-1 gap-1.5">
-            {STATS.map(([k, label, gk]) => (
-              <div key={k} className="grid grid-cols-[78px_1fr_28px] items-center gap-2 text-xs">
-                <span className="font-bold text-white/70">{isGK ? gk : label}</span>
+            {(isGK ? GK_STATS : STATS).map(([k, label]) => (
+              <div key={k} className="grid grid-cols-[86px_1fr_28px] items-center gap-2 text-xs">
+                <span className="font-bold text-white/70">{label}</span>
                 <span className="h-2 overflow-hidden rounded-full bg-white/10">
                   <span className={`block h-full rounded-full ${statColor(card.stats[k])}`} style={{ width: `${card.stats[k]}%` }} />
                 </span>

@@ -51,13 +51,22 @@ interface Props {
   footer?: React.ReactNode;
 }
 
-const STAT_KEYS: [keyof PlayerCard['stats'], string, string][] = [
-  ['pac', 'PAC', 'DIV'],
-  ['sho', 'SHO', 'HAN'],
-  ['pas', 'PAS', 'KIC'],
-  ['dri', 'DRI', 'REF'],
-  ['def', 'DEF', 'SPD'],
-  ['phy', 'PHY', 'POS'],
+const STAT_KEYS: [keyof PlayerCard['stats'], string][] = [
+  ['pac', 'PAC'],
+  ['sho', 'SHO'],
+  ['pas', 'PAS'],
+  ['dri', 'DRI'],
+  ['def', 'DEF'],
+  ['phy', 'PHY'],
+];
+// Keepers store shot-stopping in DEF, handling in DRI, kicking in PAS, speed in PAC and
+// positioning in PHY; their SHO column is unused, so it isn't shown.
+const GK_STAT_KEYS: [keyof PlayerCard['stats'], string][] = [
+  ['def', 'DIV'],
+  ['dri', 'HAN'],
+  ['pas', 'KIC'],
+  ['pac', 'SPD'],
+  ['phy', 'POS'],
 ];
 
 export function PlayerCardUI({ card, size = 'md', onClick, selected, dimmed, showStats, tilt = true, className = '', style, footer }: Props) {
@@ -153,11 +162,11 @@ export function PlayerCardUI({ card, size = 'md', onClick, selected, dimmed, sho
               {card.archetype}
             </div>
             {showStats && (
-              <div className="mt-1 grid grid-cols-6 gap-0.5 text-[8px] leading-tight">
-                {STAT_KEYS.map(([k, label, gkLabel]) => (
+              <div className={`mt-1 grid ${isGK ? 'grid-cols-5' : 'grid-cols-6'} gap-0.5 text-[8px] leading-tight`}>
+                {(isGK ? GK_STAT_KEYS : STAT_KEYS).map(([k, label]) => (
                   <div key={k} className="flex flex-col">
                     <span className="font-black">{card.stats[k]}</span>
-                    <span className="opacity-70">{isGK ? gkLabel : label}</span>
+                    <span className="opacity-70">{label}</span>
                   </div>
                 ))}
               </div>
