@@ -36,16 +36,23 @@ function flexText(e: VaultEntry) {
 export function TrophyVaultModal({ vault, career, onClose, onDelete }: Props) {
   const [open, setOpen] = useState<VaultEntry | null>(null);
   const [copied, setCopied] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
 
   const copy = async (e: VaultEntry) => {
+    const text = flexText(e);
     try {
-      await navigator.clipboard.writeText(flexText(e));
-      setCopied(true);
-      sfx.select();
-      window.setTimeout(() => setCopied(false), 1800);
+      await navigator.clipboard.writeText(text);
     } catch {
-      sfx.error();
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      ta.remove();
     }
+    setCopied(true);
+    sfx.select();
+    window.setTimeout(() => setCopied(false), 1800);
   };
 
   return (
@@ -55,7 +62,7 @@ export function TrophyVaultModal({ vault, career, onClose, onDelete }: Props) {
           <div className="holo opacity-20" />
           <div className="relative flex items-center gap-3">
             {open && (
-              <button onClick={() => setOpen(null)} className="rounded-lg bg-black/40 p-2 text-white hover:bg-black/60" aria-label="Back">
+              <button onClick={() => (setOpen(null), setConfirmDelete(false))} className="rounded-lg bg-black/40 p-2 text-white hover:bg-black/60" aria-label="Back">
                 <ArrowLeft className="h-4 w-4" />
               </button>
             )}
@@ -189,15 +196,17 @@ export function TrophyVaultModal({ vault, career, onClose, onDelete }: Props) {
                 </button>
                 <button
                   onClick={() => {
-                    if (window.confirm('Remove this squad from the vault?')) {
+                    if (confirmDelete) {
                       onDelete(open.id);
                       setOpen(null);
-                    }
+                      setConfirmDelete(false);
+                    } else setConfirmDelete(true);
                   }}
-                  className="rounded-xl border border-rose-500/50 px-3 text-rose-300 hover:bg-rose-500/15"
-                  aria-label="Delete from vault"
+                  className={`flex items-center gap-1 rounded-xl border px-3 ${confirmDelete ? 'border-rose-400 bg-rose-500/25 text-rose-100' : 'border-rose-500/50 text-rose-300 hover:bg-rose-500/15'}`}
+                  aria-label={confirmDelete ? 'Tap again to delete' : 'Delete from vault'}
                 >
                   <Trash2 className="h-5 w-5" />
+                  {confirmDelete && <span className="text-xs font-black uppercase">Confirm</span>}
                 </button>
               </div>
             </div>

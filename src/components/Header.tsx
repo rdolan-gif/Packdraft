@@ -14,6 +14,12 @@ interface Props {
 
 export function Header({ phase, packNumber, picksMade, vaultCount, onOpenVault, onNewRun }: Props) {
   const [muted, setM] = useState(isMuted());
+  const [armed, setArmed] = useState(false);
+  useEffect(() => {
+    if (!armed) return;
+    const t = window.setTimeout(() => setArmed(false), 3000);
+    return () => clearTimeout(t);
+  }, [armed]);
   useEffect(() => {
     const off = onMuteChange(setM);
     return () => {
@@ -74,13 +80,20 @@ export function Header({ phase, packNumber, picksMade, vaultCount, onOpenVault, 
         {phase !== 'title' && (
           <button
             onClick={() => {
-              if (phase === 'review' || window.confirm('Abandon this run and start a new draft?')) onNewRun();
+              if (phase === 'review' || armed) {
+                setArmed(false);
+                onNewRun();
+              } else {
+                sfx.error();
+                setArmed(true);
+              }
             }}
-            className="rounded-lg border border-white/15 bg-white/5 p-2 text-white/80 transition hover:bg-white/10"
-            aria-label="New run"
+            className={`flex items-center gap-1 rounded-lg border p-2 transition ${armed ? 'border-rose-400 bg-rose-500/20 text-rose-200' : 'border-white/15 bg-white/5 text-white/80 hover:bg-white/10'}`}
+            aria-label={armed ? 'Tap again to abandon this run' : 'New run'}
             title="New run"
           >
             <RotateCcw className="h-4 w-4" />
+            {armed && <span className="text-[10px] font-black uppercase">Tap again to abandon</span>}
           </button>
         )}
       </div>
