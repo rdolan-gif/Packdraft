@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Wand2, Lock, Play, Sparkles } from 'lucide-react';
 import { Header } from './components/Header';
 import { ManagerDraftModal } from './components/ManagerDraftModal';
@@ -71,6 +71,16 @@ export default function App() {
   const [vaultOpen, setVaultOpen] = useState(false);
   const [inspectSlot, setInspectSlot] = useState<string | null>(null);
   const [managerInfoOpen, setManagerInfoOpen] = useState(false);
+  // Between placing a card and the next pack arriving, the old pack is locked:
+  // before, clicking during that gap could draft twice from one pack (even the same player).
+  const [dealing, setDealing] = useState(false);
+  const dealTimer = useRef<number | null>(null);
+  const cancelDeal = () => {
+    if (dealTimer.current) window.clearTimeout(dealTimer.current);
+    dealTimer.current = null;
+    setDealing(false);
+  };
+  useEffect(() => () => cancelDeal(), []);
 
   const rating = useMemo(() => computeTeamRating(formationId, lineup, managerId), [formationId, lineup, managerId]);
   const picksMade = Object.values(lineup).filter(Boolean).length;
@@ -92,6 +102,7 @@ export default function App() {
   );
 
   const newRun = () => {
+    cancelDeal();
     setPhase('title');
     setManagerOffers(dealManagers());
     setManagerId(null);
@@ -125,6 +136,7 @@ export default function App() {
   };
 
   const place = (card: PlayerCard, slotId: string) => {
+    if (dealing || drafted.has(card.basePlayerId)) return;
     const nextLineup = { ...lineup, [slotId]: card };
     const nextDrafted = new Set(drafted).add(card.basePlayerId);
     setLineup(nextLineup);
@@ -140,7 +152,12 @@ export default function App() {
     if (packNumber < TOTAL_PACKS) {
       const n = packNumber + 1;
       setPackNumber(n);
-      window.setTimeout(() => dealPack(n, nextLineup, nextDrafted, formationId), 450);
+      setDealing(true);
+      dealTimer.current = window.setTimeout(() => {
+        dealTimer.current = null;
+        setDealing(false);
+        dealPack(n, nextLineup, nextDrafted, formationId);
+      }, 450);
     } else {
       setPackCards([]);
       sfx.fanfare();
@@ -180,7 +197,7 @@ export default function App() {
   };
 
   const reroll = () => {
-    if (rerollUsed) return;
+    if (rerollUsed || dealing) return;
     setRerollUsed(true);
     dealPack(packNumber, lineup, drafted, formationId);
     flash('Scout reroll used: fresh pack incoming!');
@@ -229,6 +246,7 @@ export default function App() {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         setSwapSource(null);
+        setSelected(null);
         setVaultOpen(false);
       }
     };
@@ -294,10 +312,11 @@ export default function App() {
                     packKey={packKey}
                     selectedId={selected?.id ?? null}
                     onSelect={(c) => {
+                      if (dealing) return;
                       setSelected(c);
                       setSwapSource(null);
                     }}
-                    rerollAvailable={!rerollUsed}
+                    rerollAvailable={!rerollUsed && !dealing}
                     onReroll={reroll}
                   />
                   {selected && (

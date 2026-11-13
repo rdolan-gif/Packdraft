@@ -89,7 +89,10 @@ export function SeasonBroadcast({ sim, onFinish }: Props) {
     return () => {
       if (timer.current) clearTimeout(timer.current);
     };
-  });
+    // Re-arm only when playback state changes. With no deps, every re-render (e.g. the
+    // result flash clearing) restarted the countdown and 1x/2x ran ~50-90% slow.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [playing, decision, done, speed, sim.matchweek]);
 
   // Instant sim: run until a decision or the end (batched to keep the UI responsive)
   useEffect(() => {
@@ -155,8 +158,11 @@ export function SeasonBroadcast({ sim, onFinish }: Props) {
               <button
                 onClick={() => {
                   sfx.click();
-                  if (speed === 'instant') setInstantRun((v) => !v);
-                  else setPlaying((p) => !p);
+                  if (playing || instantRun) {
+                    setPlaying(false);
+                    setInstantRun(false);
+                  } else if (speed === 'instant') setInstantRun(true);
+                  else setPlaying(true);
                 }}
                 disabled={!!decision}
                 className="flex items-center gap-1 rounded-lg bg-emerald-500 px-3 py-1.5 text-sm font-black text-black transition hover:bg-emerald-400 disabled:opacity-40"
@@ -195,7 +201,7 @@ export function SeasonBroadcast({ sim, onFinish }: Props) {
                 className="flex items-center gap-1 rounded-lg border border-white/15 bg-white/5 px-2 py-1.5 text-xs font-black text-white/80 hover:bg-white/10 disabled:opacity-40"
                 title="Simulate to the next big match (MW19 / MW38) or the end"
               >
-                <FastForward className="h-3.5 w-3.5" /> {sim.matchweek < 18 ? 'Sim to Derby Day' : sim.matchweek < 37 ? 'Sim to Final Day' : 'Sim to End'}
+                <FastForward className="h-3.5 w-3.5" /> {sim.matchweek < 19 ? 'Sim to Derby Day' : sim.matchweek < 38 ? 'Sim to Final Day' : 'Sim to End'}
               </button>
             )}
           </div>
@@ -296,8 +302,12 @@ export function SeasonBroadcast({ sim, onFinish }: Props) {
             )}
             {!done && nextFixture && userMatch && (
               <div className="mt-2 border-t border-white/10 pt-2 text-[11px] text-white/60">
-                Next: {nextFixture.home ? 'vs' : '@'} <b className="text-white/90">{sim.teamById[nextFixture.opponentId].name}</b>
-                {sim.matchweek + 1 === 19 && <span className="ml-1 font-black text-yellow-300">· DERBY DAY</span>}
+                {sim.matchweek + 1 === 19 ? (
+                  // The derby opponent is picked at kick-off (closest rival), so don't name a team yet.
+                  <>Next: <b className="text-white/90">your closest title rival</b><span className="ml-1 font-black text-yellow-300">· DERBY DAY</span></>
+                ) : (
+                  <>Next: {nextFixture.home ? 'vs' : '@'} <b className="text-white/90">{sim.teamById[nextFixture.opponentId].name}</b></>
+                )}
                 {sim.matchweek + 1 === 38 && <span className="ml-1 font-black text-yellow-300">· FINAL DAY</span>}
               </div>
             )}
@@ -457,10 +467,10 @@ function DecisionOverlay({ d, sim, onChoose }: { d: DecisionContext; sim: Season
         <div className="bg-yellow-300 px-5 py-2 text-center text-xs font-black uppercase tracking-[0.35em] text-black">Touchline Tactical Decision</div>
         <div className="p-5 text-center sm:p-7">
           <div className="text-[11px] font-black uppercase tracking-widest text-emerald-400">Matchweek {d.matchweek} · {d.title}</div>
-          <div className="mt-3 flex items-center justify-center gap-4">
-            <div className="font-display text-3xl text-emerald-300 sm:text-4xl">{sim.teamById[USER_TEAM_ID].name}</div>
-            <div className="font-display text-2xl text-white/50">{d.home ? 'vs' : '@'}</div>
-            <div className="flex items-center gap-2 font-display text-3xl text-white sm:text-4xl">
+          <div className="mt-3 flex flex-wrap items-center justify-center gap-x-4 gap-y-1">
+            <div className="min-w-0 break-words font-display text-2xl text-emerald-300 sm:text-4xl">{sim.teamById[USER_TEAM_ID].name}</div>
+            <div className="font-display text-xl text-white/50 sm:text-2xl">{d.home ? 'vs' : '@'}</div>
+            <div className="flex min-w-0 items-center gap-2 break-words font-display text-2xl text-white sm:text-4xl">
               <span className="h-5 w-5 rounded" style={{ background: `linear-gradient(135deg, ${opp.primary} 50%, ${opp.secondary} 50%)` }} />
               {opp.name}
             </div>

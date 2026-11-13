@@ -47,65 +47,85 @@ body {
   }
 }
 
-.tier-STANDARD {
-  background:
-    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.035) 0 1px, transparent 1px 12px),
-    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.035) 0 1px, transparent 1px 12px),
-    linear-gradient(160deg, #3a4250 0%, #1e232c 55%, #12151b 100%);
-  border: 1.5px solid #6b7280;
-  color: #e5e7eb;
+/* Tier skins, Prime shimmer and aura live in the components layer so Tailwind utilities
+   (selection ring, opacity, z-index) can override them. */
+@layer components {
+  .tier-STANDARD {
+    background:
+      repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.035) 0 1px, transparent 1px 12px),
+      repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.035) 0 1px, transparent 1px 12px),
+      linear-gradient(160deg, #3a4250 0%, #1e232c 55%, #12151b 100%);
+    border: 1.5px solid #6b7280;
+    color: #e5e7eb;
+  }
+
+  .tier-CULT_VETERAN {
+    background:
+      repeating-linear-gradient(100deg, rgba(255, 255, 255, 0.05) 0 2px, transparent 2px 5px),
+      linear-gradient(150deg, #b2753e 0%, #6b3f1d 38%, #1e3a8a 75%, #0f1d4a 100%);
+    border: 1.5px solid #d6a46b;
+    color: #fff7ed;
+  }
+
+  .tier-RISING_WORLD {
+    background:
+      radial-gradient(ellipse at 30% 0%, rgba(255, 255, 255, 0.35), transparent 50%),
+      linear-gradient(150deg, #fde68a 0%, #d4a017 30%, #047857 70%, #064e3b 100%);
+    border: 2px solid #fde68a;
+    color: #fffbeb;
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.35), 0 0 16px rgba(250, 204, 21, 0.35);
+  }
+
+  .tier-PRIME_ICON {
+    background:
+      radial-gradient(ellipse at 50% 0%, rgba(255, 255, 255, 0.5), transparent 55%),
+      linear-gradient(155deg, #fff7c2 0%, #facc15 22%, #b45309 55%, #451a03 100%);
+    border: 2px solid #fef08a;
+    color: #fff;
+  }
+
+  /* Prime shimmer. The stripes slide by moving the layer (GPU-only) instead of animating
+     background-position, which repainted and re-blended every card on every frame. */
+  .holo {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: -260px;
+    right: -260px;
+    pointer-events: none;
+    background: repeating-linear-gradient(
+      90deg,
+      transparent 0px,
+      rgba(255, 0, 128, 0.5) 40px,
+      rgba(255, 200, 0, 0.5) 70px,
+      rgba(0, 255, 160, 0.5) 100px,
+      rgba(0, 170, 255, 0.5) 130px,
+      rgba(180, 0, 255, 0.5) 160px,
+      transparent 200px
+    );
+    mix-blend-mode: color-dodge;
+    opacity: 0.5;
+    transform: translateX(-200px) skewX(-25deg);
+    animation: holoslide 5s linear infinite;
+    z-index: 3;
+  }
+
+  /* Prime aura: a static outer glow plus an inner pulse that only changes opacity. */
+  .aura {
+    box-shadow: 0 0 22px 5px rgba(250, 204, 21, 0.6);
+  }
+  .aura::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    box-shadow: inset 0 0 16px 3px rgba(254, 240, 138, 0.9);
+    pointer-events: none;
+    z-index: 7;
+    animation: aurapulse 1.6s ease-in-out infinite;
+  }
 }
 
-.tier-CULT_VETERAN {
-  background:
-    repeating-linear-gradient(100deg, rgba(255, 255, 255, 0.05) 0 2px, transparent 2px 5px),
-    linear-gradient(150deg, #b2753e 0%, #6b3f1d 38%, #1e3a8a 75%, #0f1d4a 100%);
-  border: 1.5px solid #d6a46b;
-  color: #fff7ed;
-}
-
-.tier-RISING_WORLD {
-  background:
-    radial-gradient(ellipse at 30% 0%, rgba(255, 255, 255, 0.35), transparent 50%),
-    linear-gradient(150deg, #fde68a 0%, #d4a017 30%, #047857 70%, #064e3b 100%);
-  border: 2px solid #fde68a;
-  color: #fffbeb;
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.35), 0 0 16px rgba(250, 204, 21, 0.35);
-}
-
-.tier-PRIME_ICON {
-  background:
-    radial-gradient(ellipse at 50% 0%, rgba(255, 255, 255, 0.5), transparent 55%),
-    linear-gradient(155deg, #fff7c2 0%, #facc15 22%, #b45309 55%, #451a03 100%);
-  border: 2px solid #fef08a;
-  color: #fff;
-}
-
-/* Prime shimmer. The stripes slide by moving the layer (GPU-only) instead of animating
-   background-position, which repainted and re-blended every card on every frame. */
-.holo {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: -260px;
-  right: -260px;
-  pointer-events: none;
-  background: repeating-linear-gradient(
-    90deg,
-    transparent 0px,
-    rgba(255, 0, 128, 0.5) 40px,
-    rgba(255, 200, 0, 0.5) 70px,
-    rgba(0, 255, 160, 0.5) 100px,
-    rgba(0, 170, 255, 0.5) 130px,
-    rgba(180, 0, 255, 0.5) 160px,
-    transparent 200px
-  );
-  mix-blend-mode: color-dodge;
-  opacity: 0.5;
-  transform: translateX(-200px) skewX(-25deg);
-  animation: holoslide 5s linear infinite;
-  z-index: 3;
-}
 @keyframes holoslide {
   from {
     transform: translateX(-200px) skewX(-25deg);
@@ -113,21 +133,6 @@ body {
   to {
     transform: translateX(0) skewX(-25deg);
   }
-}
-
-/* Prime aura: a static outer glow plus an inner pulse that only changes opacity. */
-.aura {
-  box-shadow: 0 0 22px 5px rgba(250, 204, 21, 0.6);
-}
-.aura::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  box-shadow: inset 0 0 16px 3px rgba(254, 240, 138, 0.9);
-  pointer-events: none;
-  z-index: 7;
-  animation: aurapulse 1.6s ease-in-out infinite;
 }
 @keyframes aurapulse {
   0%,

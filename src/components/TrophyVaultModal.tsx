@@ -59,7 +59,7 @@ export function TrophyVaultModal({ vault, career, onClose, onDelete }: Props) {
     <div className="fixed inset-0 z-[95] flex items-start justify-center overflow-y-auto bg-black/85 p-3 sm:p-6" onClick={onClose}>
       <div className="relative my-4 w-full max-w-5xl animate-pop overflow-hidden rounded-3xl border-2 border-yellow-300/60 bg-gradient-to-b from-zinc-900 to-black" onClick={(e) => e.stopPropagation()}>
         <div className="relative overflow-hidden border-b border-yellow-300/30 bg-gradient-to-r from-amber-700/40 via-yellow-500/20 to-amber-700/40 px-5 py-4">
-          <div className="holo opacity-20" />
+          <div className="holo z-0 opacity-20" />
           <div className="relative flex items-center gap-3">
             {open && (
               <button onClick={() => (setOpen(null), setConfirmDelete(false))} className="rounded-lg bg-black/40 p-2 text-white hover:bg-black/60" aria-label="Back">
@@ -118,7 +118,7 @@ export function TrophyVaultModal({ vault, career, onClose, onDelete }: Props) {
                       onMouseEnter={() => sfx.hover()}
                       className={`card-base sweep group flex flex-col gap-2 border-2 p-3 text-left transition hover:-translate-y-1 ${e.invincible ? 'border-yellow-300 bg-gradient-to-br from-yellow-500/25 via-amber-900/30 to-black' : 'border-white/15 bg-white/5'}`}
                     >
-                      {e.invincible && <div className="holo opacity-25" />}
+                      {e.invincible && <div className="holo z-0 opacity-25" />}
                       <div className="relative flex items-center gap-3">
                         <div className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-full border-4 font-display text-3xl ${st.stamp}`}>{e.grade}</div>
                         <div className="min-w-0">

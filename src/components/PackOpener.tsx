@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState, type PointerEvent as RPointerEvent } from 'react';
 import { RefreshCw, Scissors, Sparkles } from 'lucide-react';
 import type { PlayerCard, Tier } from '../types/game';
-import { highestTier, TIER_RANK, TOTAL_PACKS, tierRates } from '../engine/packGenerator';
+import { highestTier, TOTAL_PACKS, tierRates } from '../engine/packGenerator';
 import { sfx } from '../engine/soundEffects';
 import { burstAt, goldConfetti, shakeScreen } from '../engine/fx';
 import { CardBack, PlayerCardUI, TIER_TEXT } from './PlayerCardUI';
@@ -87,8 +87,11 @@ export function PackOpener({ packNumber, cards, packKey, selectedId, onSelect, r
   // Flip order: weakest first, best card last. Prime icons hold back for a dramatic beat.
   const flipOrder = useMemo(() => cards.map((c, i) => ({ c, i })).sort((a, b) => a.c.ovr - b.c.ovr).map((x) => x.i), [cards]);
 
+  // Only the single best Prime card is held back for the walkout beat.
+  const heldIdx = top === 'PRIME_ICON' ? flipOrder[flipOrder.length - 1] : -1;
+
   const startReveal = (baseDelay: number) => {
-    const primeIdx = top === 'PRIME_ICON' ? flipOrder[flipOrder.length - 1] : -1;
+    const primeIdx = heldIdx;
     let t = baseDelay;
     flipOrder.forEach((idx) => {
       if (idx === primeIdx) return;
@@ -104,6 +107,8 @@ export function PackOpener({ packNumber, cards, packKey, selectedId, onSelect, r
       t += 300;
     }
     later(t + 150, () => {
+      // Safety net: every card ends face-up, whatever was clicked during the reveal.
+      setFlipped(new Set(cards.map((_, i) => i)));
       setStage('revealed');
       onRevealed?.();
     });
@@ -382,7 +387,7 @@ export function PackOpener({ packNumber, cards, packKey, selectedId, onSelect, r
           <div className="flex w-full flex-wrap items-start justify-center gap-2 sm:gap-3">
             {cards.map((card, i) => {
               const isFlipped = flipped.has(i);
-              const isPrimeHold = card.tier === 'PRIME_ICON' && !isFlipped && TIER_RANK[top] === 3;
+              const isPrimeHold = i === heldIdx && !isFlipped;
               return (
                 <div
                   key={card.id}

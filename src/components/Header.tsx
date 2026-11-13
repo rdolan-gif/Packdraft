@@ -18,6 +18,17 @@ export function Header({ phase, packNumber, picksMade, vaultCount, onOpenVault, 
   const [armed, setArmed] = useState(false);
   const [lite, setL] = useState(isLite());
   useEffect(() => onLiteChange(setL), []);
+  // Leaving a run in progress needs a second tap (logo or reset button).
+  const safeToLeave = phase === 'title' || phase === 'review';
+  const requestNewRun = () => {
+    if (safeToLeave || armed) {
+      setArmed(false);
+      onNewRun();
+    } else {
+      sfx.error();
+      setArmed(true);
+    }
+  };
   useEffect(() => {
     if (!armed) return;
     const t = window.setTimeout(() => setArmed(false), 3000);
@@ -33,7 +44,7 @@ export function Header({ phase, packNumber, picksMade, vaultCount, onOpenVault, 
   return (
     <header className="sticky top-0 z-50 border-b border-white/10 bg-black/90">
       <div className="mx-auto flex max-w-7xl items-center gap-3 px-4 py-2">
-        <button onClick={onNewRun} className="flex items-center gap-2" aria-label="PackDraft 38 home">
+        <button onClick={requestNewRun} className="flex items-center gap-2" aria-label="PackDraft 38 home">
           <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-yellow-300 to-amber-600 font-display text-xl text-black shadow-lg shadow-amber-500/30">38</span>
           <span className="hidden font-display text-2xl leading-none tracking-wider text-white sm:block">
             PACK<span className="text-emerald-400">DRAFT</span> 38
@@ -95,15 +106,7 @@ export function Header({ phase, packNumber, picksMade, vaultCount, onOpenVault, 
         </button>
         {phase !== 'title' && (
           <button
-            onClick={() => {
-              if (phase === 'review' || armed) {
-                setArmed(false);
-                onNewRun();
-              } else {
-                sfx.error();
-                setArmed(true);
-              }
-            }}
+            onClick={requestNewRun}
             className={`flex items-center gap-1 rounded-lg border p-2 transition ${armed ? 'border-rose-400 bg-rose-500/20 text-rose-200' : 'border-white/15 bg-white/5 text-white/80 hover:bg-white/10'}`}
             aria-label={armed ? 'Tap again to abandon this run' : 'New run'}
             title="New run"
