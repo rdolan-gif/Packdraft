@@ -476,7 +476,7 @@ function TitleScreen({ onStart, career, vaultCount, onVault }: { onStart: () => 
   return (
     <div className="mx-auto flex max-w-6xl flex-col items-center px-4 pb-10 pt-10 text-center sm:pt-14">
       <div className="flex items-center gap-2 rounded-full border border-yellow-300/40 bg-yellow-300/10 px-3 py-1 text-[11px] font-black uppercase tracking-[0.3em] text-yellow-200">
-        <Sparkles className="h-3.5 w-3.5" /> 11 packs · 249 cards · 38 matchweeks
+        <Sparkles className="h-3.5 w-3.5" /> 11 packs · {PLAYERS.length} cards · 38 matchweeks
       </div>
       <h1 className="mt-4 font-display text-7xl leading-[0.85] text-white drop-shadow-[0_6px_0_rgba(0,0,0,.5)] sm:text-9xl">
         PACK<span className="text-emerald-400">DRAFT</span>
