@@ -34,13 +34,13 @@ export function ManagerDraftModal({ offers, onPick }: Props) {
         </p>
       </div>
 
-      <div className="mt-8 grid w-full grid-cols-1 gap-5 md:grid-cols-3">
+      <div className="mx-auto mt-8 grid w-full max-w-md grid-cols-1 gap-5 lg:max-w-none lg:grid-cols-3">
         {offers.map((m, i) => {
           const isRev = revealed.has(i);
           return (
             <div key={m.id} className="animate-pop" style={{ perspective: 1200, animationDelay: `${i * 120}ms` }}>
               <div
-                className="relative h-[430px] w-full transition-transform duration-700"
+                className="relative h-[460px] w-full transition-transform duration-700"
                 style={{ transformStyle: 'preserve-3d', transform: isRev ? 'rotateY(0)' : 'rotateY(180deg)' }}
               >
                 {/* front */}

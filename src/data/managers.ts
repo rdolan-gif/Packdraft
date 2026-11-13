@@ -64,7 +64,7 @@ export const MANAGERS: ManagerCard[] = [
     description: 'Stars sell shirts and win leagues. Balance is for accountants.',
     bonusText: '+0.6 Team Rating per World Class / Prime Icon card. Ignores midfield balance penalties.',
     emoji: '💫',
-    gradient: 'from-yellow-200 via-amber-500 to-purple-900',
+    gradient: 'from-amber-500 via-yellow-700 to-purple-950',
     preferredFormations: ['4-3-3', '4-1-2-1-2'],
   },
 ];

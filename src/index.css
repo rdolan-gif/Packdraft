@@ -36,13 +36,16 @@ body {
 }
 
 /* ────────── Card tiers ────────── */
-.card-base {
-  position: relative;
-  border-radius: 14px;
-  overflow: hidden;
-  transform-style: preserve-3d;
-  transition: transform 0.15s ease-out, box-shadow 0.2s;
-  isolation: isolate;
+/* In the components layer so utilities like `absolute inset-0` can override it. */
+@layer components {
+  .card-base {
+    position: relative;
+    border-radius: 14px;
+    overflow: hidden;
+    transform-style: preserve-3d;
+    transition: transform 0.15s ease-out, box-shadow 0.2s;
+    isolation: isolate;
+  }
 }
 
 .tier-STANDARD {
