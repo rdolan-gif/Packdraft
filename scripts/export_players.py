@@ -19,9 +19,8 @@ from pd38_schema import (ACCESSORIES, ARCHETYPES, CLUB_HEADERS, CLUB_ROWS, CLUBS
                          OVR_MAX, OVR_MIN, POSITION_GROUP, POSITIONS, ROOT, SKIN, STAT_KEYS, STAT_MAX, STAT_MIN, TIERS, TRAIT_COLS)
 
 OUT = sys.argv[1] if len(sys.argv) > 1 else str(ROOT / "PackDraft38_Players.xlsx")
-LAST_ROW = 450  # formulas and dropdowns reach this far so new rows work too
-
 players = json.loads(subprocess.check_output(["node", "scripts/dump-players.mjs"], cwd=ROOT))
+LAST_ROW = len(players) + 200  # formulas and dropdowns reach this far so new rows work too
 
 FONT = "Arial"
 f_body = Font(name=FONT, size=10)
