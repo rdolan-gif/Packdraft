@@ -33,6 +33,10 @@ export function PackOpener({ packNumber, cards, packKey, selectedId, onSelect, r
   const [flash, setFlash] = useState<{ key: number; tier: Tier } | null>(null);
   const [tilt, setTilt] = useState({ rx: 0, ry: 0, gx: 50, gy: 30 });
   const dragging = useRef(false);
+  // The strip rect is measured once at pointer-down so the pack can't shift the target mid-drag.
+  const stripRect = useRef<DOMRect | null>(null);
+  const tearRef = useRef(0);
+  const [isDragging, setIsDragging] = useState(false);
   const lastTick = useRef(0);
   const timers = useRef<number[]>([]);
   const packRef = useRef<HTMLDivElement>(null);
@@ -46,6 +50,8 @@ export function PackOpener({ packNumber, cards, packKey, selectedId, onSelect, r
     setStage('sealed');
     setFlipped(new Set());
     setTearProgress(0);
+    tearRef.current = 0;
+    primeShown.current = false;
     setFlash(null);
   }, [packKey]);
 
@@ -53,6 +59,16 @@ export function PackOpener({ packNumber, cards, packKey, selectedId, onSelect, r
 
   const later = (ms: number, fn: () => void) => {
     timers.current.push(window.setTimeout(fn, ms));
+  };
+
+  const primeShown = useRef(false);
+  const revealPrime = (idx: number) => {
+    if (primeShown.current) return;
+    primeShown.current = true;
+    sfx.roar();
+    setFlipped((s) => new Set(s).add(idx));
+    shakeScreen('heavy');
+    goldConfetti(1.3);
   };
 
   // Flip order: weakest first, best card last. Prime icons hold back for a dramatic beat.
@@ -71,12 +87,7 @@ export function PackOpener({ packNumber, cards, packKey, selectedId, onSelect, r
     });
     if (primeIdx >= 0) {
       t += 900;
-      later(t, () => {
-        sfx.roar();
-        setFlipped((s) => new Set(s).add(primeIdx));
-        shakeScreen('heavy');
-        goldConfetti(1.3);
-      });
+      later(t, () => revealPrime(primeIdx));
       t += 300;
     }
     later(t + 150, () => {
@@ -134,38 +145,57 @@ export function PackOpener({ packNumber, cards, packKey, selectedId, onSelect, r
   };
 
   // ── drag-to-tear
+
+  const progressAt = (clientX: number) => {
+    const r = stripRect.current;
+    if (!r) return 0;
+    return Math.max(0, Math.min(1, (clientX - r.left) / r.width));
+  };
+
   const onStripDown = (e: RPointerEvent<HTMLDivElement>) => {
     if (stage !== 'sealed') return;
+    e.preventDefault();
     dragging.current = true;
-    (e.target as HTMLElement).setPointerCapture?.(e.pointerId);
+    setIsDragging(true);
+    setTilt({ rx: 0, ry: 0, gx: 50, gy: 30 }); // hold the pack still while tearing
+    e.currentTarget.setPointerCapture?.(e.pointerId);
+    stripRect.current = e.currentTarget.getBoundingClientRect();
     sfx.unlock();
+    sfx.tearTick();
   };
   const onStripMove = (e: RPointerEvent<HTMLDivElement>) => {
     if (!dragging.current || stage !== 'sealed') return;
-    const r = e.currentTarget.getBoundingClientRect();
-    const p = Math.max(0, Math.min(1, (e.clientX - r.left) / r.width));
-    if (p > tearProgress) {
-      setTearProgress(p);
-      const now = performance.now();
-      if (now - lastTick.current > 45) {
-        sfx.tearTick();
-        lastTick.current = now;
-      }
-      if (p > 0.88) {
-        dragging.current = false;
-        rip();
-      }
+    const p = progressAt(e.clientX);
+    if (p <= tearRef.current) return;
+    tearRef.current = p;
+    setTearProgress(p);
+    const now = performance.now();
+    if (now - lastTick.current > 45) {
+      sfx.tearTick();
+      lastTick.current = now;
+    }
+    if (p > 0.8) {
+      dragging.current = false;
+      setIsDragging(false);
+      rip();
     }
   };
   const onStripUp = () => {
     dragging.current = false;
+    setIsDragging(false);
   };
 
   const onPackMove = (e: RPointerEvent<HTMLDivElement>) => {
+    if (dragging.current) return;
     const r = e.currentTarget.getBoundingClientRect();
     const px = (e.clientX - r.left) / r.width;
     const py = (e.clientY - r.top) / r.height;
-    setTilt({ ry: (px - 0.5) * 24, rx: (0.5 - py) * 18, gx: px * 100, gy: py * 100 });
+    // No tilt while the pointer is over the tear zone, so the strip stays put.
+    if (py < 0.22) {
+      setTilt({ rx: 0, ry: 0, gx: px * 100, gy: py * 100 });
+      return;
+    }
+    setTilt({ ry: (px - 0.5) * 14, rx: (0.5 - py) * 10, gx: px * 100, gy: py * 100 });
   };
 
   const rates = tierRates(packNumber);
@@ -291,24 +321,45 @@ export function PackOpener({ packNumber, cards, packKey, selectedId, onSelect, r
                 />
               )}
             </div>
-            {/* tear strip */}
+            {/* tear strip: tall invisible hit zone with a visible perforation line and a grab handle */}
             <div
               onPointerDown={onStripDown}
               onPointerMove={onStripMove}
               onPointerUp={onStripUp}
               onPointerCancel={onStripUp}
-              className="perforation absolute inset-x-0 top-[34px] z-10 h-[16px] cursor-ew-resize touch-none"
-              title="Drag across to tear"
+              onLostPointerCapture={onStripUp}
+              className={`absolute -left-4 -right-4 top-[14px] z-20 h-[56px] touch-none select-none ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}
+              title="Drag the handle across to tear"
+              aria-label="Tear strip: drag from left to right to open the pack"
             >
-              <div className="h-full bg-gradient-to-r from-yellow-200 via-white to-yellow-200 opacity-90 shadow-[0_0_12px_rgba(255,255,255,.9)]" style={{ width: `${tearProgress * 100}%` }} />
-              {stage === 'sealed' && tearProgress === 0 && (
-                <Scissors className="absolute -left-1 top-1/2 h-5 w-5 -translate-y-1/2 animate-pulse text-white drop-shadow" />
+              <div className="perforation absolute left-4 right-4 top-1/2 h-[14px] -translate-y-1/2 rounded-full bg-black/25">
+                <div className="h-full rounded-full bg-gradient-to-r from-yellow-200 via-white to-yellow-200 shadow-[0_0_14px_rgba(255,255,255,.9)]" style={{ width: `${tearProgress * 100}%` }} />
+              </div>
+              {stage === 'sealed' && tearProgress < 0.05 && !isDragging && (
+                <div className="pointer-events-none absolute left-16 right-6 top-1/2 flex -translate-y-1/2 items-center justify-center gap-1 text-[11px] font-black uppercase tracking-widest text-white drop-shadow-[0_1px_2px_rgba(0,0,0,.9)]">
+                  Slide to tear
+                  <span className="flex">
+                    {[0, 1, 2].map((i) => (
+                      <span key={i} className="animate-pulse" style={{ animationDelay: `${i * 0.2}s` }}>
+                        ›
+                      </span>
+                    ))}
+                  </span>
+                </div>
+              )}
+              {stage === 'sealed' && (
+                <div
+                  className={`pointer-events-none absolute top-1/2 flex h-11 w-11 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border-2 border-white bg-gradient-to-br from-yellow-200 to-amber-500 text-black shadow-[0_0_18px_rgba(250,204,21,.9)] ${tearProgress === 0 && !isDragging ? 'animate-pulse' : ''}`}
+                  style={{ left: `calc(16px + (100% - 32px) * ${tearProgress})` }}
+                >
+                  <Scissors className="h-5 w-5" />
+                </div>
               )}
             </div>
           </div>
           {stage === 'sealed' && (
             <div className="mt-5 flex flex-col items-center gap-2">
-              <div className="text-xs font-semibold text-white/60">Drag across the perforated strip, or</div>
+              <div className="text-xs font-semibold text-white/60">Grab the ✂ handle and slide it right, or</div>
               <button
                 onClick={rip}
                 className="group relative overflow-hidden rounded-xl bg-gradient-to-r from-yellow-300 via-amber-400 to-yellow-300 px-8 py-3 font-display text-2xl tracking-wider text-black shadow-lg shadow-amber-500/30 transition hover:scale-105 active:scale-95"
@@ -335,25 +386,26 @@ export function PackOpener({ packNumber, cards, packKey, selectedId, onSelect, r
                   className="animate-pop"
                   style={{ animationDelay: `${i * 70}ms`, perspective: 1000 }}
                   onClick={() => {
-                    if (!isFlipped && stage === 'fanned' && !isPrimeHold) {
-                      sfx.flip();
-                      setFlipped((s) => new Set(s).add(i));
-                    }
+                    if (isFlipped || stage !== 'fanned') return;
+                    if (isPrimeHold) return revealPrime(i);
+                    sfx.flip();
+                    setFlipped((s) => new Set(s).add(i));
                   }}
                 >
                   <div
                     className="relative transition-transform duration-700"
                     style={{ transformStyle: 'preserve-3d', transform: isFlipped ? 'rotateY(0deg)' : 'rotateY(180deg)' }}
                   >
-                    <div style={{ backfaceVisibility: 'hidden' }}>
+                    <div style={{ backfaceVisibility: 'hidden', pointerEvents: isFlipped ? 'auto' : 'none' }}>
                       <PlayerCardUI
                         card={card}
                         size="md"
                         showStats
                         selected={selectedId === card.id}
-                        dimmed={stage === 'revealed' && !!selectedId && selectedId !== card.id}
+                        dimmed={!!selectedId && selectedId !== card.id}
+                        // Pickable as soon as it is face-up; no need to wait for the rest of the pack.
                         onClick={
-                          stage === 'revealed'
+                          isFlipped
                             ? () => {
                                 sfx.select();
                                 onSelect(card);
@@ -362,7 +414,7 @@ export function PackOpener({ packNumber, cards, packKey, selectedId, onSelect, r
                         }
                       />
                     </div>
-                    <div className="absolute inset-0" style={{ backfaceVisibility: 'hidden', transform: 'rotateY(180deg)' }}>
+                    <div className="absolute inset-0" style={{ backfaceVisibility: 'hidden', transform: 'rotateY(180deg)', pointerEvents: isFlipped ? 'none' : 'auto' }}>
                       <CardBack size="md" glow={isPrimeHold} />
                     </div>
                   </div>
