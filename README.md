@@ -23,6 +23,7 @@ SINGLE=1 npx vite build   # one self-contained HTML file in dist-single/
 - **Pack engine** (`src/engine/packGenerator.ts`): no duplicate players, pity weighting from pack 6, guaranteed slot fits in packs 9–11, and a Captain's Finale (pack 11) with a guaranteed 86+ card at double Prime odds.
 - **Procedural art and sound**: SVG caricatures (`PlayerCaricature.tsx`) and a Web Audio synth (`soundEffects.ts`). There are no external image or audio files.
 - **Live season** (`seasonSimulator.ts`): minute-by-minute Poisson sim, a 20-team table, a results ticker and Golden Boot / Playmaker / Golden Glove leaderboards. Tactical pauses come at MW19 (against your closest rival) and at MW38 when something is at stake.
+- **January transfer window**: after matchweek 20, open one pack and sign one card to replace a player (or keep your squad).
 - **Review card**: grades from F to S+ with a stamp reveal, the Scout's Verdict, awards and a copyable emoji share grid.
 - **Trophy Vault**: S, S+ and unbeaten squads plus career stats, saved in `localStorage`.
 

@@ -269,12 +269,12 @@ function PlayerCaricatureImpl({ traits, kitPrimaryColor, kitSecondaryColor, kitS
       case 'goatee':
         return (
           <g fill={beardColor}>
-            <path d={`M 44 ${mouthY - 3.5} Q 50 ${mouthY - 6} 56 ${mouthY - 3.5} L 55 ${mouthY - 2} Q 50 ${mouthY - 4} 45 ${mouthY - 2} Z`} />
+            <path d={`M 43 ${mouthY - 1.5} C 45 ${mouthY - 6} 48 ${mouthY - 6} 50 ${mouthY - 5} C 52 ${mouthY - 6} 55 ${mouthY - 6} 57 ${mouthY - 1.5} C 54 ${mouthY - 3} 52 ${mouthY - 3} 50 ${mouthY - 2.5} C 48 ${mouthY - 3} 46 ${mouthY - 3} 43 ${mouthY - 1.5} Z`} />
             <path d={`M 45 ${mouthY + 4} Q 50 ${g.c + 4} 55 ${mouthY + 4} Q 50 ${mouthY + 6} 45 ${mouthY + 4} Z`} />
           </g>
         );
       case 'moustache':
-        return <path d={`M 42 ${mouthY - 2} Q 50 ${mouthY - 7} 58 ${mouthY - 2} Q 50 ${mouthY - 3.5} 42 ${mouthY - 2} Z`} fill={beardColor} />;
+        return <path d={`M 40.5 ${mouthY - 0.5} C 42 ${mouthY - 6.5} 47 ${mouthY - 7} 50 ${mouthY - 5.5} C 53 ${mouthY - 7} 58 ${mouthY - 6.5} 59.5 ${mouthY - 0.5} C 56 ${mouthY - 2.5} 53 ${mouthY - 3} 50 ${mouthY - 2.5} C 47 ${mouthY - 3} 44 ${mouthY - 2.5} 40.5 ${mouthY - 0.5} Z`} fill={beardColor} />;
       case 'beard':
       case 'fullbeard': {
         const full = fh === 'fullbeard';
@@ -284,7 +284,7 @@ function PlayerCaricatureImpl({ traits, kitPrimaryColor, kitSecondaryColor, kitS
             <path
               d={`M ${50 - g.w + 0.5} ${g.m - 2} C ${50 - g.w} ${g.m + 16} ${50 - g.j - 2} ${g.c + drop} 50 ${g.c + drop + 2} C ${50 + g.j + 2} ${g.c + drop} ${50 + g.w} ${g.m + 16} ${50 + g.w - 0.5} ${g.m - 2} L ${50 + g.w - 4} ${g.m + 4} C ${50 + 9} ${mouthY - 4} ${50 - 9} ${mouthY - 4} ${50 - g.w + 4} ${g.m + 4} Z`}
             />
-            <path d={`M 42 ${mouthY - 2} Q 50 ${mouthY - 7} 58 ${mouthY - 2} Q 50 ${mouthY - 3.5} 42 ${mouthY - 2} Z`} />
+            <path d={`M 40.5 ${mouthY - 0.5} C 42 ${mouthY - 6.5} 47 ${mouthY - 7} 50 ${mouthY - 5.5} C 53 ${mouthY - 7} 58 ${mouthY - 6.5} 59.5 ${mouthY - 0.5} C 56 ${mouthY - 2.5} 53 ${mouthY - 3} 50 ${mouthY - 2.5} C 47 ${mouthY - 3} 44 ${mouthY - 2.5} 40.5 ${mouthY - 0.5} Z`} />
           </g>
         );
       }
