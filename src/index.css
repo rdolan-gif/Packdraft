@@ -1,0 +1,254 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  background: #05110b;
+  color: #e5e7eb;
+  font-family: Inter, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+/* Stadium backdrop: floodlights, mown stripes, procedural noise */
+.stadium-bg {
+  background:
+    radial-gradient(ellipse 60% 40% at 15% -5%, rgba(255, 255, 255, 0.12), transparent 60%),
+    radial-gradient(ellipse 60% 40% at 85% -5%, rgba(255, 255, 255, 0.12), transparent 60%),
+    radial-gradient(ellipse 120% 70% at 50% 120%, rgba(16, 185, 129, 0.22), transparent 70%),
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.018) 0 60px, transparent 60px 120px),
+    linear-gradient(180deg, #071a10 0%, #05110b 55%, #03140c 100%);
+}
+
+.font-display {
+  letter-spacing: 0.03em;
+}
+
+/* ────────── Card tiers ────────── */
+.card-base {
+  position: relative;
+  border-radius: 14px;
+  overflow: hidden;
+  transform-style: preserve-3d;
+  transition: transform 0.15s ease-out, box-shadow 0.2s;
+  isolation: isolate;
+}
+
+.tier-STANDARD {
+  background:
+    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.035) 0 1px, transparent 1px 12px),
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.035) 0 1px, transparent 1px 12px),
+    linear-gradient(160deg, #3a4250 0%, #1e232c 55%, #12151b 100%);
+  border: 1.5px solid #6b7280;
+  color: #e5e7eb;
+}
+
+.tier-CULT_VETERAN {
+  background:
+    repeating-linear-gradient(100deg, rgba(255, 255, 255, 0.05) 0 2px, transparent 2px 5px),
+    linear-gradient(150deg, #b2753e 0%, #6b3f1d 38%, #1e3a8a 75%, #0f1d4a 100%);
+  border: 1.5px solid #d6a46b;
+  color: #fff7ed;
+}
+
+.tier-RISING_WORLD {
+  background:
+    radial-gradient(ellipse at 30% 0%, rgba(255, 255, 255, 0.35), transparent 50%),
+    linear-gradient(150deg, #fde68a 0%, #d4a017 30%, #047857 70%, #064e3b 100%);
+  border: 2px solid #fde68a;
+  color: #fffbeb;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.35), 0 0 16px rgba(250, 204, 21, 0.35);
+}
+
+.tier-PRIME_ICON {
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(255, 255, 255, 0.5), transparent 55%),
+    linear-gradient(155deg, #fff7c2 0%, #facc15 22%, #b45309 55%, #451a03 100%);
+  border: 2px solid #fef08a;
+  color: #fff;
+}
+
+.holo {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    115deg,
+    transparent 15%,
+    rgba(255, 0, 128, 0.55) 25%,
+    rgba(255, 200, 0, 0.55) 35%,
+    rgba(0, 255, 160, 0.55) 45%,
+    rgba(0, 170, 255, 0.55) 55%,
+    rgba(180, 0, 255, 0.55) 65%,
+    transparent 80%
+  );
+  background-size: 200% 200%;
+  mix-blend-mode: color-dodge;
+  opacity: 0.55;
+  animation: holo 4s linear infinite;
+  z-index: 3;
+}
+
+.glare {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(circle at var(--gx, 50%) var(--gy, 30%), rgba(255, 255, 255, 0.55), transparent 45%);
+  mix-blend-mode: overlay;
+  opacity: var(--go, 0);
+  transition: opacity 0.2s;
+  z-index: 4;
+}
+
+.sweep::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 40%;
+  left: 0;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.35), transparent);
+  transform: translateX(-150%) skewX(-20deg);
+  pointer-events: none;
+  z-index: 3;
+}
+.sweep:hover::after {
+  animation: sweep 1.2s ease-in-out;
+}
+
+.sparkles i {
+  position: absolute;
+  width: 3px;
+  height: 3px;
+  border-radius: 9999px;
+  background: #fff;
+  box-shadow: 0 0 6px 2px rgba(255, 255, 210, 0.9);
+  animation: twinkle 2.4s ease-in-out infinite;
+  z-index: 3;
+}
+
+@keyframes twinkle {
+  0%,
+  100% {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.2);
+  }
+}
+
+@keyframes holo {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 200% 50%;
+  }
+}
+
+@keyframes sweep {
+  0% {
+    transform: translateX(-150%) skewX(-20deg);
+  }
+  100% {
+    transform: translateX(300%) skewX(-20deg);
+  }
+}
+
+/* ────────── Foil pack ────────── */
+.foil {
+  background:
+    linear-gradient(115deg, rgba(255, 255, 255, 0) 30%, rgba(255, 255, 255, 0.45) 45%, rgba(255, 255, 255, 0) 60%),
+    repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.06) 0 2px, transparent 2px 6px),
+    conic-gradient(from 200deg at 50% 40%, #0f766e, #065f46, #14532d, #1e3a8a, #4c1d95, #0f766e);
+  background-size: 250% 250%, auto, auto;
+}
+
+.perforation {
+  background-image: radial-gradient(circle, rgba(0, 0, 0, 0.55) 1.5px, transparent 2px);
+  background-size: 9px 6px;
+  background-repeat: repeat-x;
+  background-position: center;
+}
+
+.light-beam {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 6px;
+  height: 140vmax;
+  transform-origin: 50% 0;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0));
+  filter: blur(1px);
+}
+
+.particle {
+  position: absolute;
+  border-radius: 9999px;
+  pointer-events: none;
+}
+
+/* ────────── Pitch ────────── */
+.pitch {
+  background:
+    repeating-linear-gradient(180deg, rgba(255, 255, 255, 0.045) 0 9%, transparent 9% 18%),
+    radial-gradient(ellipse at 50% 50%, #1b7a3e 0%, #135c2e 60%, #0d4422 100%);
+}
+
+/* Table row reordering */
+.row-move {
+  transition: transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.scrollbar-thin::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 9999px;
+}
+
+.text-shadow {
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);
+}
+
+.stamp-crack {
+  background-image:
+    linear-gradient(115deg, transparent 47%, rgba(0, 0, 0, 0.5) 48%, transparent 50%),
+    linear-gradient(35deg, transparent 58%, rgba(0, 0, 0, 0.45) 59%, transparent 61%),
+    linear-gradient(160deg, transparent 30%, rgba(0, 0, 0, 0.4) 31%, transparent 33%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .holo,
+  .animate-aura,
+  .animate-vibrate,
+  .sparkles i {
+    animation: none !important;
+  }
+}
+
+@keyframes shock {
+  0% {
+    transform: translate(-50%, -50%) scale(0.2);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(14);
+    opacity: 0;
+  }
+}
