@@ -1,6 +1,7 @@
 import { ADJACENT, FORMATIONS, positionGroup, slotAccepts } from '../data/formations';
 import type {
   ChemLink,
+  ManagerCheck,
   Formation,
   FormationId,
   Lineup,
@@ -71,7 +72,19 @@ interface ManagerEval {
   bonus: number;
   active: boolean;
   note: string;
+  checks: ManagerCheck[];
 }
+
+const isEngine = (c: PlayerCard) => c.archetype === 'Box-to-Box' || c.archetype === 'Destroyer';
+const isConductor = (c: PlayerCard) => c.archetype === 'Regista' || c.archetype === 'Advanced Playmaker';
+const isFocal = (c: PlayerCard) => c.archetype === 'Target Man' || c.archetype === 'Complete Forward';
+const isRunner = (c: PlayerCard) => c.archetype === 'Speedster' || c.archetype === 'Inside Forward';
+const isClassic = (c: PlayerCard) => c.decade === '1990s' || c.decade === '2000s';
+const isStar = (c: PlayerCard) => c.tier === 'RISING_WORLD' || c.tier === 'PRIME_ICON';
+const isAttackSlot = (label: Position) => positionGroup(label) === 'FWD' || label === 'CAM';
+const isDestroyerAtBase = (c: PlayerCard, label: Position) =>
+  c.archetype === 'Destroyer' && (label === 'CDM' || (label === 'CM' && c.positions.includes('CDM')));
+const isRock = (c: PlayerCard, label: Position) => label === 'CB' && c.ovr >= 84 && c.positions.includes('CB');
 
 function evalManager(managerId: ManagerId | null, formation: Formation, lineup: Lineup): ManagerEval {
   const placed = formation.slots
@@ -79,61 +92,118 @@ function evalManager(managerId: ManagerId | null, formation: Formation, lineup: 
     .filter((x): x is { slot: typeof x.slot; card: PlayerCard } => !!x.card);
   const cards = placed.map((p) => p.card);
   const midCards = placed.filter((p) => positionGroup(p.slot.label) === 'MID').map((p) => p.card);
-  const fwdCards = placed.filter((p) => positionGroup(p.slot.label) === 'FWD' || p.slot.label === 'CAM').map((p) => p.card);
+  const names = (cs: PlayerCard[]) => cs.map((c) => c.shortName).join(', ');
 
   switch (managerId) {
     case 'heavy_metal': {
-      const pacy = cards.filter((c) => c.positions[0] !== 'GK' && c.stats.pac >= 82).length;
-      const engine = midCards.some((c) => c.archetype === 'Box-to-Box' || c.archetype === 'Destroyer');
-      const active = pacy >= 5 && engine;
+      const pacy = cards.filter((c) => c.positions[0] !== 'GK' && c.stats.pac >= 82);
+      const engines = midCards.filter(isEngine);
+      const active = pacy.length >= 5 && engines.length > 0;
       return {
         bonus: active ? 1.5 : 0,
         active,
-        note: `${Math.min(pacy, 5)}/5 rapid (82+ PAC) · ${engine ? '✓' : '✗'} Box-to-Box/Destroyer in midfield`,
+        note: `${Math.min(pacy.length, 5)}/5 rapid (82+ PAC) · ${engines.length ? '✓' : '✗'} Box-to-Box/Destroyer in midfield`,
+        checks: [
+          { label: '5+ outfield players with 82+ Pace', done: pacy.length >= 5, progress: `${pacy.length}/5`, who: names(pacy) },
+          { label: 'A Box-to-Box or Destroyer playing in midfield', done: engines.length > 0, progress: engines.length ? '✓' : '0/1', who: names(engines) },
+        ],
       };
     }
     case 'tiki_taka': {
-      const passers = cards.filter((c) => c.stats.pas >= 82).length;
-      const conductor = cards.some((c) => c.archetype === 'Regista' || c.archetype === 'Advanced Playmaker');
-      const active = passers >= 6 && conductor;
+      const passers = cards.filter((c) => c.stats.pas >= 82);
+      const conductors = cards.filter(isConductor);
+      const active = passers.length >= 6 && conductors.length > 0;
       return {
         bonus: active ? 1.5 : 0,
         active,
-        note: `${Math.min(passers, 6)}/6 passers (82+ PAS) · ${conductor ? '✓' : '✗'} Regista/Adv. Playmaker`,
+        note: `${Math.min(passers.length, 6)}/6 passers (82+ PAS) · ${conductors.length ? '✓' : '✗'} Regista/Adv. Playmaker`,
+        checks: [
+          { label: '6+ players with 82+ Passing', done: passers.length >= 6, progress: `${passers.length}/6`, who: names(passers) },
+          { label: 'A Regista or Advanced Playmaker in the XI', done: conductors.length > 0, progress: conductors.length ? '✓' : '0/1', who: names(conductors) },
+        ],
       };
     }
     case 'low_block': {
-      const destroyer = placed.some(
-        (p) => p.card.archetype === 'Destroyer' && (p.slot.label === 'CDM' || (p.slot.label === 'CM' && p.card.positions.includes('CDM'))),
-      );
-      const rocks = placed.filter((p) => p.slot.label === 'CB' && p.card.ovr >= 84 && p.card.positions.includes('CB')).length;
-      const focal = cards.some((c) => c.archetype === 'Target Man' || c.archetype === 'Complete Forward');
-      const active = destroyer && rocks >= 2 && focal;
+      const destroyers = placed.filter((p) => isDestroyerAtBase(p.card, p.slot.label)).map((p) => p.card);
+      const rocks = placed.filter((p) => isRock(p.card, p.slot.label)).map((p) => p.card);
+      const focal = cards.filter(isFocal);
+      const active = destroyers.length > 0 && rocks.length >= 2 && focal.length > 0;
       return {
         bonus: active ? 1.5 : 0,
         active,
-        note: `${destroyer ? '✓' : '✗'} Destroyer at CDM · ${Math.min(rocks, 2)}/2 84+ CBs · ${focal ? '✓' : '✗'} Target Man/Complete Fwd`,
+        note: `${destroyers.length ? '✓' : '✗'} Destroyer at CDM · ${Math.min(rocks.length, 2)}/2 84+ CBs · ${focal.length ? '✓' : '✗'} Target Man/Complete Fwd`,
+        checks: [
+          { label: 'A Destroyer playing at CDM', done: destroyers.length > 0, progress: destroyers.length ? '✓' : '0/1', who: names(destroyers) },
+          { label: 'Two natural CBs rated 84+ at centre-back', done: rocks.length >= 2, progress: `${Math.min(rocks.length, 2)}/2`, who: names(rocks) },
+          { label: 'A Target Man or Complete Forward', done: focal.length > 0, progress: focal.length ? '✓' : '0/1', who: names(focal) },
+        ],
       };
     }
     case 'invincible_counter': {
-      const classics = cards.filter((c) => c.decade === '1990s' || c.decade === '2000s').length;
-      const runners = fwdCards.filter((c) => c.archetype === 'Speedster' || c.archetype === 'Inside Forward').length;
-      const bonus = Math.min(1.5, classics * 0.25 + runners * 0.35);
+      const classics = cards.filter(isClassic);
+      const runners = placed.filter((p) => isAttackSlot(p.slot.label) && isRunner(p.card)).map((p) => p.card);
+      const bonus = Math.min(1.5, classics.length * 0.25 + runners.length * 0.35);
       return {
         bonus: Math.round(bonus * 100) / 100,
         active: bonus >= 1.5,
-        note: `${classics} '90s/'00s players · ${runners} Speedster/Inside Fwd attackers`,
+        note: `${classics.length} '90s/'00s players · ${runners.length} Speedster/Inside Fwd attackers`,
+        checks: [
+          { label: `+0.25 per 1990s/2000s player (${classics.length} = +${(classics.length * 0.25).toFixed(2)})`, done: classics.length > 0, progress: `${classics.length}`, who: names(classics) },
+          { label: `+0.35 per Speedster / Inside Forward in attack (${runners.length} = +${(runners.length * 0.35).toFixed(2)})`, done: runners.length > 0, progress: `${runners.length}`, who: names(runners) },
+          { label: 'Maximum bonus +1.5', done: bonus >= 1.5, progress: `+${bonus.toFixed(2)}` },
+        ],
       };
     }
     case 'fergie_time':
-      return { bonus: 0, active: true, note: 'Late-goal probability ×2 when level or 1 down after 75\'' };
+      return {
+        bonus: 0,
+        active: true,
+        note: "Late-goal probability ×2 when level or 1 down after 75'",
+        checks: [{ label: "Always on: when you're level or 1 goal down after 75', your chance of scoring doubles", done: true, progress: '✓' }],
+      };
     case 'galactico': {
-      const stars = cards.filter((c) => c.tier === 'RISING_WORLD' || c.tier === 'PRIME_ICON').length;
-      return { bonus: Math.round(stars * 0.6 * 10) / 10, active: stars > 0, note: `${stars} Galáctico${stars === 1 ? '' : 's'} (World Class / Prime) at +0.6 each` };
+      const stars = cards.filter(isStar);
+      return {
+        bonus: Math.round(stars.length * 0.6 * 10) / 10,
+        active: stars.length > 0,
+        note: `${stars.length} Galáctico${stars.length === 1 ? '' : 's'} (World Class / Prime) at +0.6 each`,
+        checks: [
+          { label: '+0.6 per World Class or Prime Icon card (no limit)', done: stars.length > 0, progress: `${stars.length} = +${(stars.length * 0.6).toFixed(1)}`, who: names(stars) },
+          { label: 'Midfield balance penalty ignored', done: true, progress: '✓' },
+        ],
+      };
     }
     default:
-      return { bonus: 0, active: false, note: '' };
+      return { bonus: 0, active: false, note: '', checks: [] };
   }
+}
+
+/** Which parts of the manager's objective this player helps with, in this slot. */
+export function managerContribution(managerId: ManagerId | null, card: PlayerCard, slot: Position): string[] {
+  const out: string[] = [];
+  switch (managerId) {
+    case 'heavy_metal':
+      if (card.positions[0] !== 'GK' && card.stats.pac >= 82) out.push(`Rapid: ${card.stats.pac} Pace (82+)`);
+      if (positionGroup(slot) === 'MID' && isEngine(card)) out.push(`${card.archetype} in midfield`);
+      break;
+    case 'tiki_taka':
+      if (card.stats.pas >= 82) out.push(`Passer: ${card.stats.pas} Passing (82+)`);
+      if (isConductor(card)) out.push(`${card.archetype}: the conductor`);
+      break;
+    case 'low_block':
+      if (isDestroyerAtBase(card, slot)) out.push('Destroyer at CDM');
+      if (isRock(card, slot)) out.push(`84+ centre-back (${card.ovr})`);
+      if (isFocal(card)) out.push(`${card.archetype} up top`);
+      break;
+    case 'invincible_counter':
+      if (isClassic(card)) out.push(`${card.decade} player: +0.25`);
+      if (isAttackSlot(slot) && isRunner(card)) out.push(`${card.archetype} in attack: +0.35`);
+      break;
+    case 'galactico':
+      if (isStar(card)) out.push('Galáctico: +0.6');
+      break;
+  }
+  return out;
 }
 
 // ───────────────────────────── Team rating ─────────────────────────────
@@ -211,6 +281,7 @@ export function computeTeamRating(
     managerBonus: mgr.bonus,
     managerActive: mgr.active,
     managerNote: mgr.note,
+    managerChecks: mgr.checks,
     oopPenalty: Math.round(oopPenalty * 10) / 10,
     balancePenalty,
     balanceNote,

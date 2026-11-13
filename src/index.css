@@ -255,3 +255,9 @@ body {
     opacity: 0;
   }
 }
+
+@keyframes holdfill {
+  to {
+    stroke-dashoffset: 0;
+  }
+}

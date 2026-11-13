@@ -9,6 +9,7 @@ import { SeasonBroadcast } from './components/SeasonBroadcast';
 import { SeasonReviewCard } from './components/SeasonReviewCard';
 import { TrophyVaultModal } from './components/TrophyVaultModal';
 import { PlayerCardUI } from './components/PlayerCardUI';
+import { ManagerObjectivePanel, PlayerInspectPanel } from './components/InspectPanels';
 import { MANAGERS, MANAGERS_BY_ID } from './data/managers';
 import { FORMATIONS } from './data/formations';
 import { PLAYERS } from './data/players';
@@ -68,6 +69,8 @@ export default function App() {
   const [vault, setVault] = useState<VaultEntry[]>(loadVault);
   const [career, setCareer] = useState(loadCareer);
   const [vaultOpen, setVaultOpen] = useState(false);
+  const [inspectSlot, setInspectSlot] = useState<string | null>(null);
+  const [managerInfoOpen, setManagerInfoOpen] = useState(false);
 
   const rating = useMemo(() => computeTeamRating(formationId, lineup, managerId), [formationId, lineup, managerId]);
   const picksMade = Object.values(lineup).filter(Boolean).length;
@@ -334,6 +337,14 @@ export default function App() {
                 pendingCard={selected}
                 swapSource={swapSource}
                 onSlotClick={onSlotClick}
+                onInspect={(id) => {
+                  sfx.flip();
+                  setInspectSlot(id);
+                }}
+                onManagerInfo={() => {
+                  sfx.click();
+                  setManagerInfoOpen(true);
+                }}
                 rerollAvailable={!rerollUsed}
               />
             </section>
@@ -360,6 +371,25 @@ export default function App() {
       {toast && (
         <div className="fixed bottom-5 left-1/2 z-[99] -translate-x-1/2 animate-pop rounded-xl border border-white/20 bg-black/90 px-4 py-2 text-sm font-bold text-white shadow-2xl">{toast}</div>
       )}
+
+      {inspectSlot && lineup[inspectSlot] && (
+        <PlayerInspectPanel
+          slotId={inspectSlot}
+          formationId={formationId}
+          lineup={lineup}
+          rating={rating}
+          managerId={managerId}
+          onClose={() => setInspectSlot(null)}
+          onMove={() => {
+            setSwapSource(inspectSlot);
+            setSelected(null);
+            setInspectSlot(null);
+            flash('Now tap the slot to move him to (or another player to swap).');
+          }}
+        />
+      )}
+
+      {managerInfoOpen && managerId && <ManagerObjectivePanel managerId={managerId} rating={rating} onClose={() => setManagerInfoOpen(false)} />}
 
       {vaultOpen && (
         <TrophyVaultModal

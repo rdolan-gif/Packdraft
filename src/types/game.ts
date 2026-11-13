@@ -171,6 +171,13 @@ export interface SlotFit {
   effectiveOvr: number;
 }
 
+export interface ManagerCheck {
+  label: string;
+  done: boolean;
+  progress: string;
+  who?: string;
+}
+
 export interface TeamRating {
   baseAvg: number;
   chemistry: number; // 0..100
@@ -178,6 +185,7 @@ export interface TeamRating {
   managerBonus: number;
   managerActive: boolean;
   managerNote: string;
+  managerChecks: ManagerCheck[];
   oopPenalty: number;
   balancePenalty: number;
   balanceNote: string | null;

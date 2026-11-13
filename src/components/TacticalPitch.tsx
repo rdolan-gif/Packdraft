@@ -1,9 +1,10 @@
-import { AlertTriangle, ArrowLeftRight, Link2, RefreshCw } from 'lucide-react';
+import { AlertTriangle, ArrowLeftRight, Hand, Info, Link2, MousePointerClick, RefreshCw } from 'lucide-react';
 import { FORMATIONS, pitchY } from '../data/formations';
 import { MANAGERS_BY_ID } from '../data/managers';
 import { fitFor } from '../engine/chemistry';
 import type { FormationId, Lineup, ManagerId, PlayerCard, TeamRating } from '../types/game';
 import { PlayerCardUI } from './PlayerCardUI';
+import { Pressable, useFinePointer } from './Pressable';
 
 interface Props {
   formationId: FormationId;
@@ -13,6 +14,10 @@ interface Props {
   pendingCard: PlayerCard | null;
   swapSource: string | null;
   onSlotClick: (slotId: string) => void;
+  /** Open the stats panel for a filled slot. */
+  onInspect?: (slotId: string) => void;
+  /** Open the manager objective panel. */
+  onManagerInfo?: () => void;
   rerollAvailable?: boolean;
   compact?: boolean;
 }
@@ -25,7 +30,8 @@ const FIT_STYLE = {
   oop: 'border-rose-500 bg-rose-500/15 text-rose-200',
 } as const;
 
-export function TacticalPitch({ formationId, lineup, rating, managerId, pendingCard, swapSource, onSlotClick, rerollAvailable, compact }: Props) {
+export function TacticalPitch({ formationId, lineup, rating, managerId, pendingCard, swapSource, onSlotClick, onInspect, onManagerInfo, rerollAvailable, compact }: Props) {
+  const fine = useFinePointer();
   const formation = FORMATIONS[formationId];
   const slotById = Object.fromEntries(formation.slots.map((s) => [s.id, s]));
   const fitById = Object.fromEntries(rating.fits.map((f) => [f.slotId, f]));
@@ -52,13 +58,20 @@ export function TacticalPitch({ formationId, lineup, rating, managerId, pendingC
               <div className="h-full rounded-full bg-gradient-to-r from-cyan-500 to-emerald-400 transition-all duration-500" style={{ width: `${rating.chemistry}%` }} />
             </div>
           </div>
-          <div className={`rounded-xl border p-2 ${rating.managerActive ? 'border-yellow-400/60 bg-yellow-400/10' : 'border-white/10 bg-black/40'}`}>
+          <Pressable
+            onTap={onManagerInfo}
+            onHold={onManagerInfo}
+            showHoldRing={false}
+            ariaLabel="Show manager objective"
+            className={`group rounded-xl border p-2 transition hover:border-yellow-300/70 active:scale-95 ${rating.managerActive ? 'border-yellow-400/60 bg-yellow-400/10' : 'border-white/10 bg-black/40'}`}
+          >
+            <Info className="absolute right-1.5 top-1.5 h-3 w-3 text-white/40 group-hover:text-yellow-300" />
             <div className="text-[10px] font-bold uppercase tracking-widest text-white/50">Manager</div>
             <div className={`font-display text-3xl leading-none ${rating.managerBonus > 0 ? 'text-yellow-300' : 'text-white/40'}`}>
               {manager?.id === 'fergie_time' ? '⌚' : `+${rating.managerBonus.toFixed(1)}`}
             </div>
             <div className="truncate text-[10px] text-white/50">{manager?.emoji} {rating.managerActive ? 'ACTIVE' : 'inactive'}</div>
-          </div>
+          </Pressable>
         </div>
       )}
 
@@ -110,12 +123,15 @@ export function TacticalPitch({ formationId, lineup, rating, managerId, pendingC
           const isSwapSrc = swapSource === slot.id;
           const swapTarget = swapSource && swapSource !== slot.id;
           return (
-            <button
+            <Pressable
               key={slot.id}
-              onClick={() => onSlotClick(slot.id)}
-              className="absolute -translate-x-1/2 -translate-y-1/2 transition-transform max-sm:scale-[0.8] hover:z-20 hover:scale-105 focus:outline-none"
+              // Touch: tap = place / swap, hold = stats. Mouse: click = stats, unless placing or swapping.
+              onTap={() => onSlotClick(slot.id)}
+              onHold={card && onInspect ? () => onInspect(slot.id) : undefined}
+              mouseAction={card && onInspect && !pendingCard && !swapSource ? 'hold' : 'tap'}
+              className="absolute -translate-x-1/2 -translate-y-1/2 transition-transform max-sm:scale-[0.8] hover:z-20 hover:scale-105 focus:outline-none focus-visible:ring-2 focus-visible:ring-yellow-300 rounded-[14px]"
               style={{ left: `${slot.x}%`, top: `${pitchY(slot.y)}%` }}
-              aria-label={`${slot.label} slot${card ? `: ${card.name}` : ''}`}
+              ariaLabel={`${slot.label} slot${card ? `: ${card.name}` : ''}`}
             >
               {card ? (
                 <div className={`relative ${isSwapSrc ? 'scale-110 rounded-[14px] ring-4 ring-sky-400' : swapTarget ? 'opacity-90' : ''}`}>
@@ -141,7 +157,7 @@ export function TacticalPitch({ formationId, lineup, rating, managerId, pendingC
                   {!preview && <span className="mt-1 text-[8px] font-bold uppercase opacity-60">empty</span>}
                 </div>
               )}
-            </button>
+            </Pressable>
           );
         })}
       </div>
@@ -152,14 +168,25 @@ export function TacticalPitch({ formationId, lineup, rating, managerId, pendingC
             <span className="flex items-center gap-1"><Link2 className="h-3 w-3" style={{ color: LINK_COLOR.club }} /> Club</span>
             <span className="flex items-center gap-1"><Link2 className="h-3 w-3" style={{ color: LINK_COLOR.nation }} /> Nation</span>
             <span className="flex items-center gap-1"><Link2 className="h-3 w-3" style={{ color: LINK_COLOR.decade }} /> Decade</span>
-            <span className="flex items-center gap-1"><ArrowLeftRight className="h-3 w-3" /> Tap two players to swap</span>
+            {fine ? (
+              <span className="flex items-center gap-1"><MousePointerClick className="h-3 w-3" /> Click a player for stats &amp; Move</span>
+            ) : (
+              <>
+                <span className="flex items-center gap-1"><ArrowLeftRight className="h-3 w-3" /> Tap two players to swap</span>
+                <span className="flex items-center gap-1"><Hand className="h-3 w-3" /> Hold a player for stats</span>
+              </>
+            )}
             {rerollAvailable !== undefined && (
               <span className={`flex items-center gap-1 ${rerollAvailable ? 'text-sky-300' : 'text-white/30 line-through'}`}>
                 <RefreshCw className="h-3 w-3" /> Scout Reroll {rerollAvailable ? 'ready' : 'used'}
               </span>
             )}
           </div>
-          {manager && <div className="rounded-lg bg-white/5 px-2 py-1 text-center text-white/70">{manager.emoji} {rating.managerNote}</div>}
+          {manager && (
+            <button onClick={onManagerInfo} className="rounded-lg bg-white/5 px-2 py-1 text-center text-white/70 transition hover:bg-white/10">
+              {manager.emoji} {rating.managerNote} <span className="text-yellow-300/80">· details</span>
+            </button>
+          )}
           {rating.balanceNote && <div className="rounded-lg bg-amber-500/10 px-2 py-1 text-center text-amber-200">⚠ {rating.balanceNote}</div>}
           {rating.oopPenalty > 0.3 && <div className="rounded-lg bg-rose-500/10 px-2 py-1 text-center text-rose-200">⚠ Out-of-position penalties cost {rating.oopPenalty.toFixed(1)} team rating.</div>}
         </div>
