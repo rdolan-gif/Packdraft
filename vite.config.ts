@@ -6,8 +6,6 @@ import { viteSingleFile } from 'vite-plugin-singlefile';
 const single = process.env.SINGLE === '1';
 
 export default defineConfig({
-  // GitHub Pages serves the repo under /Packdraft/ until a custom domain is attached.
-  base: process.env.BASE_PATH || '/',
   plugins: single ? [react(), viteSingleFile()] : [react()],
   build: { outDir: single ? 'dist-single' : 'dist' },
 });

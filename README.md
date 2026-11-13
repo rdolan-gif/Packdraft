@@ -2,6 +2,10 @@
 
 Rip 11 packs, draft one player from each across every era of the Premier League, then survive a live 38-game season and chase an unbeaten **38-0**.
 
+## Hosting
+
+Deployed on Netlify from `main` (settings in `netlify.toml`): every push publishes a new version.
+
 ## Run it
 
 ```bash
