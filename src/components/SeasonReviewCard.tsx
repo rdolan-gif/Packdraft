@@ -3,7 +3,7 @@ import { Check, Copy, Crown, Medal, RotateCcw, Shield, Target, Trophy, Footprint
 import { FORMATIONS, pitchY } from '../data/formations';
 import { MANAGERS_BY_ID } from '../data/managers';
 import type { FormationId, Grade, Lineup, ManagerId, SeasonSummary, TeamRating } from '../types/game';
-import { GRADE_INFO, ordinal } from '../engine/seasonSimulator';
+import { gradeLabel, ordinal } from '../engine/seasonSimulator';
 import { sfx } from '../engine/soundEffects';
 import { goldConfetti, rainbowConfetti, shakeScreen } from '../engine/fx';
 import { PlayerCardUI, TIER_EMOJI } from './PlayerCardUI';
@@ -46,7 +46,7 @@ export function buildShareText(opts: { summary: SeasonSummary; teamName: string;
   const m = MANAGERS_BY_ID[managerId];
   return [
     `⚽ PackDraft 38 · ${teamName}`,
-    `Grade: ${summary.grade} ${summary.grade === 'S+' ? '👑 INVINCIBLE' : `· ${GRADE_INFO[summary.grade].title}`}`,
+    `Grade: ${summary.grade} ${summary.grade === 'S+' ? '👑 INVINCIBLE' : `· ${gradeLabel(summary.grade, summary.position).title}`}`,
     `${ordinal(summary.position)} · ${r.points} pts · ${r.won}W ${r.drawn}D ${r.lost}L · GD ${r.gf - r.ga >= 0 ? '+' : ''}${r.gf - r.ga}`,
     `${m.emoji} ${m.name} · ${formationId}`,
     '',
@@ -60,7 +60,7 @@ export function SeasonReviewCard({ summary, teamName, formationId, lineup, manag
   const [stamped, setStamped] = useState(false);
   const [copied, setCopied] = useState(false);
   const g = summary.grade;
-  const info = GRADE_INFO[g];
+  const info = gradeLabel(g, summary.position);
   const style = GRADE_STYLE[g];
   const f = FORMATIONS[formationId];
   const manager = MANAGERS_BY_ID[managerId];
@@ -213,7 +213,7 @@ export function SeasonReviewCard({ summary, teamName, formationId, lineup, manag
                 <Trophy className="h-4 w-4" /> Immortalised in the 38-0 Trophy Vault. View it.
               </button>
             ) : (
-              <div className="text-center text-xs text-white/50">Win the league with 90+ points (S) or go unbeaten to enter the Trophy Vault.</div>
+              <div className="text-center text-xs text-white/50">Win the league or go unbeaten to enter the Trophy Vault.</div>
             )}
           </div>
         </div>

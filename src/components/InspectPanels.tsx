@@ -14,7 +14,7 @@ function Sheet({ onClose, children, label }: { onClose: () => void; children: Re
     return () => window.removeEventListener('keydown', onKey);
   }, [onClose]);
   return (
-    <div className="fixed inset-0 z-[96] flex items-end justify-center bg-black/75 backdrop-blur-sm sm:items-center sm:p-4" onClick={onClose} role="dialog" aria-label={label}>
+    <div className="fixed inset-0 z-[96] flex items-end justify-center bg-black/85 sm:items-center sm:p-4" onClick={onClose} role="dialog" aria-label={label}>
       <div
         className="relative max-h-[92vh] w-full max-w-2xl animate-pop overflow-y-auto rounded-t-3xl border border-white/15 bg-gradient-to-b from-zinc-900 to-black p-4 pb-[max(1rem,env(safe-area-inset-bottom))] shadow-2xl sm:rounded-3xl sm:p-6"
         onClick={(e) => e.stopPropagation()}

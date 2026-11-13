@@ -80,11 +80,15 @@ function userPlayers(formationId: FormationId, lineup: Lineup): LeaguePlayer[] {
 function rivalPlayers(code: string, roster: RivalPlayer[], reserves: RivalPlayer[], drafted: Set<string>): LeaguePlayer[] {
   const spare = reserves.filter((r) => !drafted.has(r.id));
   const out: RivalPlayer[] = [];
+  let academy = 0;
   roster.forEach((p) => {
     if (!drafted.has(p.id)) return out.push(p);
     const idx = spare.findIndex((r) => (p.pos === 'GK') === (r.pos === 'GK'));
     if (idx >= 0) out.push(spare.splice(idx, 1)[0]);
-    else out.push({ ...p, id: `${code}_academy_${p.pos}`, name: `${code} Academy ${p.pos}` });
+    else {
+      academy++; // unique per slot: two drafted strikers from one club used to share one stats row
+      out.push({ ...p, id: `${code}_academy_${academy}`, name: `${code} Academy ${p.pos}${academy > 1 ? ` ${academy}` : ''}` });
+    }
   });
   return out.map((p) => ({
     id: `${code}:${p.id}`,
@@ -156,7 +160,22 @@ export function buildFixtures(teamIds: string[], rng: () => number): [string, st
     arr.splice(1, 0, arr.pop()!);
   }
   const second = rounds.map((round) => round.map(([h, a]) => [a, h] as [string, string]));
-  return [...rounds, ...shuffle(second, rng)];
+  // Shuffle the return legs, avoiding any team meeting the same opponent in consecutive rounds.
+  let best = shuffle([...second], rng);
+  for (let tries = 0; tries < 200 && backToBackCount([...rounds, ...best]) > 0; tries++) best = shuffle([...second], rng);
+  return [...rounds, ...best];
+}
+
+const pairKey = (h: string, a: string) => (h < a ? `${h}|${a}` : `${a}|${h}`);
+
+/** Number of fixtures that repeat a pairing from the previous round. */
+export function backToBackCount(rounds: [string, string][][]): number {
+  let n = 0;
+  for (let r = 1; r < rounds.length; r++) {
+    const prev = new Set(rounds[r - 1].map(([h, a]) => pairKey(h, a)));
+    n += rounds[r].filter(([h, a]) => prev.has(pairKey(h, a))).length;
+  }
+  return n;
 }
 
 // ───────────────────────────── season ─────────────────────────────
@@ -232,11 +251,16 @@ export class SeasonSim {
       .filter((r) => r.teamId !== USER_TEAM_ID)
       .sort((a, b) => Math.abs(a.points - me.points) - Math.abs(b.points - me.points) || (pos === 0 ? 0 : a.points > me.points ? -1 : 1));
     const start = this.matchweek; // index of round about to be played
-    for (const c of candidates) {
-      for (let r = start; r < this.fixtures.length; r++) {
-        if (this.userFixture(r).opponentId === c.teamId) {
+    const lastOpp = start > 0 ? this.userFixture(start - 1).opponentId : null;
+    const before = backToBackCount(this.fixtures);
+    for (const strict of [true, false]) {
+      for (const c of candidates) {
+        if (c.teamId === lastOpp) continue; // never a rematch of last week
+        for (let r = start; r < this.fixtures.length; r++) {
+          if (this.userFixture(r).opponentId !== c.teamId) continue;
           [this.fixtures[start], this.fixtures[r]] = [this.fixtures[r], this.fixtures[start]];
-          return;
+          if (!strict || backToBackCount(this.fixtures) <= before) return;
+          [this.fixtures[start], this.fixtures[r]] = [this.fixtures[r], this.fixtures[start]]; // undo, try next
         }
       }
     }
@@ -256,7 +280,15 @@ export class SeasonSim {
       const gap = me.points - opp.points;
       const stakes = [
         `You: ${ordinal(myPos)} · ${me.points} pts   |   ${this.teamById[opponentId].name}: ${ordinal(oppPos)} · ${opp.points} pts`,
-        gap === 0 ? 'Level on points. Winner takes the high ground.' : gap > 0 ? `You lead them by ${gap}. Win and you open a ${gap + 3}-point gap.` : `They lead you by ${-gap}. Win and the gap closes to ${Math.max(0, -gap - 3)}.`,
+        gap === 0
+          ? 'Level on points. Winner takes the high ground.'
+          : gap > 0
+            ? `You lead them by ${gap}. Win and you open a ${gap + 3}-point gap.`
+            : -gap < 3
+              ? `They lead you by ${-gap}. Win and you go ${3 + gap} clear.`
+              : -gap === 3
+                ? 'They lead you by 3. Win and you draw level.'
+                : `They lead you by ${-gap}. Win and the gap closes to ${-gap - 3}.`,
       ];
       if (me.lost === 0) stakes.push(`Unbeaten in ${me.played}. The Invincibles dream is alive.`);
       return { matchweek: mw, opponentId, home, title: 'Derby Day · Mid-Season Six-Pointer', stakes };
@@ -274,10 +306,14 @@ export class SeasonSim {
       const fifth = table[4];
       if (pos <= 4 && pos > 1 && me.points - fifth.points <= 3) stakes.push(`Top 4 on the line: ${me.points - fifth.points} pts clear of 5th.`);
       if (pos >= 5 && fourth.points - me.points <= 3) stakes.push(`Champions League chase: ${fourth.points - me.points} pts behind 4th.`);
-      if (me.lost === 0) stakes.push(me.drawn === 0 ? `37-0-0. One more win for a PERFECT 38-0 season.` : `Unbeaten in 37. Ninety minutes from Invincibility.`);
-      const r17 = table[16];
-      if (pos >= 17 && me.points - table[17].points <= 3) stakes.push(`Relegation dogfight: survival is on a knife-edge.`);
-      else if (pos >= 18 && r17.points - me.points <= 3) stakes.push(`Need a miracle to survive the drop.`);
+      const inTitleRace = pos === 1 || first.points - me.points <= 3;
+      if (me.lost === 0 && inTitleRace) stakes.push(me.drawn === 0 ? `37-0-0. One more win for a PERFECT 38-0 season.` : `Unbeaten in 37. Ninety minutes from Invincibility.`);
+      else if (me.lost === 0) stakes.push(`Unbeaten in 37. Finish the job: no defeats all season.`);
+      const safe = table[16]; // 17th
+      const drop = table[17]; // 18th
+      if (pos === 17 && me.points - drop.points <= 3) stakes.push(`Relegation dogfight: just ${me.points - drop.points} pts above the drop.`);
+      else if (pos >= 18 && safe.points - me.points <= 3) stakes.push(`Need a result to survive: ${safe.points - me.points} pts from safety.`);
+      else if (pos >= 18) stakes.push(`Relegated already. Play for pride.`);
       if (!stakes.length) return null;
       const { opponentId, home } = this.userFixture(this.matchweek);
       return { matchweek: mw, opponentId, home, title: 'Championship Sunday · Final Day', stakes };
@@ -495,6 +531,12 @@ export function gradeFor(position: number, row: TableRow): Grade {
   return 'F';
 }
 
+/** Title and subtitle for the review card. A league title under 90 pts is grade A, but it's still a title. */
+export function gradeLabel(grade: Grade, position: number) {
+  if (grade === 'A' && position === 1) return { title: 'CHAMPIONS', subtitle: 'Premier League Champions' };
+  return GRADE_INFO[grade];
+}
+
 export const GRADE_INFO: Record<Grade, { title: string; subtitle: string }> = {
   'S+': { title: 'INVINCIBLE', subtitle: 'Unbeaten Champions' },
   S: { title: 'CHAMPIONS', subtitle: 'Premier League Champions · 90+ pts' },
@@ -559,7 +601,9 @@ export function buildSummary(sim: SeasonSim, formationId: FormationId, lineup: L
 
   const topUser = [...userStats].sort((a, b) => b.goals - a.goals)[0];
   const topCreator = [...userStats].sort((a, b) => b.assists - a.assists)[0];
-  const userGk = userStats.find((s) => cardById[s.id]?.positions[0] === 'GK') ?? userStats.find((s) => s.cleanSheets > 0);
+  const gkSlot = formation.slots.find((sl) => sl.label === 'GK');
+  const gkCard = gkSlot ? lineup[gkSlot.id] : null;
+  const userGk = (gkCard && userStats.find((s) => s.id === gkCard.id)) ?? userStats.find((s) => s.cleanSheets > 0);
 
   const highlights: string[] = [];
   highlights.push(`${record.won}W ${record.drawn}D ${record.lost}L · ${record.gf} scored, ${record.ga} conceded`);
@@ -605,8 +649,10 @@ export function buildSummary(sim: SeasonSim, formationId: FormationId, lineup: L
   const opening =
     grade === 'S+' || grade === 'S'
       ? `Pairing ${s1 ? label(s1) : 'your stars'} with ${s2 ? label(s2) : 'that supporting cast'} tore the league apart`
-      : grade === 'A' || grade === 'B'
-        ? `${s1 ? label(s1) : 'Your talisman'} and ${s2 ? label(s2) : 'friends'} kept you in the hunt all season`
+      : grade === 'A' && position === 1
+        ? `${s1 ? label(s1) : 'Your talisman'} and ${s2 ? label(s2) : 'friends'} dragged this side over the line`
+        : grade === 'A' || grade === 'B'
+          ? `${s1 ? label(s1) : 'Your talisman'} and ${s2 ? label(s2) : 'friends'} kept you in the hunt all season`
         : grade === 'C' || grade === 'D'
           ? `${s1 ? label(s1) : 'Your best player'} carried the load, but too often looked lonely`
           : `Not even ${s1 ? label(s1) : 'your marquee signing'} could save this sinking ship`;
@@ -626,7 +672,8 @@ export function buildSummary(sim: SeasonSim, formationId: FormationId, lineup: L
     D: ['The fans have started singing about the board. Not kindly.', 'A big-name XI that played like a pub team on a Sunday morning.'],
     F: ['Sacked in the morning. The fans have already chartered a plane with a banner.', 'Relegated with this squad? Pundits will be dissecting this one for years.'],
   };
-  const verdict = `${opening}${twist} ${pick(closers[grade], rng)}`;
+  const champClosers = ['Champions, if not by the landslide the squad promised. The trophy looks the same either way.', 'A title is a title. The parade bus does not check the points total.'];
+  const verdict = `${opening}${twist} ${pick(grade === 'A' && position === 1 ? champClosers : closers[grade], rng)}`;
 
   return {
     grade,

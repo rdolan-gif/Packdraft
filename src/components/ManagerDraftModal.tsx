@@ -56,7 +56,7 @@ export function ManagerDraftModal({ offers, onPick }: Props) {
                   <h2 className="mt-2 font-display text-3xl leading-none text-white text-shadow">{m.name}</h2>
                   <div className="mt-1 text-sm font-bold italic text-yellow-200">“{m.tagline}”</div>
                   <p className="mt-3 text-sm text-white/85">{m.description}</p>
-                  <div className="mt-auto rounded-xl border border-white/20 bg-black/40 p-3 backdrop-blur">
+                  <div className="mt-auto rounded-xl border border-white/20 bg-black/40 p-3">
                     <div className="text-[10px] font-black uppercase tracking-widest text-yellow-300">Passive Buff</div>
                     <div className="mt-1 text-sm font-semibold text-white">{m.bonusText}</div>
                     <div className="mt-2 text-[11px] text-white/60">Favoured shapes: {m.preferredFormations.join(' · ')}</div>

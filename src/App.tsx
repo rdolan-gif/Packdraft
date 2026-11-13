@@ -201,7 +201,7 @@ export default function App() {
     setSummary(s);
     const r = s.record;
     setCareer(recordRun({ grade: s.grade, position: s.position, lost: r.lost, won: r.won, points: r.points, gf: r.gf }));
-    if (qualifiesForVault(s.grade, r.lost)) {
+    if (qualifiesForVault(s.grade, r.lost, s.position)) {
       const top = sim.leaders('goals', 50).find((p) => p.isUser);
       const entry: VaultEntry = {
         id: `${Date.now()}`,
@@ -215,7 +215,7 @@ export default function App() {
         teamRating: rating.overall,
         mvpName: s.mvp?.name ?? null,
         topScorer: top ? { name: top.name, goals: top.goals } : null,
-        invincible: r.lost === 0,
+        invincible: s.position === 1 && r.lost === 0,
       };
       setVault(saveToVault(entry));
       setSavedToVault(true);

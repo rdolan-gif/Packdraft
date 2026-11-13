@@ -56,7 +56,7 @@ export function TrophyVaultModal({ vault, career, onClose, onDelete }: Props) {
   };
 
   return (
-    <div className="fixed inset-0 z-[95] flex items-start justify-center overflow-y-auto bg-black/85 p-3 backdrop-blur-sm sm:p-6" onClick={onClose}>
+    <div className="fixed inset-0 z-[95] flex items-start justify-center overflow-y-auto bg-black/85 p-3 sm:p-6" onClick={onClose}>
       <div className="relative my-4 w-full max-w-5xl animate-pop overflow-hidden rounded-3xl border-2 border-yellow-300/60 bg-gradient-to-b from-zinc-900 to-black" onClick={(e) => e.stopPropagation()}>
         <div className="relative overflow-hidden border-b border-yellow-300/30 bg-gradient-to-r from-amber-700/40 via-yellow-500/20 to-amber-700/40 px-5 py-4">
           <div className="holo opacity-20" />
@@ -69,7 +69,7 @@ export function TrophyVaultModal({ vault, career, onClose, onDelete }: Props) {
             <Trophy className="h-8 w-8 text-yellow-300" />
             <div>
               <div className="font-display text-3xl leading-none text-white">THE 38-0 TROPHY VAULT</div>
-              <div className="text-xs font-bold uppercase tracking-widest text-yellow-200/80">Hall of Fame · S, S+ and unbeaten squads</div>
+              <div className="text-xs font-bold uppercase tracking-widest text-yellow-200/80">Hall of Fame · Champions and unbeaten squads</div>
             </div>
             <button onClick={onClose} className="ml-auto rounded-lg bg-black/40 p-2 text-white hover:bg-black/60" aria-label="Close vault">
               <X className="h-5 w-5" />
@@ -100,7 +100,7 @@ export function TrophyVaultModal({ vault, career, onClose, onDelete }: Props) {
               <div className="flex flex-col items-center gap-3 py-12 text-center">
                 <div className="text-6xl opacity-40">🏆</div>
                 <div className="font-display text-2xl text-white/80">THE CABINET IS EMPTY… FOR NOW</div>
-                <div className="max-w-md text-sm text-white/50">Win the league with 90+ points (grade S) or go a whole season unbeaten to immortalise your XI here. It is saved in this browser.</div>
+                <div className="max-w-md text-sm text-white/50">Win the league or go a whole season unbeaten to immortalise your XI here. It is saved in this browser.</div>
               </div>
             ) : (
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">

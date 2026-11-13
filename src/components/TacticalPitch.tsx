@@ -138,7 +138,7 @@ export function TacticalPitch({ formationId, lineup, rating, managerId, pendingC
                   <PlayerCardUI card={card} size="xs" tilt={false} />
                   {fit && fit.fit !== 'natural' && (
                     <span
-                      className={`absolute -bottom-2 left-1/2 z-20 flex -translate-x-1/2 items-center gap-0.5 whitespace-nowrap rounded-full border px-1.5 text-[8px] font-black ${FIT_STYLE[fit.fit]} backdrop-blur`}
+                      className={`absolute -bottom-2 left-1/2 z-20 flex -translate-x-1/2 items-center gap-0.5 whitespace-nowrap rounded-full border px-1.5 text-[8px] font-black ${FIT_STYLE[fit.fit]}`}
                       title={`Playing at ${slot.label}`}
                     >
                       {fit.fit === 'oop' && <AlertTriangle className="h-2.5 w-2.5" />}

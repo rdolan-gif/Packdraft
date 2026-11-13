@@ -69,6 +69,7 @@ export function recordRun(r: { grade: Grade; position: number; lost: number; won
   return next;
 }
 
-export function qualifiesForVault(grade: Grade, lost: number) {
-  return grade === 'S' || grade === 'S+' || lost === 0;
+/** League titles (any grade), S/S+ runs and unbeaten seasons go in the vault. */
+export function qualifiesForVault(grade: Grade, lost: number, position: number) {
+  return position === 1 || grade === 'S' || grade === 'S+' || lost === 0;
 }

@@ -94,7 +94,7 @@ export function PlayerCardUI({ card, size = 'md', onClick, selected, dimmed, sho
       onPointerEnter={(e) => onClick && e.pointerType === 'mouse' && sfx.hover()}
       onPointerLeave={onLeave}
       onPointerCancel={onLeave}
-      className={`card-base tier-${card.tier} ${card.tier === 'CULT_VETERAN' ? 'sweep' : ''} ${prime ? 'animate-aura' : ''} ${
+      className={`card-base tier-${card.tier} ${card.tier === 'CULT_VETERAN' ? 'sweep' : ''} ${prime ? 'aura' : ''} ${
         selected ? 'ring-4 ring-emerald-400 ring-offset-2 ring-offset-black' : ''
       } ${dimmed ? 'opacity-40 grayscale' : ''} ${onClick ? 'cursor-pointer' : ''} select-none shrink-0 ${className}`}
       style={{ width: d.w, height: d.h, ...style }}
@@ -123,7 +123,7 @@ export function PlayerCardUI({ card, size = 'md', onClick, selected, dimmed, sho
 
       {/* top-right: season era badge */}
       <div className="absolute right-1 top-1 z-10 flex flex-col items-end gap-0.5">
-        <span className={`rounded px-1 py-[1px] font-black ${d.small} uppercase tracking-wider bg-black/45 backdrop-blur-sm`}>
+        <span className={`rounded px-1 py-[1px] font-black ${d.small} uppercase tracking-wider bg-black/60`}>
           {size === 'xs' ? card.season : `${card.season} ${card.era}`}
         </span>
         {!tiny && (
@@ -172,7 +172,7 @@ export function CardBack({ size = 'md', glow, className = '', style }: { size?: 
   const d = DIM[size];
   return (
     <div
-      className={`card-base shrink-0 border-2 ${glow ? 'border-yellow-300 animate-aura animate-vibrate' : 'border-emerald-700'} ${className}`}
+      className={`card-base shrink-0 border-2 ${glow ? 'border-yellow-300 aura animate-vibrate' : 'border-emerald-700'} ${className}`}
       style={{
         width: d.w,
         height: d.h,

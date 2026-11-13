@@ -4,7 +4,6 @@ import type { PlayerCard, Tier } from '../types/game';
 import { highestTier, TIER_RANK, TOTAL_PACKS, tierRates } from '../engine/packGenerator';
 import { sfx } from '../engine/soundEffects';
 import { burstAt, goldConfetti, shakeScreen } from '../engine/fx';
-import { isLite } from '../engine/perf';
 import { CardBack, PlayerCardUI, TIER_TEXT } from './PlayerCardUI';
 
 type Stage = 'sealed' | 'dimming' | 'tell' | 'fanned' | 'revealed';
@@ -26,6 +25,19 @@ const FLASH: Record<Tier, { color: string; max: number }> = {
   RISING_WORLD: { color: 'radial-gradient(circle, #fde68a 0%, #a855f7 45%, #4c1d95 100%)', max: 0.9 },
   PRIME_ICON: { color: 'radial-gradient(circle, #ffffff 0%, #fde047 30%, #f59e0b 60%, #7c2d12 100%)', max: 1 },
 };
+
+function raysFor(tier: Tier) {
+  const prime = tier === 'PRIME_ICON';
+  const n = prime ? 18 : 10;
+  const step = 360 / n;
+  const stops: string[] = [];
+  for (let i = 0; i < n; i++) {
+    const a = i * step;
+    const c = prime ? `hsla(${(i * 40) % 360},100%,75%,.85)` : i % 2 ? 'rgba(250,204,21,.8)' : 'rgba(216,180,254,.85)';
+    stops.push(`transparent ${a}deg`, `${c} ${a + 1}deg`, `${c} ${a + 2.2}deg`, `transparent ${a + 3.4}deg`);
+  }
+  return `conic-gradient(from 0deg at 50% 50%, ${stops.join(', ')}, transparent 360deg)`;
+}
 
 export function PackOpener({ packNumber, cards, packKey, selectedId, onSelect, rerollAvailable, onReroll, onRevealed }: Props) {
   const [stage, setStage] = useState<Stage>('sealed');
@@ -69,7 +81,7 @@ export function PackOpener({ packNumber, cards, packKey, selectedId, onSelect, r
     sfx.roar();
     setFlipped((s) => new Set(s).add(idx));
     shakeScreen('heavy');
-    goldConfetti(1.3);
+    goldConfetti(0.9);
   };
 
   // Flip order: weakest first, best card last. Prime icons hold back for a dramatic beat.
@@ -117,8 +129,8 @@ export function PackOpener({ packNumber, cards, packKey, selectedId, onSelect, r
         later(1700, () => setFlash(null));
         sfx.stinger(top);
         shakeScreen('heavy');
-        goldConfetti(1);
-        burstAt(cx, cy + 120, ['#facc15', '#f472b6', '#22d3ee', '#a855f7', '#ffffff'], 120);
+        goldConfetti(0.7);
+        burstAt(cx, cy + 120, ['#facc15', '#f472b6', '#22d3ee', '#a855f7', '#ffffff'], 60);
       });
       later(350 + 1400, () => {
         setStage('fanned');
@@ -210,36 +222,26 @@ export function PackOpener({ packNumber, cards, packKey, selectedId, onSelect, r
         <div key={flash.key} className="pointer-events-none fixed inset-0 z-[81]">
           <div
             className="absolute inset-0 animate-flash"
-            style={{ background: FLASH[flash.tier].color, ['--flash-max' as string]: FLASH[flash.tier].max, animationDuration: flash.tier === 'PRIME_ICON' ? '1.6s' : flash.tier === 'STANDARD' ? '0.6s' : '1.1s' }}
+            // Rays are painted into the same layer as the flash: one full-screen layer, not two.
+            style={{ background: flash.tier === 'RISING_WORLD' || flash.tier === 'PRIME_ICON' ? `${raysFor(flash.tier)}, ${FLASH[flash.tier].color}` : FLASH[flash.tier].color, ['--flash-max' as string]: FLASH[flash.tier].max, animationDuration: flash.tier === 'PRIME_ICON' ? '1.6s' : flash.tier === 'STANDARD' ? '0.6s' : '1.1s' }}
           />
+          {/* Shockwave: drawn at full size and shrunk, so it animates by scaling DOWN (never up). */}
           {(flash.tier === 'RISING_WORLD' || flash.tier === 'PRIME_ICON') && (
-            <div className="absolute inset-0 overflow-hidden">
-              {Array.from({ length: flash.tier === 'PRIME_ICON' ? (isLite() ? 8 : 18) : isLite() ? 6 : 10 }).map((_, i) => (
-                <div
-                  key={i}
-                  className="light-beam animate-flash"
-                  style={{
-                    transform: `rotate(${(360 / (flash.tier === 'PRIME_ICON' ? (isLite() ? 8 : 18) : isLite() ? 6 : 10)) * i}deg)`,
-                    background:
-                      flash.tier === 'PRIME_ICON'
-                        ? `linear-gradient(180deg, hsla(${(i * 40) % 360},100%,75%,.95), transparent)`
-                        : 'linear-gradient(180deg, rgba(216,180,254,.95), rgba(250,204,21,0))',
-                    animationDuration: '1.4s',
-                    width: flash.tier === 'PRIME_ICON' ? 10 : 6,
-                  }}
-                />
-              ))}
-            </div>
-          )}
-          {flash.tier === 'RISING_WORLD' && (
-            <div className="absolute left-1/2 top-1/2 h-24 w-24 -translate-x-1/2 -translate-y-1/2 rounded-full border-[6px] border-violet-300" style={{ animation: 'shock 1s ease-out forwards' }} />
+            <div
+              className="absolute left-1/2 top-1/2 h-[80vmin] w-[80vmin] rounded-full"
+              style={{
+                background: `radial-gradient(circle, transparent 62%, ${flash.tier === 'PRIME_ICON' ? 'rgba(254,240,138,.95)' : 'rgba(196,181,253,.95)'} 66%, transparent 71%)`,
+                animation: `shock ${flash.tier === 'PRIME_ICON' ? 1.2 : 1}s ease-out forwards`,
+              }}
+            />
           )}
           {flash.tier === 'PRIME_ICON' && (
             <>
-              <div className="absolute left-1/2 top-1/2 h-32 w-32 -translate-x-1/2 -translate-y-1/2 rounded-full border-[10px] border-yellow-200" style={{ animation: 'shock 1.2s ease-out forwards' }} />
-              <div className="absolute left-0 right-0 top-[45%] h-3 animate-flash bg-gradient-to-r from-transparent via-white to-transparent blur-sm" style={{ animationDuration: '1.6s' }} />
+              <div className="absolute left-0 right-0 top-[45%] h-4 animate-flash" style={{ background: 'linear-gradient(90deg, transparent, rgba(255,255,255,.95), transparent)', animationDuration: '1.6s' }} />
               <div className="absolute inset-0 flex items-center justify-center">
-                <div className="animate-pop font-display text-6xl text-yellow-200 drop-shadow-[0_0_25px_rgba(250,204,21,1)] sm:text-8xl">WALKOUT!</div>
+                <div className="animate-pop font-display text-6xl text-yellow-200 sm:text-8xl" style={{ textShadow: '0 0 18px rgba(250,204,21,.9), 0 0 4px rgba(0,0,0,.6)' }}>
+                  WALKOUT!
+                </div>
               </div>
             </>
           )}

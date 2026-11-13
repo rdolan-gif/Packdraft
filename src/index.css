@@ -81,25 +81,62 @@ body {
   color: #fff;
 }
 
+/* Prime shimmer. The stripes slide by moving the layer (GPU-only) instead of animating
+   background-position, which repainted and re-blended every card on every frame. */
 .holo {
   position: absolute;
-  inset: 0;
+  top: 0;
+  bottom: 0;
+  left: -260px;
+  right: -260px;
   pointer-events: none;
-  background: linear-gradient(
-    115deg,
-    transparent 15%,
-    rgba(255, 0, 128, 0.55) 25%,
-    rgba(255, 200, 0, 0.55) 35%,
-    rgba(0, 255, 160, 0.55) 45%,
-    rgba(0, 170, 255, 0.55) 55%,
-    rgba(180, 0, 255, 0.55) 65%,
-    transparent 80%
+  background: repeating-linear-gradient(
+    90deg,
+    transparent 0px,
+    rgba(255, 0, 128, 0.5) 40px,
+    rgba(255, 200, 0, 0.5) 70px,
+    rgba(0, 255, 160, 0.5) 100px,
+    rgba(0, 170, 255, 0.5) 130px,
+    rgba(180, 0, 255, 0.5) 160px,
+    transparent 200px
   );
-  background-size: 200% 200%;
   mix-blend-mode: color-dodge;
-  opacity: 0.55;
-  animation: holo 4s linear infinite;
+  opacity: 0.5;
+  transform: translateX(-200px) skewX(-25deg);
+  animation: holoslide 5s linear infinite;
   z-index: 3;
+}
+@keyframes holoslide {
+  from {
+    transform: translateX(-200px) skewX(-25deg);
+  }
+  to {
+    transform: translateX(0) skewX(-25deg);
+  }
+}
+
+/* Prime aura: a static outer glow plus an inner pulse that only changes opacity. */
+.aura {
+  box-shadow: 0 0 22px 5px rgba(250, 204, 21, 0.6);
+}
+.aura::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: inset 0 0 16px 3px rgba(254, 240, 138, 0.9);
+  pointer-events: none;
+  z-index: 7;
+  animation: aurapulse 1.6s ease-in-out infinite;
+}
+@keyframes aurapulse {
+  0%,
+  100% {
+    opacity: 0.25;
+  }
+  50% {
+    opacity: 1;
+  }
 }
 
 .glare {
@@ -186,15 +223,6 @@ body {
   background-position: center;
 }
 
-.light-beam {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  width: 6px;
-  height: 140vmax;
-  transform-origin: 50% 0;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0));
-}
 
 .particle {
   position: absolute;
@@ -245,7 +273,7 @@ body {
 
 @media (prefers-reduced-motion: reduce) {
   .holo,
-  .animate-aura,
+  .aura::before,
   .animate-vibrate,
   .sparkles i {
     animation: none !important;
@@ -254,14 +282,15 @@ body {
 
 @keyframes shock {
   0% {
-    transform: translate(-50%, -50%) scale(0.2);
+    transform: translate(-50%, -50%) scale(0.08);
     opacity: 1;
   }
   100% {
-    transform: translate(-50%, -50%) scale(14);
+    transform: translate(-50%, -50%) scale(1);
     opacity: 0;
   }
 }
+
 
 @keyframes holdfill {
   to {
@@ -286,9 +315,9 @@ html.lite *::after {
   -webkit-backdrop-filter: none !important;
   backdrop-filter: none !important;
 }
-html.lite .animate-aura {
+html.lite .aura::before {
   animation: none;
-  box-shadow: 0 0 22px 6px rgba(250, 204, 21, 0.7);
+  opacity: 0.6;
 }
 html.lite .animate-vibrate {
   animation-duration: 0.3s;

@@ -345,7 +345,7 @@ export function SeasonBroadcast({ sim, onFinish }: Props) {
       </section>
 
       {done && (
-        <div className="sticky bottom-3 z-40 mx-auto flex animate-pop flex-col items-center gap-2 rounded-2xl border border-yellow-300/60 bg-black/85 px-6 py-4 text-center shadow-2xl backdrop-blur">
+        <div className="sticky bottom-3 z-40 mx-auto flex animate-pop flex-col items-center gap-2 rounded-2xl border border-yellow-300/60 bg-black/85 px-6 py-4 text-center shadow-2xl">
           <div className="font-display text-3xl text-yellow-300">FULL TIME · SEASON OVER</div>
           <div className="text-sm text-white/80">
             Finished <b>{ordinal(userPos)}</b> with <b>{userRow.points} pts</b> ({userRow.won}-{userRow.drawn}-{userRow.lost})
@@ -451,7 +451,7 @@ function DecisionOverlay({ d, sim, onChoose }: { d: DecisionContext; sim: Season
   ];
   return (
     // Scrollable so every choice stays reachable on short screens or with enlarged text.
-    <div className="fixed inset-0 z-[90] overflow-y-auto overscroll-contain bg-black/85 backdrop-blur-sm">
+    <div className="fixed inset-0 z-[90] overflow-y-auto overscroll-contain bg-black/90">
       <div className="flex min-h-full items-center justify-center p-3 sm:p-4">
       <div className="w-full max-w-3xl animate-pop overflow-hidden rounded-3xl border-2 border-yellow-300/70 bg-gradient-to-b from-zinc-900 to-black shadow-[0_0_80px_rgba(250,204,21,.25)]">
         <div className="bg-yellow-300 px-5 py-2 text-center text-xs font-black uppercase tracking-[0.35em] text-black">Touchline Tactical Decision</div>
