@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { FastForward, Pause, Play, Radio, Shield, Swords, Scale, Target, Footprints, Hand, Flame } from 'lucide-react';
-import type { MatchResult, PlayerSeasonStats, TacticalShout } from '../types/game';
-import { formatMinute, ordinal, SeasonSim, TOTAL_MATCHWEEKS, USER_TEAM_ID, type DecisionContext } from '../engine/seasonSimulator';
+import type { FormationId, Lineup, ManagerId, MatchResult, PlayerCard, PlayerSeasonStats, TacticalShout } from '../types/game';
+import { formatMinute, ordinal, SeasonSim, TOTAL_MATCHWEEKS, TRANSFER_WINDOW_AFTER, USER_TEAM_ID, type DecisionContext } from '../engine/seasonSimulator';
+import { TransferWindow } from './TransferWindow';
 import { sfx } from '../engine/soundEffects';
 import { goldConfetti, shakeScreen } from '../engine/fx';
 
@@ -12,9 +13,15 @@ const ROW_H = 30;
 interface Props {
   sim: SeasonSim;
   onFinish: () => void;
+  formationId: FormationId;
+  lineup: Lineup;
+  managerId: ManagerId;
+  /** January signing: App updates the lineup and the sim. */
+  onTransfer: (card: PlayerCard, slotId: string) => void;
 }
 
-export function SeasonBroadcast({ sim, onFinish }: Props) {
+export function SeasonBroadcast({ sim, onFinish, formationId, lineup, managerId, onTransfer }: Props) {
+  const [transferOpen, setTransferOpen] = useState(false);
   const [, setVersion] = useState(0);
   const bump = () => setVersion((v) => v + 1);
   const [playing, setPlaying] = useState(false);
@@ -44,6 +51,14 @@ export function SeasonBroadcast({ sim, onFinish }: Props) {
   const step = useCallback(
     (quiet: boolean, shout?: TacticalShout): boolean => {
       if (sim.done) return false;
+      if (!shout && sim.needsTransferWindow()) {
+        setTransferOpen(true);
+        setPlaying(false);
+        setInstantRun(false);
+        sfx.tension();
+        bump();
+        return false;
+      }
       if (!shout) {
         const d = sim.checkDecision();
         if (d) {
@@ -112,6 +127,14 @@ export function SeasonBroadcast({ sim, onFinish }: Props) {
     return () => clearTimeout(id);
   }, [flashResult, sim.matchweek]);
 
+  // After the window, carry on at the chosen speed.
+  const closeWindow = () => {
+    setTransferOpen(false);
+    bump();
+    if (speed === 'instant') setInstantRun(true);
+    else setPlaying(true);
+  };
+
   const choose = (shout: TacticalShout) => {
     sfx.select();
     setDecision(null);
@@ -164,7 +187,7 @@ export function SeasonBroadcast({ sim, onFinish }: Props) {
                   } else if (speed === 'instant') setInstantRun(true);
                   else setPlaying(true);
                 }}
-                disabled={!!decision}
+                disabled={!!decision || transferOpen}
                 className="flex items-center gap-1 rounded-lg bg-emerald-500 px-3 py-1.5 text-sm font-black text-black transition hover:bg-emerald-400 disabled:opacity-40"
               >
                 {playing || instantRun ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
@@ -197,11 +220,11 @@ export function SeasonBroadcast({ sim, onFinish }: Props) {
                   setPlaying(false);
                   setInstantRun(true);
                 }}
-                disabled={!!decision}
+                disabled={!!decision || transferOpen}
                 className="flex items-center gap-1 rounded-lg border border-white/15 bg-white/5 px-2 py-1.5 text-xs font-black text-white/80 hover:bg-white/10 disabled:opacity-40"
                 title="Simulate to the next big match (MW19 / MW38) or the end"
               >
-                <FastForward className="h-3.5 w-3.5" /> {sim.matchweek < 19 ? 'Sim to Derby Day' : sim.matchweek < 38 ? 'Sim to Final Day' : 'Sim to End'}
+                <FastForward className="h-3.5 w-3.5" /> {sim.matchweek < 19 ? 'Sim to Derby Day' : !sim.transferDone && sim.matchweek <= TRANSFER_WINDOW_AFTER ? 'Sim to January Window' : sim.matchweek < 38 ? 'Sim to Final Day' : 'Sim to End'}
               </button>
             )}
           </div>
@@ -373,6 +396,23 @@ export function SeasonBroadcast({ sim, onFinish }: Props) {
       )}
 
       {decision && <DecisionOverlay d={decision} sim={sim} onChoose={choose} />}
+      {transferOpen && (
+        <TransferWindow
+          formationId={formationId}
+          lineup={lineup}
+          managerId={managerId}
+          position={sim.userPosition()}
+          points={sim.table[USER_TEAM_ID].points}
+          onSign={(card, slotId) => {
+            onTransfer(card, slotId);
+            closeWindow();
+          }}
+          onSkip={() => {
+            sim.skipTransferWindow();
+            closeWindow();
+          }}
+        />
+      )}
     </div>
   );
 }

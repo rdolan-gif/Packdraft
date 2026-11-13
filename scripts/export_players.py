@@ -166,18 +166,27 @@ ws.freeze_panes = ws.cell(row=2, column=COL["Short Name"] + 0)  # keep IDs and n
 ws.auto_filter.ref = f"A1:{L(len(HEADERS))}{len(players) + 1}"
 
 # Dropdowns and number checks on every editable row
-def dv_list(header, rng, prompt):
-    dv = DataValidation(type="list", formula1=f"={rng}", allow_blank=True, showErrorMessage=True, errorTitle="Not allowed", error=f"Pick a value from the {header} list.", promptTitle=header, prompt=prompt, showInputMessage=True)
+LIST_VALUES = dict(lists)  # header -> allowed values (from the game code)
+
+
+def dv_list(header, rng, prompt, values=None):
+    # Short lists go inline ("a,b,c"), which every spreadsheet app shows as a dropdown.
+    # Longer ones point at the Lists tab. The reference must NOT start with "=":
+    # Excel and Google Sheets silently drop dropdowns written that way.
+    values = values or []
+    inline = '"' + ",".join(str(v) for v in values) + '"'
+    formula = inline if values and len(inline) <= 255 else rng
+    dv = DataValidation(type="list", formula1=formula, allow_blank=True, showErrorMessage=True, errorTitle="Not allowed", error=f"Pick a value from the {header} list.", promptTitle=header, prompt=prompt, showInputMessage=True)
     col = L(COL[header])
     dv.add(f"{col}2:{col}{LAST_ROW}")
     ws.add_data_validation(dv)
 
 
-dv_list("Era Label", list_range["Era Label"], "Badge text on the card.")
+dv_list("Era Label", list_range["Era Label"], "Badge text on the card.", LIST_VALUES["Era Label"])
 dv_list("Club", list_range["Club Code"], "Three-letter club code (names on the Lists tab).")
-dv_list("Archetype", list_range["Archetype"], "Playing style. Managers' bonuses check archetypes.")
-for h, _, _ in TRAIT_COLS:
-    dv_list(h, list_range[h], "Caricature look.")
+dv_list("Archetype", list_range["Archetype"], "Playing style. Managers' bonuses check archetypes.", LIST_VALUES["Archetype"])
+for h, _, allowed in TRAIT_COLS:
+    dv_list(h, list_range[h], "Caricature look: pick from the list.", allowed)
 
 ovr = DataValidation(type="whole", operator="between", formula1=str(OVR_MIN), formula2=str(OVR_MAX), showErrorMessage=True, errorTitle="OVR out of range",
                      error=f"OVR must be a whole number from {OVR_MIN} to {OVR_MAX}.", promptTitle="OVR", prompt="74–80 Squad · 81–85 Cult · 86–90 World Class · 91–96 Prime", showInputMessage=True)

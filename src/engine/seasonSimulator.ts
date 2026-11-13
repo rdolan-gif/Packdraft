@@ -21,6 +21,8 @@ import { getClub } from '../data/clubs';
 export const USER_TEAM_ID = 'USER';
 export const TOTAL_MATCHWEEKS = 38;
 export const BIG_MATCH_WEEKS = [19, 38];
+/** The January transfer window opens after this many matchweeks. */
+export const TRANSFER_WINDOW_AFTER = 20;
 
 // ───────────────────────────── helpers ─────────────────────────────
 
@@ -197,6 +199,8 @@ export class SeasonSim {
   results: MatchResult[][] = [];
   matchweek = 0; // number of matchweeks played
   shouts: { mw: number; shout: TacticalShout; result: 'W' | 'D' | 'L' }[] = [];
+  transferDone = false;
+  transfers: { mw: number; inName: string; outName: string; slot: string }[] = [];
   managerId: ManagerId;
   rating: TeamRating;
   rng: () => number;
@@ -217,6 +221,42 @@ export class SeasonSim {
         this.stats[p.id] = { id: p.id, name: p.name, teamId: t.id, isUser: p.isUser, goals: 0, assists: 0, cleanSheets: 0, apps: 0, ratingSum: 0 };
       }),
     );
+  }
+
+  /** True when the season should pause for the January transfer window. */
+  needsTransferWindow() {
+    return !this.transferDone && !this.done && this.matchweek === TRANSFER_WINDOW_AFTER;
+  }
+
+  skipTransferWindow() {
+    this.transferDone = true;
+  }
+
+  /**
+   * January signing: rebuild the user's XI and strength from the new lineup.
+   * The departing player keeps the stats he earned before January.
+   */
+  signPlayer(signed: PlayerCard, out: PlayerCard, formationId: FormationId, lineup: Lineup, rating: TeamRating, slotLabel: string) {
+    const user = this.teamById[USER_TEAM_ID];
+    user.players = userPlayers(formationId, lineup);
+    user.attack = rating.attack;
+    user.defence = rating.defence;
+    this.rating = rating;
+    for (const p of user.players) {
+      if (!this.stats[p.id]) this.stats[p.id] = { id: p.id, name: p.name, teamId: USER_TEAM_ID, isUser: true, goals: 0, assists: 0, cleanSheets: 0, apps: 0, ratingSum: 0 };
+    }
+    // A player can't play for a rival as well: replace him there with an academy player.
+    for (const t of this.teams) {
+      if (t.isUser) continue;
+      const i = t.players.findIndex((p) => p.id === `${t.id}:${signed.basePlayerId}`);
+      if (i < 0) continue;
+      const gone = t.players[i];
+      const id = `${t.id}:${t.id}_academy_jan`;
+      t.players[i] = { ...gone, id, name: `${t.short} Academy ${gone.pos}` };
+      this.stats[id] = { id, name: t.players[i].name, teamId: t.id, isUser: false, goals: 0, assists: 0, cleanSheets: 0, apps: 0, ratingSum: 0 };
+    }
+    this.transfers.push({ mw: this.matchweek, inName: signed.name, outName: out.name, slot: slotLabel });
+    this.transferDone = true;
   }
 
   get done() {
@@ -619,6 +659,7 @@ export function buildSummary(sim: SeasonSim, formationId: FormationId, lineup: L
     const opp = sim.teamById[b.homeId === USER_TEAM_ID ? b.awayId : b.homeId];
     highlights.push(`Biggest win: ${Math.max(b.homeGoals, b.awayGoals)}-${Math.min(b.homeGoals, b.awayGoals)} vs ${opp.name}`);
   }
+  sim.transfers.forEach((t) => highlights.push(`January signing: ${t.inName} replaced ${t.outName} at ${t.slot}`));
   sim.shouts.forEach((s) => {
     const label = s.shout === 'attack' ? 'All-Out Attack' : s.shout === 'bus' ? 'Park the Bus' : 'Stick to Gameplan';
     highlights.push(`MW${s.mw} touchline call (${label}): ${s.result === 'W' ? 'won it' : s.result === 'D' ? 'drew' : 'lost'}`);

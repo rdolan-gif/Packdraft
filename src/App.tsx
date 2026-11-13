@@ -212,6 +212,21 @@ export default function App() {
     window.scrollTo({ top: 0 });
   };
 
+  // January transfer window: swap one player, then rebuild the user's side in the running season.
+  const signInJanuary = (card: PlayerCard, slotId: string) => {
+    if (!sim || !managerId) return;
+    const out = lineup[slotId];
+    if (!out) return;
+    const next = { ...lineup, [slotId]: card };
+    const nextRating = computeTeamRating(formationId, next, managerId);
+    const label = FORMATIONS[formationId].slots.find((s) => s.id === slotId)?.label ?? slotId;
+    sim.signPlayer(card, out, formationId, next, nextRating, label);
+    setLineup(next);
+    setDrafted((d) => new Set(d).add(card.basePlayerId));
+    if (card.tier === 'PRIME_ICON') goldConfetti(0.8);
+    flash(`Signed: ${card.name} replaces ${out.name}`);
+  };
+
   const finishSeason = () => {
     if (!sim || !managerId) return;
     const s = buildSummary(sim, formationId, lineup, rating);
@@ -370,7 +385,9 @@ export default function App() {
           </div>
         )}
 
-        {phase === 'season' && sim && <SeasonBroadcast sim={sim} onFinish={finishSeason} />}
+        {phase === 'season' && sim && managerId && (
+          <SeasonBroadcast sim={sim} onFinish={finishSeason} formationId={formationId} lineup={lineup} managerId={managerId} onTransfer={signInJanuary} />
+        )}
 
         {phase === 'review' && summary && managerId && (
           <SeasonReviewCard

@@ -17,6 +17,11 @@ interface Props {
   rerollAvailable: boolean;
   onReroll: () => void;
   onRevealed?: () => void;
+  /** Override the heading (e.g. the January transfer pack). */
+  title?: string;
+  subtitle?: string;
+  /** Text on the foil pack's label. */
+  packLabel?: string;
 }
 
 const FLASH: Record<Tier, { color: string; max: number }> = {
@@ -40,7 +45,7 @@ function raysFor(tier: Tier) {
   return `conic-gradient(from 0deg at 50% 50%, ${stops.join(', ')}, transparent 360deg)`;
 }
 
-export function PackOpener({ packNumber, cards, packKey, selectedId, onSelect, rerollAvailable, onReroll, onRevealed }: Props) {
+export function PackOpener({ packNumber, cards, packKey, selectedId, onSelect, rerollAvailable, onReroll, onRevealed, title, subtitle, packLabel }: Props) {
   const [stage, setStage] = useState<Stage>('sealed');
   const [flipped, setFlipped] = useState<Set<number>>(new Set());
   const [tearProgress, setTearProgress] = useState(0);
@@ -271,9 +276,15 @@ export function PackOpener({ packNumber, cards, packKey, selectedId, onSelect, r
       <div className="mb-3 flex w-full items-center justify-between gap-2">
         <div>
           <div className="font-display text-3xl leading-none text-white sm:text-4xl">
-            PACK {packNumber} <span className="text-emerald-400">/ {TOTAL_PACKS}</span>
+            {title ?? (
+              <>
+                PACK {packNumber} <span className="text-emerald-400">/ {TOTAL_PACKS}</span>
+              </>
+            )}
           </div>
-          {finale ? (
+          {subtitle ? (
+            <div className="text-xs font-bold uppercase tracking-widest text-sky-300">{subtitle}</div>
+          ) : finale ? (
             <div className="text-xs font-black uppercase tracking-widest text-yellow-300">★ Captain's Finale · guaranteed 86+ · double Prime odds</div>
           ) : packNumber >= 9 ? (
             <div className="text-xs font-bold uppercase tracking-widest text-emerald-300">Anti-softlock: 2+ cards fit your empty slots</div>
@@ -318,7 +329,7 @@ export function PackOpener({ packNumber, cards, packKey, selectedId, onSelect, r
                 <div className="font-display text-7xl leading-none text-yellow-300 drop-shadow-[0_4px_0_rgba(0,0,0,.4)]">38</div>
                 <div className="font-display text-2xl tracking-[0.25em] text-white">PACKDRAFT</div>
                 <div className="rounded-full bg-black/40 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-emerald-200">
-                  {finale ? "Captain's Finale" : `Matchday Pack #${packNumber}`}
+                  {packLabel ?? (finale ? "Captain's Finale" : `Matchday Pack #${packNumber}`)}
                 </div>
                 <div className="mt-2 flex gap-1">
                   {Array.from({ length: 5 }).map((_, i) => (
