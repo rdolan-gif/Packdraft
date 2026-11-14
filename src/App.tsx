@@ -17,7 +17,7 @@ import { FORMATIONS } from './data/formations';
 import { PLAYERS } from './data/players';
 import { bestSlotFor, computeTeamRating, fitFor } from './engine/chemistry';
 import { generatePack, TOTAL_PACKS } from './engine/packGenerator';
-import { buildLeague, buildSummary, SeasonSim } from './engine/seasonSimulator';
+import { buildLeague, buildSummary, pickEra, SeasonSim } from './engine/seasonSimulator';
 import { loadCareer, loadVault, qualifiesForVault, recordRun, saveToVault, deleteFromVault } from './engine/vault';
 import { sfx } from './engine/soundEffects';
 import { goldConfetti } from './engine/fx';
@@ -222,8 +222,10 @@ export default function App() {
   const kickOff = () => {
     if (!managerId) return;
     sfx.whistle();
-    const teams = buildLeague({ teamName: teamName.trim() || 'PackDraft XI', formationId, lineup, rating, managerId });
-    setSim(new SeasonSim(teams, managerId, rating));
+    // Each draft is played in a random era of the league (scoring, home advantage, gap to the elite).
+    const era = pickEra();
+    const teams = buildLeague({ teamName: teamName.trim() || 'PackDraft XI', formationId, lineup, rating, managerId, era });
+    setSim(new SeasonSim(teams, managerId, rating, Math.random, era));
     setPhase('season');
     window.scrollTo({ top: 0 });
   };

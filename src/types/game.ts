@@ -229,6 +229,15 @@ export interface GoalEvent {
   teamId: string;
 }
 
+/** A near miss in your match (for the live broadcast only; doesn't affect the result). */
+export interface ChanceEvent {
+  minute: number;
+  teamId: string;
+  playerName: string;
+  kind: 'save' | 'post' | 'wide' | 'block';
+  keeper?: string;
+}
+
 export interface MatchResult {
   matchweek: number;
   homeId: string;
@@ -239,6 +248,10 @@ export interface MatchResult {
   headline: string | null;
   involvesUser: boolean;
   shout?: TacticalShout;
+  /** Expected goals for each side (home, away). */
+  xg?: [number, number];
+  /** Near misses, generated for your match only. */
+  chances?: ChanceEvent[];
 }
 
 export interface TableRow {

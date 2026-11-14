@@ -277,6 +277,31 @@ export const sfx = {
   sad() {
     [392, 370, 349, 262].forEach((f, i) => tone({ freq: f, type: 'triangle', start: i * 0.32, dur: 0.5, vol: 0.12 }));
   },
+  /** Crowd "ooh" for a near miss. */
+  ooh() {
+    noise({ dur: 0.9, vol: 0.18, freq: 700, freqTo: 450, q: 0.7, type: 'bandpass', color: 'pink', attack: 0.12 });
+  },
+  /** Ball cannons off the woodwork. */
+  post() {
+    tone({ freq: 1180, type: 'triangle', dur: 0.5, vol: 0.12 });
+    tone({ freq: 1770, type: 'sine', dur: 0.35, vol: 0.06 });
+    sfx.ooh();
+  },
+  /** Your goal: the stadium erupts. */
+  goalRoar(big = false) {
+    noise({ dur: big ? 2.6 : 1.8, vol: big ? 0.38 : 0.3, freq: 900, q: 0.4, type: 'bandpass', color: 'pink', attack: 0.06 });
+    noise({ dur: big ? 2 : 1.4, vol: 0.14, freq: 2600, q: 0.6, type: 'bandpass', attack: 0.1 });
+    sfx.goal(big);
+  },
+  /** Goal against: a deflated groan. */
+  groan() {
+    noise({ dur: 1.1, vol: 0.16, freq: 380, freqTo: 220, q: 0.8, type: 'bandpass', color: 'brown', attack: 0.08 });
+    sfx.concede();
+  },
+  /** A goal at another ground: a short news chime. */
+  newsflash() {
+    [988, 1319].forEach((f, i) => tone({ freq: f, type: 'sine', start: i * 0.09, dur: 0.18, vol: 0.05 }));
+  },
   tension() {
     tone({ freq: 73, type: 'sawtooth', dur: 1.8, vol: 0.12, filter: 400, attack: 0.4 });
     tone({ freq: 77.8, type: 'sawtooth', dur: 1.8, vol: 0.1, filter: 400, attack: 0.4 });

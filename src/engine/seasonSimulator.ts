@@ -1,6 +1,7 @@
 import { FORMATIONS, positionGroup } from '../data/formations';
 import { RIVAL_TEAMS, type RivalPlayer } from '../data/rivalTeams';
 import type {
+  ChanceEvent,
   FormationId,
   GoalEvent,
   Grade,
@@ -33,6 +34,61 @@ export const INFORM_WEEKS = 3;
 export const INFORM_SLOTS = 3;
 /** No club can have more than this many players in a Team of the Week. */
 export const TOTW_PER_CLUB = 2;
+
+// ───────────────────────────── league eras ─────────────────────────────
+// Every draft is played in a randomly chosen era of the league. Each era has its own scoring rate,
+// home advantage and gap between the big clubs and the rest, based on real Premier League trends.
+
+export type LeagueEraId = 'nineties' | 'noughties' | 'tens' | 'twenties';
+
+export interface LeagueEra {
+  id: LeagueEraId;
+  name: string;
+  years: string;
+  tagline: string;
+  /** Expected goals per team per game between equal sides. */
+  goalRate: number;
+  /** Multipliers on expected goals for the home and away side. */
+  home: number;
+  away: number;
+  /** How far apart the rival clubs are (1 = as listed). */
+  spread: number;
+  /** How strongly a rating gap turns into goals. */
+  slope: number;
+  /** Late on, a team that's ahead protects its lead (multiplier on both sides' scoring). */
+  protect: number;
+  /** Extra strength for the four biggest rival clubs (the era's elite). */
+  eliteBoost: number;
+}
+
+export const LEAGUE_ERAS: Record<LeagueEraId, LeagueEra> = {
+  nineties: {
+    id: 'nineties', name: 'Route One Era', years: '1995–2002',
+    tagline: 'Muddy pitches, big centre-halves and fortress home grounds. Goals are hard to come by.',
+    goalRate: 1.24, home: 1.17, away: 0.86, spread: 0.62, slope: 0.058, protect: 0.72, eliteBoost: 0,
+  },
+  noughties: {
+    id: 'noughties', name: 'Big Four Era', years: '2003–2010',
+    tagline: 'Four giants, tight defences and 1-0 wins. Top four is a closed shop.',
+    goalRate: 1.2, home: 1.15, away: 0.88, spread: 0.72, slope: 0.06, protect: 0.7, eliteBoost: 2,
+  },
+  tens: {
+    id: 'tens', name: 'Super-Team Era', years: '2011–2020',
+    tagline: 'Pressing, possession and 100-point champions. The elite pull away from the pack.',
+    goalRate: 1.28, home: 1.13, away: 0.88, spread: 0.78, slope: 0.062, protect: 0.76, eliteBoost: 2.2,
+  },
+  twenties: {
+    id: 'twenties', name: 'Goal Rush Era', years: '2021–now',
+    tagline: 'Ten minutes of stoppage time, high lines and goals everywhere. Nobody is safe.',
+    goalRate: 1.36, home: 1.11, away: 0.9, spread: 0.74, slope: 0.06, protect: 0.8, eliteBoost: 1,
+  },
+};
+
+export const LEAGUE_ERA_IDS = Object.keys(LEAGUE_ERAS) as LeagueEraId[];
+
+export function pickEra(rng: () => number = Math.random): LeagueEraId {
+  return LEAGUE_ERA_IDS[Math.floor(rng() * LEAGUE_ERA_IDS.length)];
+}
 
 export interface TotwPick {
   id: string;
@@ -146,9 +202,13 @@ export function buildLeague(opts: {
   lineup: Lineup;
   rating: TeamRating;
   managerId: ManagerId;
+  era?: LeagueEraId;
   rng?: () => number;
 }): SimTeam[] {
   const rng = opts.rng ?? Math.random;
+  const era = LEAGUE_ERAS[opts.era ?? 'tens'];
+  const mean = RIVAL_TEAMS.reduce((a, t) => a + t.strength, 0) / RIVAL_TEAMS.length;
+  const elite = new Set([...RIVAL_TEAMS].sort((a, b) => b.strength - a.strength).slice(0, 4).map((t) => t.code));
   const drafted = new Set(Object.values(opts.lineup).filter(Boolean).map((c) => c!.basePlayerId));
   const user: SimTeam = {
     id: USER_TEAM_ID,
@@ -162,7 +222,7 @@ export function buildLeague(opts: {
     players: userPlayers(opts.formationId, opts.lineup),
   };
   const rivals: SimTeam[] = RIVAL_TEAMS.map((t) => {
-    const s = t.strength + (rng() * 3 - 1.5);
+    const s = mean + (t.strength - mean) * era.spread + (elite.has(t.code) ? era.eliteBoost : 0) + (rng() * 3 - 1.5);
     const tilt = t.style === 'attack' ? 1.2 : t.style === 'defensive' ? -1.2 : 0;
     const club = getClub(t.code);
     return {
@@ -251,8 +311,10 @@ export class SeasonSim {
   managerId: ManagerId;
   rating: TeamRating;
   rng: () => number;
+  era: LeagueEra;
 
-  constructor(teams: SimTeam[], managerId: ManagerId, rating: TeamRating, rng: () => number = Math.random) {
+  constructor(teams: SimTeam[], managerId: ManagerId, rating: TeamRating, rng: () => number = Math.random, era: LeagueEraId = 'tens') {
+    this.era = LEAGUE_ERAS[era];
     this.teams = teams;
     this.managerId = managerId;
     this.rating = rating;
@@ -414,7 +476,8 @@ export class SeasonSim {
 
   private lambda(att: SimTeam, def: SimTeam, home: boolean) {
     const diff = att.attack - def.defence;
-    return 1.2 * Math.exp(diff * 0.07) * (home ? 1.1 : 0.92);
+    const e = this.era;
+    return e.goalRate * Math.exp(diff * e.slope) * (home ? e.home : e.away);
   }
 
   private playMatch(mw: number, homeId: string, awayId: string, shout?: TacticalShout): MatchResult {
@@ -444,6 +507,15 @@ export class SeasonSim {
       const tMul = m > 75 ? 1.18 : m < 10 ? 0.8 : 1;
       let ph = (lh / 90) * tMul;
       let pa = (la / 90) * tMul;
+      // Game state: from the 70th minute a side that's ahead sits deeper and the game slows down.
+      // A level game in the last half hour gets cagey too: nobody wants to lose it.
+      if (m > 70 && hg !== ag) {
+        ph *= this.era.protect;
+        pa *= this.era.protect;
+      } else if (m > 60 && hg === ag) {
+        ph *= 0.8;
+        pa *= 0.8;
+      }
       if (fergie && m > 75) {
         const userGoals = userIsHome ? hg : ag;
         const oppGoals = userIsHome ? ag : hg;
@@ -462,9 +534,34 @@ export class SeasonSim {
         goals.push(this.makeGoal(away, m));
       }
     }
-    const result: MatchResult = { matchweek: mw, homeId, awayId, homeGoals: hg, awayGoals: ag, goals, headline: null, involvesUser, shout };
+    const result: MatchResult = { matchweek: mw, homeId, awayId, homeGoals: hg, awayGoals: ag, goals, headline: null, involvesUser, shout, xg: [lh, la] };
+    if (involvesUser) result.chances = this.makeChances(home, away, lh, la, goals, 90 + stoppage);
     result.headline = this.headline(result);
     return result;
+  }
+
+  /** Near misses for the live broadcast: roughly 1.5 per expected goal, never on a goal minute. */
+  private makeChances(home: SimTeam, away: SimTeam, lh: number, la: number, goals: GoalEvent[], end: number): ChanceEvent[] {
+    const out: ChanceEvent[] = [];
+    const taken = new Set(goals.map((g) => g.minute));
+    const kinds: ChanceEvent['kind'][] = ['save', 'save', 'save', 'wide', 'wide', 'block', 'post'];
+    for (const [team, opp, l] of [
+      [home, away, lh],
+      [away, home, la],
+    ] as [SimTeam, SimTeam, number][]) {
+      const n = Math.min(6, Math.round(l * 1.5 + this.rng() * 1.6));
+      for (let i = 0; i < n; i++) {
+        let minute = 2 + Math.floor(this.rng() * (end - 3));
+        while (taken.has(minute) && minute < end) minute++;
+        taken.add(minute);
+        const shooter = weighted(team.players, (p) => p.scoreWeight + 0.15, this.rng);
+        if (!shooter) continue;
+        const kind = kinds[Math.floor(this.rng() * kinds.length)];
+        const keeper = opp.players.find((p) => p.pos === 'GK')?.name;
+        out.push({ minute, teamId: team.id, playerName: shooter.name, kind, keeper });
+      }
+    }
+    return out.sort((a, b) => a.minute - b.minute);
   }
 
   private makeGoal(team: SimTeam, minute: number): GoalEvent {
@@ -762,6 +859,7 @@ export function buildSummary(sim: SeasonSim, formationId: FormationId, lineup: L
 
   const highlights: string[] = [];
   highlights.push(`${record.won}W ${record.drawn}D ${record.lost}L · ${record.gf} scored, ${record.ga} conceded`);
+  highlights.push(`League era: ${sim.era.name} (${sim.era.years})`);
   if (record.lost === 0 && record.drawn === 0) highlights.push('PERFECT SEASON: 38 wins from 38. Statistically absurd.');
   else if (record.lost === 0) highlights.push('Went the entire season unbeaten.');
   if (bestStreak >= 5) highlights.push(`${bestStreak}-match winning streak`);

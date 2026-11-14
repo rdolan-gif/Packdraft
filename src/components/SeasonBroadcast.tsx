@@ -1,16 +1,23 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { FastForward, Pause, Play, Radio, Shield, Swords, Scale, Target, Footprints, Hand, Flame } from 'lucide-react';
-import type { FormationId, Lineup, ManagerId, MatchResult, PlayerCard, PlayerSeasonStats, TacticalShout } from '../types/game';
-import { formatMinute, INFORM_BOOST, INFORM_SLOTS, INFORM_WEEKS, ordinal, SeasonSim, TOTAL_MATCHWEEKS, TRANSFER_WINDOW_AFTER, USER_TEAM_ID, type DecisionContext } from '../engine/seasonSimulator';
+import type { FormationId, Lineup, ManagerId, PlayerCard, PlayerSeasonStats, TableRow, TacticalShout } from '../types/game';
+import { INFORM_BOOST, INFORM_SLOTS, INFORM_WEEKS, ordinal, SeasonSim, TOTAL_MATCHWEEKS, TRANSFER_WINDOW_AFTER, USER_TEAM_ID, type DecisionContext, type TotwPick } from '../engine/seasonSimulator';
+import { buildLiveMatchweek, chanceText, checkMilestones, liveTable, type LiveEvent, type LiveMatchweek, type Milestone, pointsHistory, snapshotTable } from '../engine/liveMatch';
 import { TransferWindow } from './TransferWindow';
 import { PlayerCardUI } from './PlayerCardUI';
+import { LiveMatchHero, type Celebration, type FeedItem } from './season/LiveMatchHero';
+import { AroundTheGrounds, LiveTable, TitleRaceChart } from './season/LivePanels';
+import { ChaseBadges, MidSeasonAwards, MilestonePop } from './season/Moments';
 import { recordTotw } from '../engine/stickerBook';
 import { sfx } from '../engine/soundEffects';
-import { goldConfetti, shakeScreen } from '../engine/fx';
+import { burstAt, goldConfetti, rainbowConfetti, shakeScreen } from '../engine/fx';
 
 type Speed = 1 | 2 | 4 | 'instant';
-const SPEED_MS: Record<Exclude<Speed, 'instant'>, number> = { 1: 2000, 2: 1000, 4: 500 };
-const ROW_H = 30;
+/** Match minutes per real second, and how long big moments hold the screen (relative to 1x). */
+const RATE: Record<Exclude<Speed, 'instant'>, number> = { 1: 16, 2: 32, 4: 75 };
+const HOLD: Record<Exclude<Speed, 'instant'>, number> = { 1: 1, 2: 0.6, 4: 0.3 };
+const LEADER_KINDS = ['goals', 'assists', 'cleanSheets'] as const;
+type LeaderKind = (typeof LEADER_KINDS)[number];
 
 interface Props {
   sim: SeasonSim;
@@ -22,43 +29,73 @@ interface Props {
   onTransfer: (card: PlayerCard, slotId: string) => void;
 }
 
+/** Mutable playback state, kept in a ref so the 20fps loop never reads stale values. */
+interface Playback {
+  phase: 'idle' | 'live' | 'ft';
+  live: LiveMatchweek | null;
+  before: Record<string, TableRow> | null;
+  minute: number;
+  idx: number;
+  holdUntil: number;
+  lastT: number;
+  momentum: number;
+  seed: number;
+  trailed: boolean;
+  userFT: boolean;
+  feed: FeedItem[];
+  flashes: Record<number, number>;
+  news: string | null;
+  celebration: Celebration | null;
+  leaders: Record<LeaderKind, PlayerSeasonStats[]> | null;
+  totw: { mw: number; players: TotwPick[] } | null;
+  informs: ReturnType<SeasonSim['activeInforms']> | null;
+}
+
+let feedKey = 0;
+
 export function SeasonBroadcast({ sim, onFinish, formationId, lineup, managerId, onTransfer }: Props) {
   const [transferOpen, setTransferOpen] = useState(false);
+  const [awardsOpen, setAwardsOpen] = useState(false);
   const [informReveal, setInformReveal] = useState<{ key: number; cards: { card: PlayerCard; boost: number }[] } | null>(null);
   const [, setVersion] = useState(0);
   const bump = () => setVersion((v) => v + 1);
   const [playing, setPlaying] = useState(false);
   const [speed, setSpeed] = useState<Speed>(1);
   const [decision, setDecision] = useState<DecisionContext | null>(null);
-  const [tab, setTab] = useState<'goals' | 'assists' | 'cleanSheets'>('goals');
-  const [flashResult, setFlashResult] = useState<'W' | 'D' | 'L' | null>(null);
+  const [tab, setTab] = useState<LeaderKind>('goals');
   const [instantRun, setInstantRun] = useState(false);
-  const timer = useRef<number | null>(null);
+  const [milestone, setMilestone] = useState<Milestone | null>(null);
 
-  const done = sim.done;
-  const table = sim.sortedTable();
-  const latest: MatchResult[] = sim.results[sim.matchweek - 1] ?? [];
-  const userRow = sim.table[USER_TEAM_ID];
-  const userPos = sim.userPosition();
-  const nextFixture = !done ? sim.userFixture(sim.matchweek) : null;
+  const pb = useRef<Playback>({
+    phase: 'idle', live: null, before: null, minute: 0, idx: 0, holdUntil: 0, lastT: 0, momentum: 0, seed: 0,
+    trailed: false, userFT: false, feed: [], flashes: {}, news: null, celebration: null, leaders: null, totw: null, informs: null,
+  });
+  const queue = useRef<Milestone[]>([]);
+  const seen = useRef(new Set<string>());
+  const playingRef = useRef(playing);
+  const speedRef = useRef(speed);
+  const blockedRef = useRef(false);
+  playingRef.current = playing;
+  speedRef.current = speed;
+  blockedRef.current = !!decision || transferOpen || awardsOpen;
 
-  const userOutcome = (r: MatchResult | undefined) => {
-    if (!r) return null;
-    const home = r.homeId === USER_TEAM_ID;
-    const us = home ? r.homeGoals : r.awayGoals;
-    const them = home ? r.awayGoals : r.homeGoals;
-    return us > them ? 'W' : us < them ? 'L' : 'D';
+  const st = pb.current;
+  const isLive = st.phase === 'live';
+  const holdScale = () => (speedRef.current === 'instant' ? 0.3 : HOLD[speedRef.current]);
+  const pushFeed = (minute: number, text: string, tone: FeedItem['tone']) => {
+    st.feed = [{ key: ++feedKey, minute, text, tone }, ...st.feed].slice(0, 8);
   };
 
-  /** Plays one matchweek; returns false if a decision pause is required. */
-  const step = useCallback(
-    (quiet: boolean, shout?: TacticalShout): boolean => {
+  // ───────── one matchweek: start ─────────
+  /** Kicks off the next matchweek. Returns false if the season paused (decision / window) or ended. */
+  const startNext = useCallback(
+    (shout?: TacticalShout): boolean => {
       if (sim.done) return false;
       if (!shout && sim.needsTransferWindow()) {
-        setTransferOpen(true);
+        setAwardsOpen(true);
         setPlaying(false);
         setInstantRun(false);
-        sfx.tension();
+        sfx.fanfare();
         bump();
         return false;
       }
@@ -74,64 +111,253 @@ export function SeasonBroadcast({ sim, onFinish, formationId, lineup, managerId,
           return false;
         }
       }
+      // Freeze everything a viewer could read the result from, then play the round.
+      const before = snapshotTable(sim);
+      const leaders = Object.fromEntries(LEADER_KINDS.map((k) => [k, sim.leaders(k, 10).map((x) => ({ ...x }))])) as Playback['leaders']; // copies: stats objects update as the round is played
+      const totw = sim.latestTotw;
+      const informs = sim.activeInforms();
       const results = sim.playMatchweek(shout);
-      const out = userOutcome(results[0]);
-      // Team of the Week: honours go in the sticker book; reveal your in-form players.
-      if (sim.newTotwIds.length) {
-        recordTotw(sim.newTotwIds);
-        if (!quiet) {
-          const userPlayers = sim.teamById[USER_TEAM_ID].players;
-          const cards = sim.newTotwIds
-            .map((id) => ({ card: userPlayers.find((p) => p.id === id)?.card, boost: sim.informs[id]?.boost ?? 0 }))
-            .filter((x): x is { card: PlayerCard; boost: number } => !!x.card);
-          if (cards.length) {
-            setInformReveal({ key: Date.now(), cards });
-            sfx.stinger('ELITE');
-          }
-        }
-      }
-      if (!quiet) {
-        setFlashResult(out);
-        if (out === 'W') sfx.goal(sim.matchweek === 19 || sim.matchweek === 38);
-        else if (out === 'L') sfx.concede();
-        else sfx.whistle();
-      }
-      if (sim.done) {
-        setPlaying(false);
-        setInstantRun(false);
-        sfx.finalWhistle();
-        const row = sim.table[USER_TEAM_ID];
-        if (sim.userPosition() === 1) {
-          goldConfetti(row.lost === 0 ? 1.6 : 1);
-          sfx.trophy();
-        }
-      }
+      const live = buildLiveMatchweek(sim, results);
+      Object.assign(st, {
+        phase: 'live', live, before, minute: 0, idx: 0, momentum: 0, seed: Math.random() * 10, trailed: false, userFT: false,
+        feed: [], flashes: {}, news: null, celebration: null, leaders, totw, informs, lastT: performance.now(), holdUntil: performance.now() + 400 * holdScale(),
+      } satisfies Partial<Playback>);
+      const u = results[0];
+      const opp = sim.teamById[u.homeId === USER_TEAM_ID ? u.awayId : u.homeId];
+      pushFeed(0, `Kick-off ${u.homeId === USER_TEAM_ID ? 'at home to' : 'away at'} ${opp.name}.`, 'whistle');
+      sfx.whistle();
       return true;
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [sim],
   );
 
-  // Timed playback
+  // ───────── one matchweek: events ─────────
+  const userMatchIdx = () => st.live!.results.findIndex((r) => r.involvesUser);
+  const scoreAt = (minute: number, includeIdx: number) => {
+    const r = st.live!.results[userMatchIdx()];
+    let us = 0;
+    let them = 0;
+    st.live!.events.slice(0, includeIdx).forEach((e) => {
+      if (e.kind !== 'goal' || st.live!.results[e.match] !== r || e.minute > minute) return;
+      if (e.user) us++;
+      else them++;
+    });
+    return { us, them };
+  };
+
+  /** Returns a hold in ms (0 = keep playing). */
+  const playEvent = (e: LiveEvent, i: number, quiet: boolean): number => {
+    const live = st.live!;
+    const k = holdScale();
+    const um = live.results[userMatchIdx()];
+    const homeSign = (teamId: string) => (teamId === um.homeId ? 1 : -1);
+    if (e.kind === 'goal') {
+      const r = live.results[e.match];
+      if (!r.involvesUser) {
+        st.flashes = { ...st.flashes, [e.match]: e.minute };
+        const h = sim.teamById[r.homeId];
+        const a = sim.teamById[r.awayId];
+        st.news = `${e.scorer} scores for ${sim.teamById[e.teamId].short} · ${h.short} v ${a.short}`;
+        if (live.mw === TOTAL_MATCHWEEKS && st.before) {
+          // Final day: the title can change hands with every goal.
+          const prev = liveTable(sim, st.before, live, e.minute - 0.5)[0].teamId;
+          const now = liveTable(sim, st.before, live, e.minute)[0].teamId;
+          if (prev !== now && !quiet) {
+            pushFeed(e.minute, `AS IT STANDS: ${sim.teamById[now].name} ${now === USER_TEAM_ID ? 'ARE CHAMPIONS!' : 'would be champions!'}`, 'news');
+            if (now === USER_TEAM_ID) sfx.goalRoar(true);
+            else sfx.groan();
+            return 900 * k;
+          }
+        }
+        if (!quiet && speedRef.current === 1) sfx.newsflash();
+        return 0;
+      }
+      const { us, them } = scoreAt(e.minute, i);
+      st.momentum = Math.max(-1, Math.min(1, st.momentum + 0.8 * homeSign(e.teamId)));
+      if (e.user) {
+        const nowUs = us + 1;
+        const tally = live.events.slice(0, i + 1).filter((x) => x.kind === 'goal' && x.user && x.scorerId === e.scorerId).length;
+        let label = 'GOAL!';
+        if (tally === 3) label = 'HAT-TRICK!';
+        else if (e.minute >= 85 && nowUs > them && us <= them) label = 'LATE WINNER!';
+        else if (e.minute >= 85 && nowUs === them) label = 'LATE EQUALISER!';
+        else if (nowUs === them) label = 'EQUALISER!';
+        else if (tally === 2) label = 'BRACE!';
+        const card = sim.teamById[USER_TEAM_ID].players.find((p) => p.id === e.scorerId)?.card;
+        pushFeed(e.minute, `GOAL! ${e.scorer}${e.assist ? ` (assist ${e.assist})` : ''}. ${nowUs}-${them}.`, 'goal');
+        if (quiet) return 0;
+        st.celebration = { key: Date.now(), user: true, minute: e.minute, scorer: e.scorer, assist: e.assist, card, label, teamName: sim.teamById[USER_TEAM_ID].name, colour: '#10b981' };
+        const special = label !== 'GOAL!' && label !== 'EQUALISER!';
+        sfx.goalRoar(special || live.mw === 19 || live.mw === 38);
+        shakeScreen(special ? 'heavy' : 'micro');
+        const hero = document.querySelector('[data-shake-zone]')?.getBoundingClientRect();
+        if (hero) burstAt(hero.left + hero.width / 2, hero.top + hero.height / 2, ['#10b981', '#facc15', '#ffffff'], special ? 90 : 45);
+        if (label === 'HAT-TRICK!') rainbowConfetti();
+        return (special ? 2800 : 2000) * k;
+      }
+      const opp = sim.teamById[e.teamId];
+      if (them + 1 > us) st.trailed = true;
+      pushFeed(e.minute, `${opp.short} score. ${e.scorer}. ${us}-${them + 1}.`, 'concede');
+      if (quiet) return 0;
+      st.celebration = { key: Date.now(), user: false, minute: e.minute, scorer: e.scorer, assist: e.assist, label: 'GOAL', teamName: opp.name, colour: opp.primary };
+      sfx.groan();
+      return 1100 * k;
+    }
+    if (e.kind === 'chance') {
+      st.momentum = Math.max(-1, Math.min(1, st.momentum + 0.45 * homeSign(e.teamId)));
+      pushFeed(e.minute, chanceText(e), e.user ? 'chance' : 'info');
+      if (quiet) return 0;
+      if (e.type === 'post') sfx.post();
+      else sfx.ooh();
+      return (e.type === 'post' ? 600 : 280) * k;
+    }
+    if (e.kind === 'chatter') {
+      pushFeed(e.minute, e.text, 'info');
+      return 0;
+    }
+    if (e.type === 'ht') {
+      const { us, them } = scoreAt(45, i);
+      pushFeed(45, `HALF-TIME. ${us}-${them}.`, 'whistle');
+      if (!quiet) sfx.whistle();
+      return 700 * k;
+    }
+    // full time in your match
+    st.userFT = true;
+    const { us, them } = scoreAt(999, i);
+    const res = us > them ? 'W' : us < them ? 'L' : 'D';
+    pushFeed(e.minute, `FULL-TIME. ${us}-${them}. ${res === 'W' ? (st.trailed ? 'What a comeback!' : 'Three points!') : res === 'D' ? 'A point apiece.' : 'Beaten.'}`, 'whistle');
+    if (!quiet) {
+      sfx.whistle(true);
+      if (res === 'W') sfx.trophy();
+      else if (res === 'L') sfx.sad();
+    }
+    return 600 * k;
+  };
+
+  // ───────── one matchweek: end ─────────
+  const finishLive = (quiet: boolean) => {
+    const live = st.live!;
+    // Anything not yet shown (skip / instant) is applied silently.
+    while (st.idx < live.events.length) {
+      playEvent(live.events[st.idx], st.idx, true);
+      st.idx++;
+    }
+    st.minute = live.end;
+    st.phase = 'ft';
+    st.celebration = null;
+    st.news = null;
+    st.leaders = null;
+    st.totw = null;
+    st.informs = null;
+    // Team of the Week: honours go in the sticker book; reveal your in-form players.
+    if (sim.newTotwIds.length) {
+      recordTotw(sim.newTotwIds);
+      if (!quiet) {
+        const userPlayers = sim.teamById[USER_TEAM_ID].players;
+        const cards = sim.newTotwIds
+          .map((id) => ({ card: userPlayers.find((p) => p.id === id)?.card, boost: sim.informs[id]?.boost ?? 0 }))
+          .filter((x): x is { card: PlayerCard; boost: number } => !!x.card);
+        if (cards.length) setInformReveal({ key: Date.now(), cards });
+      }
+    }
+    const found = checkMilestones(sim, seen.current);
+    const r = live.results[userMatchIdx()];
+    const userWon = r.homeId === USER_TEAM_ID ? r.homeGoals > r.awayGoals : r.awayGoals > r.homeGoals;
+    if (st.trailed && userWon) found.push({ id: `comeback${live.mw}`, icon: '🔄', title: 'COMEBACK WIN!', sub: 'From behind to three points', size: 1 });
+    queue.current.push(...(quiet ? found.filter((m) => m.size === 3).slice(-1) : found));
+    if (sim.done) {
+      setPlaying(false);
+      setInstantRun(false);
+      sfx.finalWhistle();
+      if (sim.userPosition() === 1) goldConfetti(sim.table[USER_TEAM_ID].lost === 0 ? 1.6 : 1);
+    }
+    st.holdUntil = performance.now() + (quiet ? 0 : 1400 * holdScale());
+  };
+
+  /** Plays a whole matchweek with no animation (instant sim). */
+  const quietStep = (): boolean => {
+    if (st.phase === 'live') finishLive(true);
+    if (!startNext()) return false;
+    finishLive(true);
+    return true;
+  };
+
+  // ───────── the loop ─────────
   useEffect(() => {
-    if (!playing || decision || done || speed === 'instant') return;
-    timer.current = window.setTimeout(() => {
-      step(false);
+    const id = window.setInterval(() => {
+      const now = performance.now();
+      const dt = Math.min(0.25, (now - st.lastT) / 1000);
+      st.lastT = now;
+      if (now < st.holdUntil) return;
+      if (st.celebration) {
+        st.celebration = null;
+        bump();
+      }
+      // Milestones queue up and take the screen one at a time.
+      if (queue.current.length) {
+        const m = queue.current.shift()!;
+        setMilestone(m);
+        if (m.size === 3) {
+          goldConfetti(1.2);
+          sfx.roar();
+        } else if (m.tone === 'sad') sfx.sad();
+        else sfx.stinger(m.size === 2 ? 'RISING_WORLD' : 'ELITE');
+        st.holdUntil = now + (m.size === 3 ? 3200 : m.size === 2 ? 2300 : 1700) * Math.max(0.6, holdScale());
+        return;
+      }
+      setMilestone((m) => (m ? null : m));
+      if (st.phase === 'live') {
+        if (!playingRef.current || blockedRef.current) return;
+        const live = st.live!;
+        const sp = speedRef.current === 'instant' ? 4 : speedRef.current;
+        const big = live.mw === 19 || live.mw === TOTAL_MATCHWEEKS;
+        let rate = big ? Math.min(RATE[sp], 16) : RATE[sp];
+        // Broadcast pacing: rush through quiet spells, slow down as a chance builds in your match.
+        const ui = userMatchIdx();
+        const next = live.events.slice(st.idx).find((e) => e.kind === 'chance' || e.kind === 'whistle' || (e.kind === 'goal' && e.match === ui));
+        const gap = next ? next.minute - st.minute : 99;
+        if (gap > 6) rate *= 2.5;
+        else if (gap < 1.5 && next && next.kind !== 'whistle') rate *= 0.55;
+        st.minute = Math.min(live.end, st.minute + rate * dt);
+        // momentum drifts towards whoever is creating more, with a little wobble
+        const [xh, xa] = live.results[userMatchIdx()].xg ?? [1, 1];
+        const target = ((xh - xa) / (xh + xa)) * 0.7 + Math.sin(st.minute / 6 + st.seed) * 0.3;
+        st.momentum += (target - st.momentum) * 0.06;
+        while (st.idx < live.events.length && live.events[st.idx].minute <= st.minute) {
+          const e = live.events[st.idx];
+          const hold = playEvent(e, st.idx, false);
+          st.idx++;
+          if (hold > 0) {
+            st.minute = Math.max(st.minute, e.minute);
+            st.holdUntil = now + hold;
+            break;
+          }
+        }
+        if (st.minute >= live.end && st.idx >= live.events.length) finishLive(false);
+        bump();
+        return;
+      }
+      // Between matchweeks: kick off the next one if we're playing.
+      if (!playingRef.current || blockedRef.current || sim.done) return;
+      if (speedRef.current === 'instant') {
+        setPlaying(false);
+        setInstantRun(true);
+        return;
+      }
+      startNext();
       bump();
-    }, SPEED_MS[speed]);
-    return () => {
-      if (timer.current) clearTimeout(timer.current);
-    };
-    // Re-arm only when playback state changes. With no deps, every re-render (e.g. the
-    // result flash clearing) restarted the countdown and 1x/2x ran ~50-90% slow.
+    }, 50);
+    return () => clearInterval(id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [playing, decision, done, speed, sim.matchweek]);
+  }, [sim]);
 
   // Instant sim: run until a decision or the end (batched to keep the UI responsive)
   useEffect(() => {
-    if (!instantRun || decision) return;
+    if (!instantRun || decision || awardsOpen || transferOpen) return;
     const id = window.setTimeout(() => {
       let n = 0;
-      while (n < 4 && step(true)) n++;
+      while (n < 4 && quietStep()) n++;
       bump();
       if (sim.done) setInstantRun(false);
     }, 40);
@@ -140,81 +366,98 @@ export function SeasonBroadcast({ sim, onFinish, formationId, lineup, managerId,
 
   useEffect(() => {
     if (!informReveal) return;
+    sfx.stinger('ELITE');
     const id = window.setTimeout(() => setInformReveal(null), 2600);
     return () => clearTimeout(id);
   }, [informReveal]);
 
-  useEffect(() => {
-    if (!flashResult) return;
-    const id = window.setTimeout(() => setFlashResult(null), 900);
-    return () => clearTimeout(id);
-  }, [flashResult, sim.matchweek]);
+  const resume = () => {
+    if (speedRef.current === 'instant') setInstantRun(true);
+    else setPlaying(true);
+  };
 
   // After the window, carry on at the chosen speed.
   const closeWindow = () => {
     setTransferOpen(false);
     bump();
-    if (speed === 'instant') setInstantRun(true);
-    else setPlaying(true);
+    resume();
   };
 
   const choose = (shout: TacticalShout) => {
     sfx.select();
     setDecision(null);
-    step(false, shout);
+    // Big matches are always shown live, whatever the speed.
+    startNext(shout);
+    setInstantRun(false);
+    setPlaying(true);
     bump();
-    // Carry on at the chosen speed. (Instant Sim used to stop here and look frozen.)
-    if (sim.done) return;
-    if (speed === 'instant') setInstantRun(true);
-    else setPlaying(true);
   };
 
-  const leaders = useMemo(() => sim.leaders(tab, 10), [sim, tab, sim.matchweek]);
+  const skipToFT = () => {
+    if (st.phase !== 'live') return;
+    sfx.click();
+    finishLive(false);
+    bump();
+  };
+
+  // ───────── what's on screen ─────────
+  const rows = isLive && st.before && st.live ? liveTable(sim, st.before, st.live, st.minute) : sim.sortedTable();
+  const userRow = rows.find((r) => r.teamId === USER_TEAM_ID)!;
+  const userPos = rows.indexOf(userRow) + 1;
+  const shownWeek = isLive ? st.live!.mw : Math.min(sim.matchweek + (sim.done ? 0 : 1), TOTAL_MATCHWEEKS);
+  const completed = isLive ? sim.matchweek - 1 : sim.matchweek;
+  const seasonOver = sim.done && st.phase !== 'live';
+  const history = useMemo(() => pointsHistory(sim), [sim, completed]); // eslint-disable-line react-hooks/exhaustive-deps
+  const leaders = st.leaders ? st.leaders[tab] : sim.leaders(tab, 10);
+  const totw = isLive ? st.totw : sim.latestTotw;
+  const informs = isLive && st.informs ? st.informs : sim.activeInforms();
+  const bigMatch = st.live?.mw === 19 ? 'DERBY DAY · LIVE' : st.live?.mw === TOTAL_MATCHWEEKS ? 'CHAMPIONSHIP SUNDAY · LIVE' : null;
+  const busy = playing || instantRun;
 
   const tickerText = useMemo(() => {
+    const latest = sim.results[completed - 1] ?? [];
     const items = latest.filter((r) => r.headline).map((r) => `MW${r.matchweek}: ${r.headline}`);
-    return items.length ? items.join('   •   ') : 'Welcome to the PackDraft 38 Live Broadcast. 20 clubs, 38 matchweeks, one shot at immortality.';
-  }, [latest]);
-
-  const userMatch = latest[0]?.involvesUser ? latest[0] : undefined;
-  const outcome = userOutcome(userMatch);
+    return items.length ? items.join('   •   ') : `Welcome to the PackDraft 38 Live Broadcast. ${sim.era.name} (${sim.era.years}): ${sim.era.tagline}`;
+  }, [sim, completed]);
 
   return (
     <div className="mx-auto flex max-w-7xl flex-col gap-3 px-3 py-4 sm:px-4">
       {/* Broadcast header */}
-      <div data-shake-zone className="relative overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-r from-emerald-950 via-black to-emerald-950">
-        <div className="flex flex-wrap items-center gap-3 px-4 py-3">
+      <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-r from-emerald-950 via-black to-emerald-950">
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-2 px-4 py-3">
           <div className="flex items-center gap-2">
             <span className="flex items-center gap-1 rounded bg-red-600 px-2 py-0.5 text-[10px] font-black uppercase tracking-widest text-white">
               <Radio className="h-3 w-3 animate-pulse" /> Live
             </span>
             <span className="font-display text-2xl leading-none text-white sm:text-3xl">
-              MATCHWEEK {Math.min(sim.matchweek + (done ? 0 : 1), TOTAL_MATCHWEEKS)} <span className="text-white/40">/ 38</span>
+              MATCHWEEK {shownWeek} <span className="text-white/40">/ 38</span>
             </span>
           </div>
-          <div className="flex items-center gap-3 text-sm">
-            <span className="rounded-lg bg-white/10 px-2 py-1 font-black text-yellow-300">{ordinal(userPos)}</span>
+          <div className="flex items-center gap-2 text-sm">
+            <span className="rounded-lg bg-white/10 px-2 py-1 font-black text-yellow-300">{userRow.played ? ordinal(userPos) : '–'}</span>
             <span className="font-bold text-white/80">
               {userRow.won}W-{userRow.drawn}D-{userRow.lost}L · <span className="text-yellow-300">{userRow.points} pts</span>
             </span>
-            {userRow.lost === 0 && userRow.played > 0 && <span className="rounded bg-yellow-300 px-1.5 py-0.5 text-[10px] font-black uppercase text-black">Unbeaten</span>}
           </div>
+          <ChaseBadges sim={sim} upto={completed} />
+          <span className="rounded-md border border-white/15 px-1.5 py-0.5 text-[10px] font-black uppercase tracking-wider text-white/60" title={sim.era.tagline}>
+            {sim.era.name} · {sim.era.years}
+          </span>
           <div className="ml-auto flex flex-wrap items-center gap-1.5">
-            {!done && (
+            {!seasonOver && (
               <button
                 onClick={() => {
                   sfx.click();
-                  if (playing || instantRun) {
+                  if (busy) {
                     setPlaying(false);
                     setInstantRun(false);
-                  } else if (speed === 'instant') setInstantRun(true);
-                  else setPlaying(true);
+                  } else resume();
                 }}
-                disabled={!!decision || transferOpen}
+                disabled={!!decision || transferOpen || awardsOpen}
                 className="flex items-center gap-1 rounded-lg bg-emerald-500 px-3 py-1.5 text-sm font-black text-black transition hover:bg-emerald-400 disabled:opacity-40"
               >
-                {playing || instantRun ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
-                {playing || instantRun ? 'Pause' : sim.matchweek === 0 ? 'Kick Off' : 'Play'}
+                {busy ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+                {busy ? 'Pause' : sim.matchweek === 0 ? 'Kick Off' : 'Play'}
               </button>
             )}
             {([1, 2, 4, 'instant'] as Speed[]).map((s) => (
@@ -223,7 +466,8 @@ export function SeasonBroadcast({ sim, onFinish, formationId, lineup, managerId,
                 onClick={() => {
                   sfx.click();
                   setSpeed(s);
-                  if (s === 'instant' && (playing || instantRun)) {
+                  speedRef.current = s;
+                  if (s === 'instant' && busy) {
                     setPlaying(false);
                     setInstantRun(true);
                   } else if (s !== 'instant' && instantRun) {
@@ -236,18 +480,19 @@ export function SeasonBroadcast({ sim, onFinish, formationId, lineup, managerId,
                 {s === 'instant' ? 'Instant Sim' : `${s}x`}
               </button>
             ))}
-            {!done && (
+            {!seasonOver && (
               <button
                 onClick={() => {
                   sfx.click();
                   setPlaying(false);
                   setInstantRun(true);
                 }}
-                disabled={!!decision || transferOpen}
+                disabled={!!decision || transferOpen || awardsOpen}
                 className="flex items-center gap-1 rounded-lg border border-white/15 bg-white/5 px-2 py-1.5 text-xs font-black text-white/80 hover:bg-white/10 disabled:opacity-40"
-                title="Simulate to the next big match (MW19 / MW38) or the end"
+                title="Simulate to the next big moment or the end"
               >
-                <FastForward className="h-3.5 w-3.5" /> {sim.matchweek < 19 ? 'Sim to Derby Day' : !sim.transferDone && sim.matchweek <= TRANSFER_WINDOW_AFTER ? 'Sim to January Window' : sim.matchweek < 38 ? 'Sim to Final Day' : 'Sim to End'}
+                <FastForward className="h-3.5 w-3.5" />{' '}
+                {sim.matchweek < 19 ? 'Sim to Derby Day' : !sim.transferDone && sim.matchweek <= TRANSFER_WINDOW_AFTER ? 'Sim to January Window' : sim.matchweek < 38 ? 'Sim to Final Day' : 'Sim to End'}
               </button>
             )}
           </div>
@@ -261,119 +506,48 @@ export function SeasonBroadcast({ sim, onFinish, formationId, lineup, managerId,
         </div>
         {/* progress */}
         <div className="h-1 w-full bg-white/10">
-          <div className="h-full bg-gradient-to-r from-emerald-400 to-yellow-300 transition-all duration-500" style={{ width: `${(sim.matchweek / 38) * 100}%` }} />
+          <div className="h-full bg-gradient-to-r from-emerald-400 to-yellow-300 transition-all duration-500" style={{ width: `${(completed / 38) * 100}%` }} />
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-3 lg:grid-cols-[1.25fr_1fr]">
-        {/* League table */}
-        <section className="rounded-2xl border border-white/10 bg-black/40 p-2 sm:p-3">
-          <h3 className="mb-2 flex items-center justify-between px-1 font-display text-xl text-white">
-            PREMIER LEAGUE TABLE
-            <span className="flex gap-2 text-[9px] font-black uppercase tracking-wider">
-              <span className="text-yellow-300">■ Title</span>
-              <span className="text-sky-400">■ UCL</span>
-              <span className="text-rose-500">■ Drop</span>
-            </span>
-          </h3>
-          <div className="grid grid-cols-[26px_1fr_24px_24px_24px_24px_34px_32px] gap-1 px-2 pb-1 text-[10px] font-black uppercase text-white/40 sm:grid-cols-[26px_1fr_24px_24px_24px_24px_28px_28px_34px_32px_70px]">
-            <span>#</span>
-            <span>Club</span>
-            <span className="text-center">P</span>
-            <span className="text-center">W</span>
-            <span className="text-center">D</span>
-            <span className="text-center">L</span>
-            <span className="hidden text-center sm:block">GF</span>
-            <span className="hidden text-center sm:block">GA</span>
-            <span className="text-center">GD</span>
-            <span className="text-center">Pts</span>
-            <span className="hidden text-center sm:block">Form</span>
-          </div>
-          <div className="relative" style={{ height: ROW_H * 20 }}>
-            {table.map((row, idx) => {
-              const team = sim.teamById[row.teamId];
-              const pos = idx + 1;
-              const zone = pos === 1 ? 'border-l-yellow-300' : pos <= 4 ? 'border-l-sky-400' : pos >= 18 ? 'border-l-rose-500' : 'border-l-transparent';
-              const isUser = team.isUser;
-              return (
-                <div
-                  key={row.teamId}
-                  className={`row-move absolute inset-x-0 grid grid-cols-[26px_1fr_24px_24px_24px_24px_34px_32px] items-center gap-1 rounded-md border-l-4 px-2 text-xs sm:grid-cols-[26px_1fr_24px_24px_24px_24px_28px_28px_34px_32px_70px] ${zone} ${
-                    isUser ? 'bg-gradient-to-r from-emerald-500/35 via-emerald-500/20 to-yellow-400/20 font-black text-white ring-1 ring-yellow-300/60' : idx % 2 ? 'bg-white/[0.03] text-white/85' : 'text-white/85'
-                  }`}
-                  style={{ transform: `translateY(${idx * ROW_H}px)`, height: ROW_H - 2 }}
-                >
-                  <span className={`font-black ${pos === 1 ? 'text-yellow-300' : 'text-white/60'}`}>{pos}</span>
-                  <span className="flex min-w-0 items-center gap-1.5">
-                    <span className="h-3 w-3 shrink-0 rounded-sm border border-black/40" style={{ background: `linear-gradient(135deg, ${team.primary} 50%, ${team.secondary} 50%)` }} />
-                    <span className="truncate">{isUser ? `★ ${team.name}` : team.name}</span>
-                  </span>
-                  <span className="text-center">{row.played}</span>
-                  <span className="text-center">{row.won}</span>
-                  <span className="text-center">{row.drawn}</span>
-                  <span className="text-center">{row.lost}</span>
-                  <span className="hidden text-center sm:block">{row.gf}</span>
-                  <span className="hidden text-center sm:block">{row.ga}</span>
-                  <span className="text-center">{row.gf - row.ga > 0 ? '+' : ''}{row.gf - row.ga}</span>
-                  <span className="text-center font-black text-white">{row.points}</span>
-                  <span className="hidden justify-center gap-0.5 sm:flex">
-                    {row.form.map((f, i) => (
-                      <span key={i} className={`h-2.5 w-2.5 rounded-full ${f === 'W' ? 'bg-emerald-400' : f === 'D' ? 'bg-slate-400' : 'bg-rose-500'}`} />
-                    ))}
-                  </span>
-                </div>
-              );
-            })}
-          </div>
-        </section>
-
-        <div className="flex flex-col gap-3">
-          {/* Your match */}
-          <section
-            className={`relative overflow-hidden rounded-2xl border p-3 transition-colors ${
-              flashResult === 'W' ? 'border-emerald-400 bg-emerald-500/25' : flashResult === 'L' ? 'border-rose-500 bg-rose-500/20' : flashResult === 'D' ? 'border-slate-300 bg-slate-500/20' : 'border-white/10 bg-black/40'
-            }`}
-          >
-            <div className="text-[10px] font-black uppercase tracking-widest text-white/50">
-              {userMatch ? `Your result · MW${userMatch.matchweek}` : 'Season preview'}
-              {userMatch?.shout && <span className="ml-2 rounded bg-yellow-300 px-1 text-black">{userMatch.shout === 'attack' ? '🔥 All-Out Attack' : userMatch.shout === 'bus' ? '🛡️ Park the Bus' : '⚖️ Gameplan'}</span>}
+      {/* Phone order: your match, around the grounds, table, title race. Desktop: two columns. */}
+      <div className="grid grid-cols-1 items-start gap-3 lg:grid-cols-[1.35fr_1fr]">
+        <div className="flex min-w-0 flex-col gap-3 lg:col-start-1 lg:row-start-1">
+          <LiveMatchHero sim={sim} live={st.live} minute={st.minute} momentum={st.momentum} feed={st.feed} celebration={st.celebration} finished={st.phase === 'ft'} onSkip={skipToFT} bigMatch={bigMatch} />
+          {st.phase !== 'live' && !busy && !seasonOver && (
+            <button
+              onClick={() => {
+                sfx.click();
+                resume();
+              }}
+              disabled={!!decision || transferOpen || awardsOpen}
+              className="animate-pop rounded-2xl bg-gradient-to-r from-emerald-400 via-yellow-300 to-emerald-400 py-3 font-display text-3xl tracking-wider text-black shadow-xl shadow-emerald-500/20 transition hover:scale-[1.01]"
+            >
+              {sim.matchweek === 0 ? 'KICK OFF THE SEASON' : 'PLAY NEXT MATCHWEEK'}
+            </button>
+          )}
+        </div>
+        <div className="flex min-w-0 flex-col gap-3 lg:col-start-2 lg:row-span-2 lg:row-start-1">
+          <AroundTheGrounds sim={sim} live={st.live} minute={st.minute} flashes={st.flashes} before={st.before} />
+          {st.news && isLive && (
+            <div key={st.news} className="animate-pop rounded-xl border border-sky-300/40 bg-sky-500/10 px-3 py-1.5 text-xs font-bold text-sky-100">
+              📡 {st.news}
             </div>
-            {userMatch ? (
-              <UserMatchCard r={userMatch} sim={sim} outcome={outcome} />
-            ) : (
-              <div className="py-3 text-sm text-white/70">
-                Your XI kicks off against <b className="text-white">{nextFixture ? sim.teamById[nextFixture.opponentId].name : ''}</b>
-                {nextFixture?.home ? ' at home' : ' away'}. Press <b className="text-emerald-300">Kick Off</b> to start the broadcast.
-              </div>
-            )}
-            {!done && nextFixture && userMatch && (
-              <div className="mt-2 border-t border-white/10 pt-2 text-[11px] text-white/60">
-                {sim.matchweek + 1 === 19 ? (
-                  // The derby opponent is picked at kick-off (closest rival), so don't name a team yet.
-                  <>Next: <b className="text-white/90">your closest title rival</b><span className="ml-1 font-black text-yellow-300">· DERBY DAY</span></>
-                ) : (
-                  <>Next: {nextFixture.home ? 'vs' : '@'} <b className="text-white/90">{sim.teamById[nextFixture.opponentId].name}</b></>
-                )}
-                {sim.matchweek + 1 === 38 && <span className="ml-1 font-black text-yellow-300">· FINAL DAY</span>}
-              </div>
-            )}
-          </section>
-
-          {/* Matchday ticker */}
-          <section className="rounded-2xl border border-white/10 bg-black/40 p-3">
-            <h3 className="mb-2 font-display text-xl text-white">MATCHDAY RESULTS</h3>
-            <div className="scrollbar-thin flex max-h-[260px] flex-col gap-1 overflow-y-auto pr-1">
-              {latest.length === 0 && <div className="text-xs text-white/50">No results yet.</div>}
-              {latest.map((r) => (
-                <FixtureRow key={`${r.homeId}-${r.awayId}`} r={r} sim={sim} />
-              ))}
-            </div>
-          </section>
+          )}
+          <div className="hidden lg:block">
+            <TitleRaceChart sim={sim} history={history} upto={completed} />
+          </div>
+        </div>
+        <div className="flex min-w-0 flex-col gap-3 lg:col-start-1 lg:row-start-2">
+          <LiveTable sim={sim} rows={rows} before={st.before} live={isLive} />
+          <div className="lg:hidden">
+            <TitleRaceChart sim={sim} history={history} upto={completed} />
+          </div>
         </div>
       </div>
 
       {/* Team of the Week + your in-form players */}
-      <TotwPanel sim={sim} />
+      <TotwPanel sim={sim} totw={totw} informs={informs} />
 
       {/* Leaderboards */}
       <section className="rounded-2xl border border-white/10 bg-black/40 p-3">
@@ -403,7 +577,7 @@ export function SeasonBroadcast({ sim, onFinish, formationId, lineup, managerId,
         <Leaders rows={leaders} kind={tab} sim={sim} />
       </section>
 
-      {done && (
+      {seasonOver && (
         <div className="sticky bottom-3 z-40 mx-auto flex animate-pop flex-col items-center gap-2 rounded-2xl border border-yellow-300/60 bg-black/85 px-6 py-4 text-center shadow-2xl">
           <div className="font-display text-3xl text-yellow-300">FULL TIME · SEASON OVER</div>
           <div className="text-sm text-white/80">
@@ -435,7 +609,18 @@ export function SeasonBroadcast({ sim, onFinish, formationId, lineup, managerId,
         </div>
       )}
 
+      {milestone && <MilestonePop key={milestone.id} m={milestone} />}
       {decision && <DecisionOverlay d={decision} sim={sim} onChoose={choose} />}
+      {awardsOpen && (
+        <MidSeasonAwards
+          sim={sim}
+          onContinue={() => {
+            sfx.select();
+            setAwardsOpen(false);
+            setTransferOpen(true);
+          }}
+        />
+      )}
       {transferOpen && (
         <TransferWindow
           formationId={formationId}
@@ -457,58 +642,7 @@ export function SeasonBroadcast({ sim, onFinish, formationId, lineup, managerId,
   );
 }
 
-function scorerLine(r: MatchResult, teamId: string) {
-  const by = new Map<string, number[]>();
-  r.goals.filter((g) => g.teamId === teamId).forEach((g) => by.set(g.scorerName, [...(by.get(g.scorerName) ?? []), g.minute]));
-  return [...by.entries()].map(([n, ms]) => `${n} ${ms.map(formatMinute).join(', ')}`).join(', ');
-}
-
-function UserMatchCard({ r, sim, outcome }: { r: MatchResult; sim: SeasonSim; outcome: 'W' | 'D' | 'L' | null }) {
-  const h = sim.teamById[r.homeId];
-  const a = sim.teamById[r.awayId];
-  return (
-    <div className="mt-1">
-      <div className="flex items-center justify-between gap-2">
-        <div className={`flex-1 truncate text-right font-display text-xl ${h.isUser ? 'text-emerald-300' : 'text-white'}`}>{h.name}</div>
-        <div className={`rounded-lg px-3 py-1 font-display text-4xl leading-none ${outcome === 'W' ? 'bg-emerald-500 text-black' : outcome === 'L' ? 'bg-rose-600 text-white' : 'bg-slate-500 text-white'}`}>
-          {r.homeGoals}-{r.awayGoals}
-        </div>
-        <div className={`flex-1 truncate font-display text-xl ${a.isUser ? 'text-emerald-300' : 'text-white'}`}>{a.name}</div>
-      </div>
-      <div className="mt-1 grid grid-cols-2 gap-3 text-[11px] text-white/70">
-        <div className="text-right">{scorerLine(r, r.homeId)}</div>
-        <div>{scorerLine(r, r.awayId)}</div>
-      </div>
-      {r.headline && <div className="mt-2 text-center text-sm font-black uppercase tracking-wide text-yellow-300">“{r.headline}”</div>}
-    </div>
-  );
-}
-
-function FixtureRow({ r, sim }: { r: MatchResult; sim: SeasonSim }) {
-  const h = sim.teamById[r.homeId];
-  const a = sim.teamById[r.awayId];
-  return (
-    <div className={`rounded-lg px-2 py-1.5 text-xs ${r.involvesUser ? 'bg-emerald-500/15 ring-1 ring-emerald-400/50' : 'bg-white/[0.03]'}`}>
-      <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2">
-        <span className={`truncate text-right ${h.isUser ? 'font-black text-emerald-300' : 'text-white/85'}`}>{h.name}</span>
-        <span className="rounded bg-black/60 px-2 font-display text-base leading-tight text-white">
-          {r.homeGoals}-{r.awayGoals}
-        </span>
-        <span className={`truncate ${a.isUser ? 'font-black text-emerald-300' : 'text-white/85'}`}>{a.name}</span>
-      </div>
-      {(r.goals.length > 0 || r.headline) && (
-        <div className="mt-0.5 grid grid-cols-[1fr_auto_1fr] gap-2 text-[10px] text-white/45">
-          <span className="truncate text-right">{scorerLine(r, r.homeId)}</span>
-          <span className="w-10" />
-          <span className="truncate">{scorerLine(r, r.awayId)}</span>
-        </div>
-      )}
-      {r.headline && !r.involvesUser && <div className="text-center text-[10px] font-bold italic text-yellow-200/80">{r.headline}</div>}
-    </div>
-  );
-}
-
-function Leaders({ rows, kind, sim }: { rows: PlayerSeasonStats[]; kind: 'goals' | 'assists' | 'cleanSheets'; sim: SeasonSim }) {
+const Leaders = memo(function Leaders({ rows, kind, sim }: { rows: PlayerSeasonStats[]; kind: 'goals' | 'assists' | 'cleanSheets'; sim: SeasonSim }) {
   if (!rows.length) return <div className="py-3 text-center text-xs text-white/50">The leaderboard fills up once the ball starts rolling.</div>;
   const max = rows[0][kind] || 1;
   return (
@@ -530,7 +664,7 @@ function Leaders({ rows, kind, sim }: { rows: PlayerSeasonStats[]; kind: 'goals'
       })}
     </div>
   );
-}
+});
 
 function DecisionOverlay({ d, sim, onChoose }: { d: DecisionContext; sim: SeasonSim; onChoose: (s: TacticalShout) => void }) {
   const opp = sim.teamById[d.opponentId];
@@ -597,9 +731,7 @@ function InformCard({ card, boost, size = 'xs' }: { card: PlayerCard; boost: num
   );
 }
 
-function TotwPanel({ sim }: { sim: SeasonSim }) {
-  const totw = sim.latestTotw;
-  const informs = sim.activeInforms();
+const TotwPanel = memo(function TotwPanel({ sim, totw, informs }: { sim: SeasonSim; totw: { mw: number; players: TotwPick[] } | null; informs: ReturnType<SeasonSim['activeInforms']> }) {
   const userCards = new Map(sim.teamById[USER_TEAM_ID].players.map((p) => [p.id, p.card]));
   if (!totw && !informs.length) return null;
   return (
@@ -645,4 +777,4 @@ function TotwPanel({ sim }: { sim: SeasonSim }) {
       </div>
     </section>
   );
-}
+});
