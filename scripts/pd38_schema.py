@@ -57,7 +57,7 @@ TRAIT_COLS = [
 ]
 
 HEADERS = (
-    ["Card ID", "Player ID", "Full Name", "Short Name", "Nation", "Season", "Era Label", "OVR", "Tier (auto)", "Card Colour (auto)", "Positions", "Club", "Archetype"]
+    ["Card ID", "Player ID", "Full Name", "Short Name", "Nation", "Season", "Born", "Age (auto)", "Era Label", "OVR", "Tier (auto)", "Card Colour (auto)", "Positions", "Club", "Archetype"]
     + [h for h, _ in STAT_KEYS]
     + [h for h, _, _ in TRAIT_COLS]
     + ["Primary Pos (auto)", "Group (auto)"]

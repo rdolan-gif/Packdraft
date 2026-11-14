@@ -5,6 +5,7 @@
 Checks every row first and lists problems by row number. Nothing is written
 unless the whole sheet is valid.
 """
+import datetime
 import json
 import re
 import subprocess
@@ -27,7 +28,7 @@ if "Players" not in wb.sheetnames:
 ws = wb["Players"]
 header = [str(c.value).strip() if c.value is not None else "" for c in ws[1]]
 col = {h: i for i, h in enumerate(header)}
-missing = [h for h in COL if h not in col and "(auto)" not in h and h != "Card ID" and not h.startswith("Base ")]
+missing = [h for h in COL if h not in col and "(auto)" not in h and h not in ("Card ID", "Born") and not h.startswith("Base ")]  # Born is optional (older sheets)
 # Stat cells may be formulas (stat follows OVR). Use the value the spreadsheet app calculated;
 # if the file was never opened in one (no saved results), work it out from the Base columns.
 vws = load_workbook(SRC, data_only=True)["Players"]
@@ -165,7 +166,20 @@ for r, row in enumerate(ws.iter_rows(min_row=2, values_only=True), start=2):
     for h, v in (("Full Name", name), ("Short Name", short), ("Nation", nation)):
         if not v:
             errors.append(f"Row {r}: {h} is empty.")
-    cards.append(dict(r=r, pid=pid, name=name, short=short, nation=nation, season=season, era=era, ovr=ovr, positions=positions, club=club, arch=arch, stats=stats, traits=traits))
+    born = ""
+    if "Born" in col and row[col["Born"]] not in (None, ""):
+        v = row[col["Born"]]
+        if isinstance(v, (datetime.datetime, datetime.date)):
+            born = v.strftime("%Y-%m-%d")
+        else:
+            born = str(v).strip()[:10]
+        try:
+            d = datetime.date.fromisoformat(born)
+            if not 1940 <= d.year <= 2015:
+                errors.append(f"Row {r}: Born {born} looks wrong (year should be 1940–2015).")
+        except ValueError:
+            errors.append(f"Row {r}: Born '{born}' must be a date like 1977-08-17.")
+    cards.append(dict(r=r, pid=pid, name=name, short=short, nation=nation, season=season, era=era, ovr=ovr, positions=positions, club=club, arch=arch, stats=stats, traits=traits, born=born))
 
 # Cross-row checks
 seen = {}
@@ -179,6 +193,8 @@ for c in cards:
 for pid, cs in players.items():
     first = cs[0]
     for c in cs[1:]:
+        if c["born"] and first["born"] and c["born"] != first["born"]:
+            errors.append(f"Row {c['r']}: Born {c['born']} differs from row {first['r']} ({first['born']}) for the same Player ID {pid}.")
         for f, label in (("name", "Full Name"), ("short", "Short Name"), ("nation", "Nation")):
             if c[f] != first[f]:
                 errors.append(f"Row {c['r']}: {label} '{c[f]}' differs from row {first['r']} ('{first[f]}') for the same Player ID {pid}.")
@@ -284,11 +300,33 @@ print(f"{len(club_changes)} club colour change(s).")
 for c in club_changes:
     print(c)
 
+# Birth dates (Born column): one per player; players left blank keep the date the game already has.
+births_ts = ROOT / "src/data/births.ts"
+born_changes = []
+if "Born" in col:
+    src = births_ts.read_text(encoding="utf-8")
+    current = dict(re.findall(r"^  (\w+): '([\d-]+)',$", src, flags=re.M))
+    births = {}
+    for pid, cs in players.items():
+        b = next((c["born"] for c in cs if c["born"]), "") or current.get(pid, "")
+        if b:
+            births[pid] = b
+        if b != current.get(pid, ""):
+            born_changes.append(f"  {pid}: {current.get(pid, '(none)')} -> {b or '(none)'}")
+    print(f"{len(born_changes)} birth date change(s).")
+    for c in born_changes[:40]:
+        print(c)
+
 if DRY:
     print("\nDry run: nothing written.")
 else:
     OUT.write_text("\n".join(lines), encoding="utf-8")
     print(f"\nWrote {OUT.relative_to(ROOT)}")
+    if born_changes:
+        body = "\n".join(f"  {pid}: '{d}'," for pid, d in sorted(births.items()))
+        src = re.sub(r"(export const BORN: Record<string, string> = \{\n)(.*?)(\n\};)", lambda m: m.group(1) + body + m.group(3), src, flags=re.S)
+        births_ts.write_text(src, encoding="utf-8")
+        print(f"Wrote {births_ts.relative_to(ROOT)}")
     if clubs_new is not None and club_changes:
         clubs_ts = ROOT / "src/data/clubs.ts"
         src = clubs_ts.read_text(encoding="utf-8")

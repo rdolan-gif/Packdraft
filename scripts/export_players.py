@@ -4,6 +4,7 @@
 
 Edit the workbook, then turn it back into game data with scripts/import_players.py.
 """
+import datetime
 import json
 import subprocess
 import sys
@@ -49,6 +50,7 @@ guide = [
     ("Era Label: the badge text on the card (e.g. PRIME, LEGEND). Pick from the dropdown.", ""),
     ("Positions: primary first, extras after a slash, e.g. ST/LW or CB/RB. Valid codes are on the Lists tab.", ""),
     ("Club: three-letter code from the dropdown (names on the Lists tab). It sets kit colours and club chemistry.", ""),
+    ("Born: date of birth as YYYY-MM-DD, the same on every row for that player. Age (auto) is his age on 1 September of the card's season: handy for RISING STAR or VETERAN labels.", ""),
     ("Archetype: from the dropdown. Managers' bonuses look for specific archetypes.", ""),
     ("PAC to PHY follow OVR: change a card's OVR and every stat moves by the same amount from its starting value (the grey Base columns at the far right). Type a number into a stat to set it by hand instead.", ""),
     (f"PAC to PHY: {STAT_MIN} to {STAT_MAX}. Goalkeepers: PAC = speed, SHO = not used (leave 30-40), PAS = kicking, DRI = handling, DEF = shot-stopping, PHY = positioning.", ""),
@@ -118,7 +120,7 @@ ls.cell(row=1, column=len(lists) + 2, value="Allowed values come from the game c
 
 # ───────────────────────── Players ─────────────────────────
 ws = wb.create_sheet("Players", 1)
-auto_cols = {"Card ID", "Tier (auto)", "Card Colour (auto)", "Primary Pos (auto)", "Group (auto)", *BASE_COLS}
+auto_cols = {"Card ID", "Age (auto)", "Tier (auto)", "Card Colour (auto)", "Primary Pos (auto)", "Group (auto)", *BASE_COLS}
 for h, ci in COL.items():
     c = ws.cell(row=1, column=ci, value=h)
     c.font = f_head
@@ -137,6 +139,10 @@ def put_formulas(r: int):
     colour = f"INDEX({list_range['Era Colour']},MATCH({G},{list_range['Era Label']},0))"
     ws.cell(row=r, column=COL["Card Colour (auto)"], value=f'=IF({T}="","",IFERROR(IF({T}="ELITE",{colour},IF({T}="RISING_WORLD","Gold, "&LOWER({colour})&" trim",IF({T}="PRIME_ICON","Pearl white","Grey"))),""))')
     ws.cell(row=r, column=COL["Tier (auto)"], value=f'=IF({H}="","",IFERROR(INDEX({tier_list},MATCH({H},{tier_min},1)),"OVR too low"))')
+    # Age on 1 September of the season's first year (90-99 = 1990s, 00-89 = 2000s)
+    D = f"{L(COL['Born'])}{r}"
+    yy = f"VALUE(LEFT({F},2))"
+    ws.cell(row=r, column=COL["Age (auto)"], value=f'=IF(OR({D}="",{F}=""),"",IFERROR(DATEDIF({D},DATE(IF({yy}>=90,1900,2000)+{yy},9,1),"y"),"Check date"))')
     ws.cell(row=r, column=COL["Primary Pos (auto)"], value=f'=IF({J}="","",LEFT({J},FIND("/",{J}&"/")-1))')
     ws.cell(row=r, column=COL["Group (auto)"], value=f'=IF({Z}="","",IFERROR(INDEX({grp_list},MATCH({Z},{pos_list},0)),"Bad position"))')
     for h in auto_cols:
@@ -147,7 +153,7 @@ def put_formulas(r: int):
 for r, p in enumerate(players, start=2):
     values = {
         "Player ID": p["basePlayerId"], "Full Name": p["name"], "Short Name": p["shortName"], "Nation": p["nation"],
-        "Season": p["season"], "Era Label": p["era"], "OVR": p["ovr"], "Positions": "/".join(p["positions"]),
+        "Season": p["season"], "Born": (datetime.date.fromisoformat(p["born"]) if p.get("born") else None), "Era Label": p["era"], "OVR": p["ovr"], "Positions": "/".join(p["positions"]),
         "Club": p["club"], "Archetype": p["archetype"],
         **{h: p["stats"][k] for h, k in STAT_KEYS},
         **{h: p["traits"][k] for h, k, _ in TRAIT_COLS},
@@ -158,6 +164,8 @@ for r, p in enumerate(players, start=2):
         c.border = border
         if h == "Season":
             c.number_format = "@"  # keep "08-09" as text
+        if h == "Born":
+            c.number_format = "yyyy-mm-dd"
     # Snapshot of the starting numbers, then stats follow OVR: base + (OVR - base OVR), kept within range.
     ws.cell(row=r, column=COL["Base OVR"], value=p["ovr"])
     ovr_ref, base_ovr_ref = f"{L(COL['OVR'])}{r}", f"{L(COL['Base OVR'])}{r}"
@@ -178,9 +186,10 @@ for r, p in enumerate(players, start=2):
 for r in range(len(players) + 2, LAST_ROW + 1):
     put_formulas(r)
     ws.cell(row=r, column=COL["Season"]).number_format = "@"
+    ws.cell(row=r, column=COL["Born"]).number_format = "yyyy-mm-dd"
 
 # Column widths
-widths = {"Card ID": 24, "Player ID": 22, "Full Name": 24, "Short Name": 16, "Nation": 18, "Season": 9, "Era Label": 13, "OVR": 7, "Tier (auto)": 14, "Card Colour (auto)": 22,
+widths = {"Born": 12, "Age (auto)": 7, "Card ID": 24, "Player ID": 22, "Full Name": 24, "Short Name": 16, "Nation": 18, "Season": 9, "Era Label": 13, "OVR": 7, "Tier (auto)": 14, "Card Colour (auto)": 22,
           "Positions": 12, "Club": 8, "Archetype": 21, "Primary Pos (auto)": 11, "Group (auto)": 9}
 for h, ci in COL.items():
     ws.column_dimensions[L(ci)].width = widths.get(h, 7 if h in dict(STAT_KEYS) else 13)
