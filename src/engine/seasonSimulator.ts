@@ -18,6 +18,7 @@ import type {
   TeamRating,
 } from '../types/game';
 import { getClub } from '../data/clubs';
+import { PLAYERS } from '../data/players';
 
 export const USER_TEAM_ID = 'USER';
 export const TOTAL_MATCHWEEKS = 38;
@@ -30,6 +31,8 @@ export const INFORM_MAX = 3;
 export const INFORM_WEEKS = 3;
 /** At most this many of your players can be in form at once (oldest drop off). */
 export const INFORM_SLOTS = 3;
+/** No club can have more than this many players in a Team of the Week. */
+export const TOTW_PER_CLUB = 2;
 
 export interface TotwPick {
   id: string;
@@ -108,6 +111,24 @@ function rivalPlayers(code: string, roster: RivalPlayer[], reserves: RivalPlayer
       out.push({ ...p, id: `${code}_academy_${academy}`, name: `${code} Academy ${p.pos}${academy > 1 ? ` ${academy}` : ''}` });
     }
   });
+  // Rival rosters only list their key men: fill the rest of a 4-3-3 from the club's cards in the pool,
+  // so every club fields a full XI (fair Team of the Week odds; your XI no longer outnumbers theirs).
+  const need: Record<string, number> = { GK: 1, DEF: 4, MID: 3, FWD: 3 };
+  out.forEach((p) => (need[positionGroup(p.pos)] = (need[positionGroup(p.pos)] ?? 0) - 1));
+  const taken = new Set(out.map((p) => p.id));
+  const names = new Set(out.map((p) => p.name));
+  const FILL_WEIGHTS: Record<string, [number, number]> = { GK: [0, 0], DEF: [0.08, 0.2], MID: [0.2, 0.5], FWD: [0.35, 0.4] };
+  PLAYERS.filter((c) => c.club === code)
+    .sort((a, b) => b.ovr - a.ovr)
+    .forEach((c) => {
+      const g = positionGroup(c.positions[0]);
+      if ((need[g] ?? 0) <= 0 || drafted.has(c.basePlayerId) || taken.has(c.basePlayerId) || names.has(c.name)) return;
+      need[g]--;
+      taken.add(c.basePlayerId);
+      names.add(c.name);
+      const [sw, aw] = FILL_WEIGHTS[g];
+      out.push({ id: c.basePlayerId, name: c.name, pos: c.positions[0], sw, aw });
+    });
   return out.map((p) => ({
     id: `${code}:${p.id}`,
     name: p.name,
@@ -538,9 +559,11 @@ export class SeasonSim {
         st.apps++;
         const pp = perPlayer.get(p.id);
         const defensive = p.pos === 'GK' || positionGroup(p.pos) === 'DEF';
-        let rating = 6.5 + res + (this.rng() - 0.5) * 1.1;
+        // Individual form swings a lot more than the result, so TOTW spreads across the league.
+        const form = (this.rng() + this.rng() + this.rng() - 1.5) * 1.6;
+        let rating = 6.5 + res * 0.6 + form;
         if (pp) rating += pp.g * 1.0 + pp.a * 0.6;
-        if (conceded === 0 && defensive) rating += 0.6;
+        if (conceded === 0 && defensive) rating += 0.4;
         if (defensive) rating -= conceded * 0.15;
         const r = Math.max(4, Math.min(10, rating));
         st.ratingSum += r;
@@ -560,9 +583,20 @@ export class SeasonSim {
       const r = this.weekRatings[p.id];
       if (r !== undefined) all.push({ id: p.id, name: p.name, teamId: t.id, pos: p.pos, rating: Math.round(r * 10) / 10, isUser: t.isUser });
     }
-    const best = (group: string, n: number) =>
-      all.filter((p) => positionGroup(p.pos) === group).sort((a, b) => b.rating - a.rating || Number(b.isUser) - Number(a.isUser)).slice(0, n);
-    const xi = [...best('GK', 1), ...best('DEF', 4), ...best('MID', 3), ...best('FWD', 3)];
+    // Best performers first; each position group has a quota and no club gets more than TOTW_PER_CLUB.
+    const quota: Record<string, number> = { GK: 1, DEF: 4, MID: 3, FWD: 3 };
+    const perClub: Record<string, number> = {};
+    const chosen: TotwPick[] = [];
+    all.sort((a, b) => b.rating - a.rating || Number(a.isUser) - Number(b.isUser));
+    for (const p of all) {
+      const g = positionGroup(p.pos);
+      if (!quota[g] || (perClub[p.teamId] ?? 0) >= TOTW_PER_CLUB) continue;
+      quota[g]--;
+      perClub[p.teamId] = (perClub[p.teamId] ?? 0) + 1;
+      chosen.push(p);
+    }
+    const order = ['GK', 'DEF', 'MID', 'FWD'];
+    const xi = chosen.sort((a, b) => order.indexOf(positionGroup(a.pos)) - order.indexOf(positionGroup(b.pos)) || b.rating - a.rating);
     this.totwHistory.push({ mw, players: xi });
     this.newTotwIds = xi.filter((p) => p.isUser).map((p) => p.id);
     for (const p of xi.filter((x) => x.isUser)) {
