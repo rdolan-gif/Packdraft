@@ -64,6 +64,37 @@ const unionCanton = (
 );
 
 const FLAGS: Record<string, ReactNode> = {
+  Gabon: hStripes(['#009e60', '#fcd116', '#3a75c4']),
+  Peru: vStripes(['#d91023', '#ffffff', '#d91023']),
+  Georgia: (
+    <>
+      <rect width={W} height={H} fill="#ffffff" />
+      <path d={`M${W / 2} 0 V${H} M0 ${H / 2} H${W}`} stroke="#ff0000" strokeWidth={3} />
+      {[
+        [7.5, 5],
+        [22.5, 5],
+        [7.5, 15],
+        [22.5, 15],
+      ].map(([x, y]) => (
+        <path key={`${x}${y}`} d={`M${x} ${y - 2.2} V${y + 2.2} M${x - 2.2} ${y} H${x + 2.2}`} stroke="#ff0000" strokeWidth={1.3} />
+      ))}
+    </>
+  ),
+  Slovakia: (
+    <>
+      {hStripes(['#ffffff', '#0b4ea2', '#ee1c25'])}
+      <path d="M7 5.5 H14 V11 Q14 15 10.5 16.5 Q7 15 7 11 Z" fill="#ee1c25" stroke="#ffffff" strokeWidth={0.7} />
+      <path d="M10.5 7 V14 M8.6 9 H12.4 M8 11 H13" stroke="#ffffff" strokeWidth={0.9} />
+    </>
+  ),
+  Bermuda: (
+    <>
+      <rect width={W} height={H} fill="#c8102e" />
+      {unionCanton}
+      <path d="M19 6 H26 V11 Q26 15 22.5 16.5 Q19 15 19 11 Z" fill="#ffffff" stroke="#00247d" strokeWidth={0.5} />
+      <circle cx={22.5} cy={11} r={2.2} fill="#c8102e" />
+    </>
+  ),
   Algeria: (
     <>
       {vStripes(['#006233', '#ffffff'])}

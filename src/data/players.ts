@@ -22,7 +22,7 @@ export const PLAYERS: PlayerCard[] = [
     { skinTone: 'light', hairStyle: 'short', hairColor: 'black', facialHair: 'beard', headShape: 'oval', expression: 'cool', accessory: 'none' },
     [
       ['23-24', 'CULT HERO', 86, 'GK', 'ARS', 'Sweeper Keeper', [84, 30, 90, 82, 88, 80]],
-      ['21-22', 'RISING STAR', 78, 'GK', 'BRE', 'Sweeper Keeper', [78, 30, 84, 74, 80, 72]],
+      ['21-22', 'CULT HERO', 78, 'GK', 'BRE', 'Sweeper Keeper', [78, 30, 84, 74, 80, 72]],
     ]),
   ...player('schmeichel_peter', 'Peter Schmeichel', 'Schmeichel', 'Denmark',
     { skinTone: 'pale', hairStyle: 'short', hairColor: 'grey', facialHair: 'none', headShape: 'square', expression: 'roar', accessory: 'none' },
@@ -48,12 +48,13 @@ export const PLAYERS: PlayerCard[] = [
       ['10-11', 'CULT HERO', 81, 'GK', 'BIR', 'Shot Stopper', [60, 32, 70, 78, 83, 80]],
       ['06-07', 'RISING STAR', 77, 'GK', 'WAT', 'Shot Stopper', [64, 35, 66, 74, 79, 74]],
       ['19-20', 'VETERAN', 79, 'GK', 'WAT', 'Shot Stopper', [58, 35, 70, 77, 81, 78]],
-      ['12-13', 'VETERAN', 83, 'GK', 'WBA', 'Shot Stopper', [58, 32, 72, 80, 85, 82]],
+      ['12-13', 'CULT HERO', 83, 'GK', 'WBA', 'Shot Stopper', [58, 32, 72, 80, 85, 82]],
     ]),
   ...player('hart_joe', 'Joe Hart', 'Hart', 'England',
     { skinTone: 'pale', hairStyle: 'short', hairColor: 'brown', facialHair: 'none', headShape: 'long', expression: 'roar', accessory: 'none' },
     [
       ['09-10', 'RISING STAR', 80, 'GK', 'BIR', 'Shot Stopper', [68, 32, 68, 76, 82, 78]],
+      ['11-12', 'WORLD CLASS', 87, 'GK', 'MCI', 'Shot Stopper', [76, 35, 74, 84, 88, 85]],
     ]),
   ...player('friedel_brad', 'Brad Friedel', 'Friedel', 'United States',
     { skinTone: 'pale', hairStyle: 'bald', hairColor: 'blonde', facialHair: 'none', headShape: 'square', expression: 'focused', accessory: 'none' },
@@ -69,7 +70,7 @@ export const PLAYERS: PlayerCard[] = [
   ...player('jaaskelainen_jussi', 'Jussi Jääskeläinen', 'Jääskeläinen', 'Finland',
     { skinTone: 'pale', hairStyle: 'short', hairColor: 'blonde', facialHair: 'none', headShape: 'long', expression: 'focused', accessory: 'none' },
     [
-      ['01-02', 'RISING STAR', 78, 'GK', 'BOL', 'Shot Stopper', [60, 32, 68, 76, 80, 75]],
+      ['01-02', 'CULT HERO', 78, 'GK', 'BOL', 'Shot Stopper', [60, 32, 68, 76, 80, 75]],
       ['05-06', 'CULT HERO', 84, 'GK', 'BOL', 'Shot Stopper', [62, 34, 70, 81, 85, 82]],
     ]),
   ...player('boruc_artur', 'Artur Boruc', 'Boruc', 'Poland',
@@ -100,7 +101,7 @@ export const PLAYERS: PlayerCard[] = [
   ...player('martyn_nigel', 'Nigel Martyn', 'Martyn', 'England',
     { skinTone: 'pale', hairStyle: 'short', hairColor: 'darkbrown', facialHair: 'none', headShape: 'round', expression: 'cool', accessory: 'none' },
     [
-      ['94-95', 'RISING STAR', 82, 'GK', 'CRY', 'Shot Stopper', [62, 30, 66, 80, 84, 79]],
+      ['94-95', 'CULT HERO', 82, 'GK', 'CRY', 'Shot Stopper', [62, 30, 66, 80, 84, 79]],
       ['98-99', 'CULT HERO', 85, 'GK', 'LEE', 'Shot Stopper', [60, 32, 72, 82, 87, 83], { expression: 'focused' }],
     ]),
   ...player('howard_tim', 'Tim Howard', 'Howard', 'United States',
@@ -239,7 +240,7 @@ export const PLAYERS: PlayerCard[] = [
   ...player('lloris_hugo', 'Hugo Lloris', 'Lloris', 'France',
     { skinTone: 'pale', hairStyle: 'short', hairColor: 'darkbrown', facialHair: 'none', headShape: 'oval', expression: 'focused', accessory: 'none' },
     [
-      ['12-13', 'RISING STAR', 83, 'GK', 'TOT', 'Sweeper Keeper', [84, 35, 70, 78, 85, 78]],
+      ['12-13', 'WORLD CLASS', 83, 'GK', 'TOT', 'Sweeper Keeper', [84, 35, 70, 78, 85, 78]],
       ['17-18', 'PRIME', 86, 'GK', 'TOT', 'Sweeper Keeper', [86, 35, 72, 80, 88, 82], { accessory: 'captainband' }],
     ]),
   ...player('gomes_heurelho', 'Heurelho Gomes', 'Gomes', 'Brazil',
@@ -265,12 +266,27 @@ export const PLAYERS: PlayerCard[] = [
   ...player('sullivan_neil', 'Neil Sullivan', 'Sullivan', 'Scotland',
     { skinTone: 'pale', hairStyle: 'short', hairColor: 'brown', facialHair: 'none', headShape: 'round', expression: 'determined', accessory: 'none' },
     [
-      ['97-98', 'RISING STAR', 80, 'GK', 'WIM', 'Shot Stopper', [58, 30, 62, 77, 82, 78]],
+      ['97-98', 'CULT HERO', 80, 'GK', 'WIM', 'Shot Stopper', [58, 30, 62, 77, 82, 78]],
     ]),
   ...player('patricio_rui', 'Rui Patrício', 'Patrício', 'Portugal',
     { skinTone: 'light', hairStyle: 'short', hairColor: 'darkbrown', facialHair: 'stubble', headShape: 'oval', expression: 'focused', accessory: 'none' },
     [
       ['18-19', 'VETERAN', 84, 'GK', 'WOL', 'Shot Stopper', [62, 34, 73, 81, 86, 83]],
+    ]),
+  ...player('lehmann_jens', 'Jens Lehmann', 'Lehmann', 'Germany',
+    { skinTone: 'pale', hairStyle: 'short', hairColor: 'blonde', facialHair: 'none', headShape: 'long', expression: 'roar', accessory: 'none' },
+    [
+      ['03-04', 'VETERAN', 85, 'GK', 'ARS', 'Sweeper Keeper', [72, 35, 78, 84, 86, 84]],
+    ]),
+  ...player('pope_nick', 'Nick Pope', 'Pope', 'England',
+    { skinTone: 'pale', hairStyle: 'short', hairColor: 'brown', facialHair: 'beard', headShape: 'long', expression: 'focused', accessory: 'none' },
+    [
+      ['22-23', 'WORLD CLASS', 85, 'GK', 'NEW', 'Shot Stopper', [62, 35, 68, 82, 87, 84]],
+    ]),
+  ...player('courtois_thibaut', 'Thibaut Courtois', 'Courtois', 'Belgium',
+    { skinTone: 'pale', hairStyle: 'short', hairColor: 'darkbrown', facialHair: 'none', headShape: 'long', expression: 'focused', accessory: 'none' },
+    [
+      ['16-17', 'WORLD CLASS', 88, 'GK', 'CHE', 'Shot Stopper', [62, 35, 72, 86, 90, 88]],
     ]),
   // ── Defenders ──
   ...player('lauren_lauren', 'Lauren', 'Lauren', 'Cameroon',
@@ -281,7 +297,7 @@ export const PLAYERS: PlayerCard[] = [
   ...player('adams_tony', 'Tony Adams', 'Adams', 'England',
     { skinTone: 'pale', hairStyle: 'short', hairColor: 'brown', facialHair: 'none', headShape: 'square', expression: 'determined', accessory: 'captainband' },
     [
-      ['92-93', 'RISING STAR', 85, 'CB', 'ARS', 'Stopper', [64, 45, 62, 56, 88, 88]],
+      ['92-93', 'CULT HERO', 85, 'CB', 'ARS', 'Stopper', [64, 45, 62, 56, 88, 88]],
       ['97-98', 'PRIME', 90, 'CB', 'ARS', 'Stopper', [62, 50, 70, 60, 94, 90]],
     ]),
   ...player('campbell_sol', 'Sol Campbell', 'Campbell', 'England',
@@ -369,6 +385,7 @@ export const PLAYERS: PlayerCard[] = [
     { skinTone: 'pale', hairStyle: 'short', hairColor: 'blonde', facialHair: 'none', headShape: 'oval', expression: 'determined', accessory: 'none' },
     [
       ['94-95', 'CULT HERO', 84, 'LB/LM', 'BLB', 'Wing-Back', [81, 62, 80, 75, 80, 72]],
+      ['97-98', 'CULT HERO', 82, 'LB', 'CHE', 'Wing-Back', [80, 62, 80, 76, 78, 70]],
     ]),
   ...player('berg_henning', 'Henning Berg', 'Berg', 'Norway',
     { skinTone: 'pale', hairStyle: 'short', hairColor: 'blonde', facialHair: 'none', headShape: 'long', expression: 'focused', accessory: 'none' },
@@ -394,6 +411,7 @@ export const PLAYERS: PlayerCard[] = [
     { skinTone: 'pale', hairStyle: 'short', hairColor: 'brown', facialHair: 'none', headShape: 'long', expression: 'focused', accessory: 'none' },
     [
       ['10-11', 'RISING STAR', 81, 'CB', 'BOL', 'Ball-Playing CB', [66, 52, 66, 62, 81, 82]],
+      ['16-17', 'WORLD CLASS', 85, 'CB', 'CHE', 'Stopper', [66, 58, 68, 62, 86, 84]],
     ]),
   ...player('gardner_ricardo', 'Ricardo Gardner', 'Gardner', 'Jamaica',
     { skinTone: 'deep', hairStyle: 'dreads', hairColor: 'black', facialHair: 'none', headShape: 'oval', expression: 'grin', accessory: 'none' },
@@ -489,7 +507,7 @@ export const PLAYERS: PlayerCard[] = [
   ...player('fish_mark', 'Mark Fish', 'Fish', 'South Africa',
     { skinTone: 'dark', hairStyle: 'buzz', hairColor: 'black', facialHair: 'none', headShape: 'round', expression: 'grin', accessory: 'none' },
     [
-      ['01-02', 'VETERAN', 79, 'CB', 'CHA', 'Ball-Playing CB', [66, 40, 68, 64, 81, 78]],
+      ['01-02', 'CULT HERO', 79, 'CB', 'CHA', 'Ball-Playing CB', [66, 40, 68, 64, 81, 78]],
     ]),
   ...player('powell_chris', 'Chris Powell', 'Powell', 'England',
     { skinTone: 'deep', hairStyle: 'buzz', hairColor: 'black', facialHair: 'none', headShape: 'oval', expression: 'grin', accessory: 'none' },
@@ -518,6 +536,7 @@ export const PLAYERS: PlayerCard[] = [
     [
       ['94-95', 'CULT HERO', 80, 'CB/CDM', 'CRY', 'Ball-Playing CB', [64, 50, 72, 68, 80, 74]],
       ['03-04', 'VETERAN', 81, 'CB', 'MID', 'Ball-Playing CB', [56, 45, 70, 62, 82, 76]],
+      ['95-96', 'WORLD CLASS', 84, 'CB', 'AVL', 'Ball-Playing CB', [66, 45, 72, 66, 85, 78]],
     ]),
   ...player('wanbissaka_aaron', 'Aaron Wan-Bissaka', 'Wan-Bissaka', 'England',
     { skinTone: 'deep', hairStyle: 'short', hairColor: 'black', facialHair: 'none', headShape: 'oval', expression: 'focused', accessory: 'none' },
@@ -550,7 +569,7 @@ export const PLAYERS: PlayerCard[] = [
   ...player('lescott_joleon', 'Joleon Lescott', 'Lescott', 'England',
     { skinTone: 'brown', hairStyle: 'bald', hairColor: 'black', facialHair: 'none', headShape: 'oval', expression: 'focused', accessory: 'none' },
     [
-      ['07-08', 'RISING STAR', 81, 'CB/LB', 'EVE', 'Stopper', [72, 62, 64, 62, 82, 80]],
+      ['07-08', 'CULT HERO', 81, 'CB/LB', 'EVE', 'Stopper', [72, 62, 64, 62, 82, 80]],
     ]),
   ...player('hangeland_brede', 'Brede Hangeland', 'Hangeland', 'Norway',
     { skinTone: 'pale', hairStyle: 'short', hairColor: 'blonde', facialHair: 'none', headShape: 'long', expression: 'determined', accessory: 'none' },
@@ -566,6 +585,7 @@ export const PLAYERS: PlayerCard[] = [
     { skinTone: 'pale', hairStyle: 'short', hairColor: 'ginger', facialHair: 'stubble', headShape: 'square', expression: 'roar', accessory: 'none' },
     [
       ['11-12', 'VETERAN', 77, 'LB/LM', 'FUL', 'Full-Back', [70, 74, 72, 70, 74, 80]],
+      ['01-02', 'CULT HERO', 84, 'LB/LM', 'LIV', 'Wing-Back', [82, 84, 76, 74, 74, 84]],
     ]),
   ...player('robinson_antonee', 'Antonee Robinson', 'Robinson', 'United States',
     { skinTone: 'brown', hairStyle: 'short', hairColor: 'black', facialHair: 'beard', headShape: 'oval', expression: 'grin', accessory: 'none' },
@@ -577,7 +597,7 @@ export const PLAYERS: PlayerCard[] = [
     [
       ['16-17', 'SQUAD', 76, 'LB', 'HUL', 'Wing-Back', [84, 50, 74, 72, 72, 72]],
       ['19-20', 'WORLD CLASS', 89, 'LB', 'LIV', 'Wing-Back', [88, 60, 90, 82, 85, 82], { facialHair: 'beard' }],
-      ['23-24', 'VETERAN', 82, 'LB', 'LIV', 'Wing-Back', [80, 56, 84, 76, 80, 78], { facialHair: 'beard' }],
+      ['23-24', 'WORLD CLASS', 82, 'LB', 'LIV', 'Wing-Back', [80, 56, 84, 76, 80, 78], { facialHair: 'beard' }],
     ]),
   ...player('maguire_harry', 'Harry Maguire', 'Maguire', 'England',
     { skinTone: 'pale', hairStyle: 'short', hairColor: 'brown', facialHair: 'stubble', headShape: 'square', expression: 'determined', accessory: 'none' },
@@ -662,7 +682,7 @@ export const PLAYERS: PlayerCard[] = [
     [
       ['17-18', 'RISING STAR', 80, 'RB', 'LIV', 'Wing-Back', [80, 60, 84, 78, 72, 70]],
       ['19-20', 'PRIME', 90, 'RB', 'LIV', 'Wing-Back', [84, 74, 96, 84, 80, 76]],
-      ['22-23', 'VETERAN', 84, 'RB/CM', 'LIV', 'Wing-Back', [78, 72, 92, 82, 72, 72]],
+      ['22-23', 'WORLD CLASS', 84, 'RB/CM', 'LIV', 'Wing-Back', [78, 72, 92, 82, 72, 72]],
     ]),
   ...player('vandijk_virgil', 'Virgil van Dijk', 'Van Dijk', 'Netherlands',
     { skinTone: 'brown', hairStyle: 'short', hairColor: 'black', facialHair: 'beard', headShape: 'long', expression: 'cool', accessory: 'none' },
@@ -692,6 +712,7 @@ export const PLAYERS: PlayerCard[] = [
     { skinTone: 'deep', hairStyle: 'buzz', hairColor: 'black', facialHair: 'none', headShape: 'square', expression: 'determined', accessory: 'none' },
     [
       ['02-03', 'SQUAD', 78, 'CB', 'MID', 'Stopper', [62, 50, 58, 56, 80, 85]],
+      ['95-96', 'CULT HERO', 83, 'CB', 'AVL', 'Stopper', [72, 50, 62, 58, 85, 88]],
     ]),
   ...player('queudrue_franck', 'Franck Queudrue', 'Queudrue', 'France',
     { skinTone: 'pale', hairStyle: 'short', hairColor: 'brown', facialHair: 'none', headShape: 'square', expression: 'determined', accessory: 'none' },
@@ -760,6 +781,7 @@ export const PLAYERS: PlayerCard[] = [
     { skinTone: 'pale', hairStyle: 'short', hairColor: 'brown', facialHair: 'beard', headShape: 'oval', expression: 'focused', accessory: 'none' },
     [
       ['22-23', 'WORLD CLASS', 86, 'RB', 'NEW', 'Wing-Back', [72, 68, 88, 76, 78, 70]],
+      ['17-18', 'CULT HERO', 82, 'RB', 'TOT', 'Wing-Back', [78, 68, 84, 76, 76, 72]],
     ]),
   ...player('cooper_colin', 'Colin Cooper', 'Cooper', 'England',
     { skinTone: 'pale', hairStyle: 'short', hairColor: 'brown', facialHair: 'none', headShape: 'square', expression: 'determined', accessory: 'none' },
@@ -1026,6 +1048,213 @@ export const PLAYERS: PlayerCard[] = [
     [
       ['23-24', 'RISING STAR', 80, 'LB/LM', 'WOL', 'Wing-Back', [84, 62, 74, 84, 72, 70]],
     ]),
+  ...player('dixon_lee', 'Lee Dixon', 'Dixon', 'England',
+    { skinTone: 'pale', hairStyle: 'short', hairColor: 'brown', facialHair: 'none', headShape: 'long', expression: 'determined', accessory: 'none' },
+    [
+      ['97-98', 'VETERAN', 82, 'RB', 'ARS', 'Full-Back', [78, 58, 74, 72, 82, 74]],
+    ]),
+  ...player('winterburn_nigel', 'Nigel Winterburn', 'Winterburn', 'England',
+    { skinTone: 'pale', hairStyle: 'short', hairColor: 'darkbrown', facialHair: 'none', headShape: 'oval', expression: 'determined', accessory: 'none' },
+    [
+      ['97-98', 'VETERAN', 81, 'LB', 'ARS', 'Full-Back', [76, 60, 73, 70, 82, 72]],
+    ]),
+  ...player('keown_martin', 'Martin Keown', 'Keown', 'England',
+    { skinTone: 'pale', hairStyle: 'buzz', hairColor: 'darkbrown', facialHair: 'none', headShape: 'long', expression: 'roar', accessory: 'none' },
+    [
+      ['97-98', 'VETERAN', 84, 'CB', 'ARS', 'Stopper', [72, 42, 62, 58, 87, 86]],
+    ]),
+  ...player('toure_kolo', 'Kolo Touré', 'K. Touré', 'Côte d\'Ivoire',
+    { skinTone: 'dark', hairStyle: 'buzz', hairColor: 'black', facialHair: 'none', headShape: 'round', expression: 'grin', accessory: 'none' },
+    [
+      ['03-04', 'RISING STAR', 85, 'CB/RB', 'ARS', 'Stopper', [84, 40, 64, 66, 86, 84]],
+    ]),
+  ...player('bould_steve', 'Steve Bould', 'Bould', 'England',
+    { skinTone: 'pale', hairStyle: 'receding', hairColor: 'brown', facialHair: 'none', headShape: 'long', expression: 'focused', accessory: 'none' },
+    [
+      ['97-98', 'VETERAN', 80, 'CB', 'ARS', 'Stopper', [58, 40, 64, 56, 84, 84]],
+    ]),
+  ...player('koscielny_laurent', 'Laurent Koscielny', 'Koscielny', 'France',
+    { skinTone: 'pale', hairStyle: 'short', hairColor: 'darkbrown', facialHair: 'stubble', headShape: 'oval', expression: 'determined', accessory: 'none' },
+    [
+      ['15-16', 'WORLD CLASS', 85, 'CB', 'ARS', 'Ball-Playing CB', [78, 45, 70, 66, 87, 80]],
+    ]),
+  ...player('sagna_bacary', 'Bacary Sagna', 'Sagna', 'France',
+    { skinTone: 'dark', hairStyle: 'dreads', hairColor: 'black', facialHair: 'none', headShape: 'long', expression: 'determined', accessory: 'none' },
+    [
+      ['10-11', 'CULT HERO', 83, 'RB', 'ARS', 'Full-Back', [80, 52, 72, 72, 82, 80]],
+    ]),
+  ...player('magalhaes_gabriel', 'Gabriel Magalhães', 'Gabriel', 'Brazil',
+    { skinTone: 'light', hairStyle: 'short', hairColor: 'black', facialHair: 'beard', headShape: 'square', expression: 'determined', accessory: 'none' },
+    [
+      ['23-24', 'WORLD CLASS', 87, 'CB', 'ARS', 'Stopper', [76, 45, 66, 62, 88, 88]],
+    ]),
+  ...player('white_ben', 'Ben White', 'B. White', 'England',
+    { skinTone: 'pale', hairStyle: 'short', hairColor: 'brown', facialHair: 'beard', headShape: 'oval', expression: 'focused', accessory: 'none' },
+    [
+      ['23-24', 'WORLD CLASS', 84, 'RB/CB', 'ARS', 'Full-Back', [78, 58, 76, 76, 82, 78]],
+    ]),
+  ...player('hyypia_sami', 'Sami Hyypiä', 'Hyypiä', 'Finland',
+    { skinTone: 'pale', hairStyle: 'short', hairColor: 'darkbrown', facialHair: 'none', headShape: 'long', expression: 'determined', accessory: 'none' },
+    [
+      ['01-02', 'WORLD CLASS', 87, 'CB', 'LIV', 'Stopper', [62, 52, 72, 62, 89, 88]],
+    ]),
+  ...player('skrtel_martin', 'Martin Škrtel', 'Škrtel', 'Slovakia',
+    { skinTone: 'pale', hairStyle: 'bald', hairColor: 'brown', facialHair: 'stubble', headShape: 'square', expression: 'roar', accessory: 'none' },
+    [
+      ['13-14', 'CULT HERO', 83, 'CB', 'LIV', 'Stopper', [64, 48, 62, 58, 86, 88]],
+    ]),
+  ...player('agger_daniel', 'Daniel Agger', 'Agger', 'Denmark',
+    { skinTone: 'pale', hairStyle: 'long', hairColor: 'brown', facialHair: 'stubble', headShape: 'long', expression: 'focused', accessory: 'none' },
+    [
+      ['08-09', 'CULT HERO', 83, 'CB', 'LIV', 'Ball-Playing CB', [72, 62, 78, 70, 84, 80]],
+    ]),
+  ...player('stones_john', 'John Stones', 'Stones', 'England',
+    { skinTone: 'pale', hairStyle: 'short', hairColor: 'darkbrown', facialHair: 'stubble', headShape: 'long', expression: 'cool', accessory: 'none' },
+    [
+      ['22-23', 'WORLD CLASS', 87, 'CB/CDM', 'MCI', 'Ball-Playing CB', [74, 52, 84, 80, 86, 78]],
+      ['15-16', 'RISING STAR', 80, 'CB', 'EVE', 'Ball-Playing CB', [72, 45, 78, 76, 80, 74]],
+    ]),
+  ...player('dunne_richard', 'Richard Dunne', 'Dunne', 'Republic of Ireland',
+    { skinTone: 'pale', hairStyle: 'buzz', hairColor: 'brown', facialHair: 'none', headShape: 'round', expression: 'determined', accessory: 'none' },
+    [
+      ['04-05', 'CULT HERO', 82, 'CB', 'MCI', 'Stopper', [58, 42, 60, 54, 85, 88]],
+    ]),
+  ...player('laporte_aymeric', 'Aymeric Laporte', 'Laporte', 'Spain',
+    { skinTone: 'light', hairStyle: 'sidepart', hairColor: 'darkbrown', facialHair: 'stubble', headShape: 'oval', expression: 'focused', accessory: 'none' },
+    [
+      ['18-19', 'WORLD CLASS', 87, 'CB', 'MCI', 'Ball-Playing CB', [72, 50, 82, 72, 87, 82]],
+    ]),
+  ...player('bruce_steve', 'Steve Bruce', 'Bruce', 'England',
+    { skinTone: 'pale', hairStyle: 'short', hairColor: 'darkbrown', facialHair: 'none', headShape: 'square', expression: 'roar', accessory: 'none' },
+    [
+      ['93-94', 'VETERAN', 85, 'CB', 'MUN', 'Stopper', [58, 62, 68, 60, 88, 88]],
+    ]),
+  ...player('pallister_gary', 'Gary Pallister', 'Pallister', 'England',
+    { skinTone: 'pale', hairStyle: 'short', hairColor: 'darkbrown', facialHair: 'none', headShape: 'long', expression: 'focused', accessory: 'none' },
+    [
+      ['93-94', 'WORLD CLASS', 87, 'CB', 'MUN', 'Ball-Playing CB', [72, 45, 72, 66, 89, 86]],
+    ]),
+  ...player('neville_phil', 'Phil Neville', 'P. Neville', 'England',
+    { skinTone: 'pale', hairStyle: 'short', hairColor: 'darkbrown', facialHair: 'none', headShape: 'long', expression: 'focused', accessory: 'none' },
+    [
+      ['98-99', 'CULT HERO', 79, 'LB/RB', 'MUN', 'Full-Back', [74, 52, 72, 70, 78, 72]],
+      ['08-09', 'VETERAN', 80, 'CM/RB', 'EVE', 'Box-to-Box', [70, 58, 76, 70, 78, 74]],
+    ]),
+  ...player('martinez_lisandro', 'Lisandro Martínez', 'Li. Martínez', 'Argentina',
+    { skinTone: 'light', hairStyle: 'ponytail', hairColor: 'darkbrown', facialHair: 'stubble', headShape: 'round', expression: 'roar', accessory: 'none' },
+    [
+      ['22-23', 'RISING STAR', 84, 'CB/LB', 'MUN', 'Ball-Playing CB', [74, 48, 80, 76, 85, 82]],
+    ]),
+  ...player('albert_philippe', 'Philippe Albert', 'Albert', 'Belgium',
+    { skinTone: 'pale', hairStyle: 'short', hairColor: 'blonde', facialHair: 'none', headShape: 'long', expression: 'grin', accessory: 'none' },
+    [
+      ['96-97', 'CULT HERO', 83, 'CB', 'NEW', 'Ball-Playing CB', [66, 72, 78, 70, 84, 80]],
+    ]),
+  ...player('botman_sven', 'Sven Botman', 'Botman', 'Netherlands',
+    { skinTone: 'pale', hairStyle: 'short', hairColor: 'brown', facialHair: 'none', headShape: 'long', expression: 'determined', accessory: 'none' },
+    [
+      ['22-23', 'RISING STAR', 84, 'CB', 'NEW', 'Stopper', [70, 44, 72, 64, 86, 84]],
+    ]),
+  ...player('schar_fabian', 'Fabian Schär', 'Schär', 'Switzerland',
+    { skinTone: 'pale', hairStyle: 'short', hairColor: 'brown', facialHair: 'beard', headShape: 'oval', expression: 'determined', accessory: 'none' },
+    [
+      ['22-23', 'CULT HERO', 83, 'CB', 'NEW', 'Ball-Playing CB', [62, 66, 80, 70, 83, 80]],
+    ]),
+  ...player('staunton_steve', 'Steve Staunton', 'Staunton', 'Republic of Ireland',
+    { skinTone: 'pale', hairStyle: 'short', hairColor: 'brown', facialHair: 'none', headShape: 'long', expression: 'focused', accessory: 'none' },
+    [
+      ['93-94', 'CULT HERO', 80, 'LB', 'AVL', 'Full-Back', [76, 64, 76, 72, 78, 76]],
+    ]),
+  ...player('konsa_ezri', 'Ezri Konsa', 'Konsa', 'England',
+    { skinTone: 'dark', hairStyle: 'buzz', hairColor: 'black', facialHair: 'stubble', headShape: 'round', expression: 'determined', accessory: 'none' },
+    [
+      ['23-24', 'CULT HERO', 82, 'CB/RB', 'AVL', 'Stopper', [78, 40, 66, 64, 84, 80]],
+    ]),
+  ...player('cash_matty', 'Matty Cash', 'Cash', 'Poland',
+    { skinTone: 'pale', hairStyle: 'short', hairColor: 'brown', facialHair: 'stubble', headShape: 'oval', expression: 'roar', accessory: 'none' },
+    [
+      ['22-23', 'CULT HERO', 80, 'RB', 'AVL', 'Full-Back', [82, 62, 70, 74, 76, 78]],
+    ]),
+  ...player('alderweireld_toby', 'Toby Alderweireld', 'Alderweireld', 'Belgium',
+    { skinTone: 'pale', hairStyle: 'short', hairColor: 'blonde', facialHair: 'stubble', headShape: 'long', expression: 'focused', accessory: 'none' },
+    [
+      ['16-17', 'WORLD CLASS', 87, 'CB', 'TOT', 'Ball-Playing CB', [66, 52, 82, 66, 88, 80]],
+    ]),
+  ...player('dawson_michael', 'Michael Dawson', 'M. Dawson', 'England',
+    { skinTone: 'pale', hairStyle: 'short', hairColor: 'darkbrown', facialHair: 'none', headShape: 'square', expression: 'determined', accessory: 'none' },
+    [
+      ['09-10', 'CULT HERO', 80, 'CB', 'TOT', 'Stopper', [62, 42, 60, 54, 83, 84]],
+    ]),
+  ...player('rose_danny', 'Danny Rose', 'Rose', 'England',
+    { skinTone: 'dark', hairStyle: 'buzz', hairColor: 'black', facialHair: 'none', headShape: 'oval', expression: 'determined', accessory: 'none' },
+    [
+      ['16-17', 'CULT HERO', 82, 'LB', 'TOT', 'Wing-Back', [86, 62, 74, 78, 78, 76]],
+    ]),
+  ...player('romero_cristian', 'Cristian Romero', 'Romero', 'Argentina',
+    { skinTone: 'light', hairStyle: 'curly', hairColor: 'darkbrown', facialHair: 'beard', headShape: 'square', expression: 'roar', accessory: 'none' },
+    [
+      ['23-24', 'WORLD CLASS', 85, 'CB', 'TOT', 'Stopper', [76, 52, 72, 68, 87, 84]],
+    ]),
+  ...player('vandeven_micky', 'Micky van de Ven', 'Van de Ven', 'Netherlands',
+    { skinTone: 'pale', hairStyle: 'short', hairColor: 'blonde', facialHair: 'none', headShape: 'long', expression: 'determined', accessory: 'none' },
+    [
+      ['23-24', 'RISING STAR', 84, 'CB/LB', 'TOT', 'Ball-Playing CB', [93, 40, 72, 68, 84, 80]],
+    ]),
+  ...player('desailly_marcel', 'Marcel Desailly', 'Desailly', 'France',
+    { skinTone: 'dark', hairStyle: 'bald', hairColor: 'black', facialHair: 'none', headShape: 'square', expression: 'focused', accessory: 'none' },
+    [
+      ['98-99', 'WORLD CLASS', 89, 'CB/CDM', 'CHE', 'Stopper', [78, 52, 74, 70, 90, 90]],
+    ]),
+  ...player('carvalho_ricardo', 'Ricardo Carvalho', 'Carvalho', 'Portugal',
+    { skinTone: 'light', hairStyle: 'short', hairColor: 'black', facialHair: 'none', headShape: 'long', expression: 'focused', accessory: 'none' },
+    [
+      ['04-05', 'WORLD CLASS', 89, 'CB', 'CHE', 'Ball-Playing CB', [76, 40, 76, 72, 91, 80]],
+    ]),
+  ...player('leboeuf_frank', 'Frank Leboeuf', 'Leboeuf', 'France',
+    { skinTone: 'pale', hairStyle: 'bald', hairColor: 'brown', facialHair: 'none', headShape: 'long', expression: 'cool', accessory: 'none' },
+    [
+      ['97-98', 'CULT HERO', 83, 'CB', 'CHE', 'Ball-Playing CB', [62, 72, 82, 70, 82, 74]],
+    ]),
+  ...player('ivanovic_branislav', 'Branislav Ivanović', 'Ivanović', 'Serbia',
+    { skinTone: 'pale', hairStyle: 'buzz', hairColor: 'darkbrown', facialHair: 'stubble', headShape: 'square', expression: 'roar', accessory: 'none' },
+    [
+      ['14-15', 'WORLD CLASS', 86, 'RB/CB', 'CHE', 'Full-Back', [74, 68, 74, 70, 86, 90]],
+    ]),
+  ...player('james_reece', 'Reece James', 'R. James', 'England',
+    { skinTone: 'brown', hairStyle: 'short', hairColor: 'black', facialHair: 'none', headShape: 'round', expression: 'determined', accessory: 'none' },
+    [
+      ['21-22', 'RISING STAR', 86, 'RB', 'CHE', 'Wing-Back', [82, 76, 82, 80, 82, 86]],
+    ]),
+  ...player('silva_thiago', 'Thiago Silva', 'T. Silva', 'Brazil',
+    { skinTone: 'light', hairStyle: 'short', hairColor: 'black', facialHair: 'none', headShape: 'oval', expression: 'focused', accessory: 'none' },
+    [
+      ['21-22', 'VETERAN', 87, 'CB', 'CHE', 'Ball-Playing CB', [66, 50, 80, 74, 89, 80]],
+    ]),
+  ...player('watson_dave', 'Dave Watson', 'D. Watson', 'England',
+    { skinTone: 'pale', hairStyle: 'short', hairColor: 'brown', facialHair: 'none', headShape: 'square', expression: 'determined', accessory: 'none' },
+    [
+      ['94-95', 'VETERAN', 81, 'CB', 'EVE', 'Stopper', [60, 46, 62, 56, 84, 84]],
+    ]),
+  ...player('yobo_joseph', 'Joseph Yobo', 'Yobo', 'Nigeria',
+    { skinTone: 'dark', hairStyle: 'buzz', hairColor: 'black', facialHair: 'none', headShape: 'long', expression: 'focused', accessory: 'none' },
+    [
+      ['05-06', 'CULT HERO', 80, 'CB', 'EVE', 'Stopper', [80, 40, 62, 62, 82, 80]],
+    ]),
+  ...player('unsworth_david', 'David Unsworth', 'Unsworth', 'England',
+    { skinTone: 'pale', hairStyle: 'short', hairColor: 'brown', facialHair: 'none', headShape: 'round', expression: 'determined', accessory: 'none' },
+    [
+      ['94-95', 'CULT HERO', 79, 'LB/CB', 'EVE', 'Full-Back', [70, 68, 68, 64, 78, 82]],
+    ]),
+  ...player('hibbert_tony', 'Tony Hibbert', 'Hibbert', 'England',
+    { skinTone: 'pale', hairStyle: 'buzz', hairColor: 'brown', facialHair: 'none', headShape: 'oval', expression: 'determined', accessory: 'none' },
+    [
+      ['07-08', 'CULT HERO', 77, 'RB', 'EVE', 'Full-Back', [74, 40, 62, 64, 78, 74]],
+    ]),
+  ...player('branthwaite_jarrad', 'Jarrad Branthwaite', 'Branthwaite', 'England',
+    { skinTone: 'pale', hairStyle: 'short', hairColor: 'brown', facialHair: 'none', headShape: 'long', expression: 'determined', accessory: 'none' },
+    [
+      ['23-24', 'RISING STAR', 82, 'CB', 'EVE', 'Stopper', [76, 40, 70, 62, 84, 82]],
+    ]),
   // ── Midfielders ──
   ...player('vieira_patrick', 'Patrick Vieira', 'Vieira', 'France',
     { skinTone: 'deep', hairStyle: 'buzz', hairColor: 'black', facialHair: 'none', headShape: 'long', expression: 'determined', accessory: 'none' },
@@ -1068,7 +1297,7 @@ export const PLAYERS: PlayerCard[] = [
     { skinTone: 'pale', hairStyle: 'mohawk', hairColor: 'ginger', facialHair: 'none', headShape: 'oval', expression: 'cool', accessory: 'none' },
     [
       ['01-02', 'CULT HERO', 86, 'RM/RW', 'ARS', 'Inside Forward', [87, 83, 78, 85, 52, 68]],
-      ['06-07', 'VETERAN', 81, 'RM/LM', 'ARS', 'Winger', [82, 74, 78, 82, 48, 66], { hairStyle: 'short', hairColor: 'brown' }],
+      ['06-07', 'CULT HERO', 81, 'RM/LM', 'ARS', 'Winger', [82, 74, 78, 82, 48, 66], { hairStyle: 'short', hairColor: 'brown' }],
     ]),
   ...player('saka_bukayo', 'Bukayo Saka', 'Saka', 'England',
     { skinTone: 'deep', hairStyle: 'short', hairColor: 'black', facialHair: 'none', headShape: 'round', expression: 'grin', accessory: 'none' },
@@ -1215,7 +1444,7 @@ export const PLAYERS: PlayerCard[] = [
   ...player('eriksen_christian', 'Christian Eriksen', 'Eriksen', 'Denmark',
     { skinTone: 'pale', hairStyle: 'short', hairColor: 'blonde', facialHair: 'none', headShape: 'oval', expression: 'focused', accessory: 'none' },
     [
-      ['21-22', 'VETERAN', 82, 'CM/CAM', 'BRE', 'Deep-Lying Playmaker', [60, 77, 87, 81, 50, 60]],
+      ['21-22', 'CULT HERO', 82, 'CM/CAM', 'BRE', 'Deep-Lying Playmaker', [60, 77, 87, 81, 50, 60]],
       ['16-17', 'WORLD CLASS', 87, 'CAM/CM', 'TOT', 'Advanced Playmaker', [70, 83, 90, 86, 50, 62]],
     ]),
   ...player('damsgaard_mikkel', 'Mikkel Damsgaard', 'Damsgaard', 'Denmark',
@@ -1227,6 +1456,7 @@ export const PLAYERS: PlayerCard[] = [
     { skinTone: 'light', hairStyle: 'short', hairColor: 'darkbrown', facialHair: 'none', headShape: 'oval', expression: 'focused', accessory: 'none' },
     [
       ['22-23', 'WORLD CLASS', 84, 'CM/CAM', 'BRI', 'Box-to-Box', [70, 80, 85, 82, 72, 74]],
+      ['24-25', 'WORLD CLASS', 87, 'CM/CDM', 'LIV', 'Deep-Lying Playmaker', [72, 80, 87, 84, 74, 74]],
     ]),
   ...player('caicedo_moises', 'Moisés Caicedo', 'Caicedo', 'Ecuador',
     { skinTone: 'deep', hairStyle: 'short', hairColor: 'black', facialHair: 'none', headShape: 'oval', expression: 'determined', accessory: 'none' },
@@ -1268,7 +1498,7 @@ export const PLAYERS: PlayerCard[] = [
   ...player('murphy_danny', 'Danny Murphy', 'Murphy', 'England',
     { skinTone: 'pale', hairStyle: 'short', hairColor: 'darkbrown', facialHair: 'none', headShape: 'oval', expression: 'smirk', accessory: 'none' },
     [
-      ['04-05', 'VETERAN', 82, 'CM/CAM', 'CHA', 'Deep-Lying Playmaker', [62, 78, 85, 76, 64, 66]],
+      ['04-05', 'CULT HERO', 82, 'CM/CAM', 'CHA', 'Deep-Lying Playmaker', [62, 78, 85, 76, 64, 66]],
       ['08-09', 'CULT HERO', 81, 'CM', 'FUL', 'Deep-Lying Playmaker', [58, 75, 86, 77, 68, 66], { headShape: 'round', accessory: 'captainband' }],
     ]),
   ...player('dicanio_paolo', 'Paolo Di Canio', 'Di Canio', 'Italy',
@@ -1301,7 +1531,7 @@ export const PLAYERS: PlayerCard[] = [
     { skinTone: 'deep', hairStyle: 'bald', hairColor: 'black', facialHair: 'none', headShape: 'round', expression: 'roar', accessory: 'none' },
     [
       ['06-07', 'WORLD CLASS', 89, 'CM/CDM', 'CHE', 'Box-to-Box', [84, 78, 82, 80, 87, 92]],
-      ['10-11', 'VETERAN', 80, 'CDM/CM', 'CHE', 'Destroyer', [72, 66, 76, 72, 80, 84]],
+      ['10-11', 'WORLD CLASS', 80, 'CDM/CM', 'CHE', 'Destroyer', [72, 66, 76, 72, 80, 84]],
     ]),
   ...player('debruyne_kevin', 'Kevin De Bruyne', 'De Bruyne', 'Belgium',
     { skinTone: 'pale', hairStyle: 'quiff', hairColor: 'ginger', facialHair: 'none', headShape: 'oval', expression: 'focused', accessory: 'none' },
@@ -1329,7 +1559,8 @@ export const PLAYERS: PlayerCard[] = [
   ...player('cabaye_yohan', 'Yohan Cabaye', 'Cabaye', 'France',
     { skinTone: 'light', hairStyle: 'short', hairColor: 'darkbrown', facialHair: 'stubble', headShape: 'oval', expression: 'cool', accessory: 'none' },
     [
-      ['15-16', 'VETERAN', 81, 'CM', 'CRY', 'Deep-Lying Playmaker', [62, 76, 85, 78, 66, 66]],
+      ['15-16', 'CULT HERO', 81, 'CM', 'CRY', 'Deep-Lying Playmaker', [62, 76, 85, 78, 66, 66]],
+      ['11-12', 'WORLD CLASS', 85, 'CM', 'NEW', 'Deep-Lying Playmaker', [72, 80, 87, 82, 68, 68]],
     ]),
   ...player('eze_eberechi', 'Eberechi Eze', 'Eze', 'England',
     { skinTone: 'deep', hairStyle: 'short', hairColor: 'black', facialHair: 'none', headShape: 'oval', expression: 'smirk', accessory: 'none' },
@@ -1368,6 +1599,7 @@ export const PLAYERS: PlayerCard[] = [
     { skinTone: 'pale', hairStyle: 'short', hairColor: 'brown', facialHair: 'none', headShape: 'long', expression: 'focused', accessory: 'none' },
     [
       ['95-96', 'PRIME', 84, 'RM', 'EVE', 'Winger', [90, 80, 74, 84, 38, 70]],
+      ['93-94', 'WORLD CLASS', 86, 'RW', 'MUN', 'Speedster', [94, 82, 74, 86, 36, 70]],
     ]),
   ...player('rooney_wayne', 'Wayne Rooney', 'Rooney', 'England',
     { skinTone: 'pale', hairStyle: 'short', hairColor: 'brown', facialHair: 'none', headShape: 'round', expression: 'roar', accessory: 'none' },
@@ -1397,6 +1629,7 @@ export const PLAYERS: PlayerCard[] = [
     { skinTone: 'brown', hairStyle: 'cornrows', hairColor: 'black', facialHair: 'none', headShape: 'oval', expression: 'cool', accessory: 'none' },
     [
       ['10-11', 'RISING STAR', 79, 'CM/CAM', 'FUL', 'Box-to-Box', [72, 70, 78, 83, 64, 80]],
+      ['16-17', 'WORLD CLASS', 86, 'CM', 'TOT', 'Box-to-Box', [76, 70, 84, 90, 78, 88]],
     ]),
   ...player('bullard_jimmy', 'Jimmy Bullard', 'Bullard', 'England',
     { skinTone: 'pale', hairStyle: 'short', hairColor: 'blonde', facialHair: 'none', headShape: 'round', expression: 'tongue', accessory: 'none' },
@@ -1592,7 +1825,7 @@ export const PLAYERS: PlayerCard[] = [
     { skinTone: 'light', hairStyle: 'short', hairColor: 'darkbrown', facialHair: 'stubble', headShape: 'oval', expression: 'roar', accessory: 'none' },
     [
       ['19-20', 'RISING STAR', 87, 'CAM', 'MUN', 'Advanced Playmaker', [78, 88, 92, 86, 64, 74]],
-      ['23-24', 'VETERAN', 84, 'CAM/CM', 'MUN', 'Advanced Playmaker', [70, 82, 88, 80, 62, 72], { accessory: 'captainband' }],
+      ['23-24', 'WORLD CLASS', 84, 'CAM/CM', 'MUN', 'Advanced Playmaker', [70, 82, 88, 80, 62, 72], { accessory: 'captainband' }],
     ]),
   ...player('giggs_ryan', 'Ryan Giggs', 'Giggs', 'Wales',
     { skinTone: 'tan', hairStyle: 'curly', hairColor: 'darkbrown', facialHair: 'none', headShape: 'long', expression: 'focused', accessory: 'none' },
@@ -1706,6 +1939,7 @@ export const PLAYERS: PlayerCard[] = [
     { skinTone: 'pale', hairStyle: 'short', hairColor: 'brown', facialHair: 'none', headShape: 'oval', expression: 'smirk', accessory: 'none' },
     [
       ['02-03', 'LEGEND', 80, 'CAM', 'POR', 'Advanced Playmaker', [56, 78, 84, 78, 40, 62]],
+      ['98-99', 'VETERAN', 84, 'CAM', 'AVL', 'Advanced Playmaker', [66, 82, 86, 84, 40, 66]],
     ]),
   ...player('taarabt_adel', 'Adel Taarabt', 'Taarabt', 'Morocco',
     { skinTone: 'olive', hairStyle: 'curly', hairColor: 'black', facialHair: 'stubble', headShape: 'oval', expression: 'cool', accessory: 'none' },
@@ -1736,7 +1970,8 @@ export const PLAYERS: PlayerCard[] = [
   ...player('barton_joey', 'Joey Barton', 'J. Barton', 'England',
     { skinTone: 'pale', hairStyle: 'short', hairColor: 'brown', facialHair: 'beard', headShape: 'square', expression: 'smirk', accessory: 'none' },
     [
-      ['11-12', 'VETERAN', 78, 'CM', 'QPR', 'Box-to-Box', [64, 70, 78, 72, 74, 78]],
+      ['11-12', 'CULT HERO', 78, 'CM', 'QPR', 'Box-to-Box', [64, 70, 78, 72, 74, 78]],
+      ['10-11', 'CULT HERO', 82, 'CM', 'NEW', 'Box-to-Box', [72, 76, 82, 76, 74, 78]],
     ]),
   ...player('letissier_matt', 'Matt Le Tissier', 'Le Tissier', 'England',
     { skinTone: 'pale', hairStyle: 'short', hairColor: 'blonde', facialHair: 'none', headShape: 'round', expression: 'smirk', accessory: 'none' },
@@ -1834,6 +2069,7 @@ export const PLAYERS: PlayerCard[] = [
     [
       ['11-12', 'RISING STAR', 81, 'CAM', 'SWA', 'Advanced Playmaker', [73, 83, 81, 79, 44, 65]],
       ['16-17', 'CULT HERO', 84, 'CAM/CM', 'SWA', 'Advanced Playmaker', [70, 84, 86, 80, 50, 66]],
+      ['18-19', 'CULT HERO', 84, 'CAM', 'EVE', 'Advanced Playmaker', [72, 84, 86, 82, 46, 66]],
     ]),
   ...player('ki_sungyueng', 'Ki Sung-yueng', 'Ki', 'Korea Republic',
     { skinTone: 'light', hairStyle: 'short', hairColor: 'black', facialHair: 'none', headShape: 'oval', expression: 'cool', accessory: 'none' },
@@ -1865,6 +2101,7 @@ export const PLAYERS: PlayerCard[] = [
     { skinTone: 'deep', hairStyle: 'buzz', hairColor: 'black', facialHair: 'none', headShape: 'long', expression: 'determined', accessory: 'none' },
     [
       ['17-18', 'CULT HERO', 81, 'CM', 'WAT', 'Box-to-Box', [76, 72, 74, 77, 76, 84]],
+      ['23-24', 'CULT HERO', 82, 'CM', 'EVE', 'Box-to-Box', [76, 78, 76, 76, 76, 82]],
     ]),
   ...player('pereyra_roberto', 'Roberto Pereyra', 'Pereyra', 'Argentina',
     { skinTone: 'light', hairStyle: 'long', hairColor: 'darkbrown', facialHair: 'beard', headShape: 'oval', expression: 'cool', accessory: 'headband' },
@@ -1916,6 +2153,7 @@ export const PLAYERS: PlayerCard[] = [
     { skinTone: 'brown', hairStyle: 'buzz', hairColor: 'black', facialHair: 'none', headShape: 'square', expression: 'focused', accessory: 'none' },
     [
       ['07-08', 'RISING STAR', 79, 'RM/RW', 'WIG', 'Winger', [88, 66, 74, 78, 50, 80]],
+      ['11-12', 'WORLD CLASS', 85, 'RM/RB', 'MUN', 'Winger', [90, 70, 80, 82, 60, 84]],
     ]),
   ...player('palacios_wilson', 'Wilson Palacios', 'Palacios', 'Honduras',
     { skinTone: 'brown', hairStyle: 'short', hairColor: 'black', facialHair: 'none', headShape: 'oval', expression: 'roar', accessory: 'none' },
@@ -1983,11 +2221,237 @@ export const PLAYERS: PlayerCard[] = [
     { skinTone: 'deep', hairStyle: 'buzz', hairColor: 'black', facialHair: 'none', headShape: 'square', expression: 'roar', accessory: 'captainband' },
     [
       ['03-04', 'VETERAN', 77, 'CDM/CM', 'WOL', 'Destroyer', [56, 64, 72, 68, 78, 76]],
+      ['93-94', 'WORLD CLASS', 87, 'CM/CDM', 'MUN', 'Box-to-Box', [78, 76, 82, 80, 86, 88]],
     ]),
   ...player('jarvis_matt', 'Matt Jarvis', 'Jarvis', 'England',
     { skinTone: 'pale', hairStyle: 'short', hairColor: 'brown', facialHair: 'none', headShape: 'oval', expression: 'grin', accessory: 'none' },
     [
       ['11-12', 'CULT HERO', 81, 'LM', 'WOL', 'Winger', [87, 70, 78, 80, 40, 64]],
+    ]),
+  ...player('petit_emmanuel', 'Emmanuel Petit', 'Petit', 'France',
+    { skinTone: 'pale', hairStyle: 'ponytail', hairColor: 'blonde', facialHair: 'none', headShape: 'long', expression: 'determined', accessory: 'none' },
+    [
+      ['97-98', 'WORLD CLASS', 87, 'CDM/CM', 'ARS', 'Deep-Lying Playmaker', [70, 74, 86, 78, 84, 82]],
+    ]),
+  ...player('silva_gilberto', 'Gilberto Silva', 'Gilberto', 'Brazil',
+    { skinTone: 'brown', hairStyle: 'buzz', hairColor: 'black', facialHair: 'none', headShape: 'long', expression: 'focused', accessory: 'none' },
+    [
+      ['03-04', 'WORLD CLASS', 86, 'CDM', 'ARS', 'Destroyer', [70, 62, 80, 74, 88, 84]],
+    ]),
+  ...player('parlour_ray', 'Ray Parlour', 'Parlour', 'England',
+    { skinTone: 'pale', hairStyle: 'short', hairColor: 'ginger', facialHair: 'none', headShape: 'round', expression: 'grin', accessory: 'none' },
+    [
+      ['01-02', 'CULT HERO', 81, 'RM/CM', 'ARS', 'Box-to-Box', [76, 72, 76, 76, 72, 80]],
+    ]),
+  ...player('cazorla_santi', 'Santi Cazorla', 'Cazorla', 'Spain',
+    { skinTone: 'light', hairStyle: 'short', hairColor: 'darkbrown', facialHair: 'none', headShape: 'round', expression: 'grin', accessory: 'none' },
+    [
+      ['14-15', 'WORLD CLASS', 86, 'CM/CAM', 'ARS', 'Advanced Playmaker', [76, 80, 89, 90, 60, 58]],
+    ]),
+  ...player('ramsey_aaron', 'Aaron Ramsey', 'Ramsey', 'Wales',
+    { skinTone: 'pale', hairStyle: 'short', hairColor: 'brown', facialHair: 'stubble', headShape: 'oval', expression: 'grin', accessory: 'none' },
+    [
+      ['13-14', 'WORLD CLASS', 85, 'CM', 'ARS', 'Box-to-Box', [78, 82, 84, 82, 72, 74]],
+    ]),
+  ...player('coutinho_philippe', 'Philippe Coutinho', 'Coutinho', 'Brazil',
+    { skinTone: 'light', hairStyle: 'short', hairColor: 'black', facialHair: 'stubble', headShape: 'oval', expression: 'grin', accessory: 'none' },
+    [
+      ['16-17', 'WORLD CLASS', 88, 'CAM/LW', 'LIV', 'Advanced Playmaker', [80, 86, 87, 91, 40, 58]],
+    ]),
+  ...player('wijnaldum_georginio', 'Georginio Wijnaldum', 'Wijnaldum', 'Netherlands',
+    { skinTone: 'dark', hairStyle: 'short', hairColor: 'black', facialHair: 'goatee', headShape: 'round', expression: 'grin', accessory: 'none' },
+    [
+      ['18-19', 'WORLD CLASS', 86, 'CM', 'LIV', 'Box-to-Box', [78, 76, 84, 85, 76, 80]],
+    ]),
+  ...player('barnes_john', 'John Barnes', 'Barnes', 'England',
+    { skinTone: 'dark', hairStyle: 'short', hairColor: 'black', facialHair: 'none', headShape: 'oval', expression: 'grin', accessory: 'none' },
+    [
+      ['94-95', 'VETERAN', 85, 'CM/LM', 'LIV', 'Deep-Lying Playmaker', [70, 76, 88, 86, 64, 78]],
+    ]),
+  ...player('redknapp_jamie', 'Jamie Redknapp', 'Redknapp', 'England',
+    { skinTone: 'pale', hairStyle: 'curtains', hairColor: 'brown', facialHair: 'none', headShape: 'oval', expression: 'smirk', accessory: 'none' },
+    [
+      ['97-98', 'CULT HERO', 83, 'CM', 'LIV', 'Deep-Lying Playmaker', [70, 80, 85, 78, 66, 68]],
+    ]),
+  ...player('szoboszlai_dominik', 'Dominik Szoboszlai', 'Szoboszlai', 'Hungary',
+    { skinTone: 'pale', hairStyle: 'slick', hairColor: 'blonde', facialHair: 'none', headShape: 'long', expression: 'determined', accessory: 'none' },
+    [
+      ['24-25', 'RISING STAR', 84, 'CM/CAM', 'LIV', 'Box-to-Box', [82, 82, 84, 82, 66, 78]],
+    ]),
+  ...player('fernandinho_fernandinho', 'Fernandinho', 'Fernandinho', 'Brazil',
+    { skinTone: 'brown', hairStyle: 'buzz', hairColor: 'black', facialHair: 'none', headShape: 'long', expression: 'determined', accessory: 'none' },
+    [
+      ['17-18', 'WORLD CLASS', 87, 'CDM', 'MCI', 'Destroyer', [74, 70, 84, 80, 86, 82]],
+    ]),
+  ...player('gundogan_ilkay', 'İlkay Gündoğan', 'Gündoğan', 'Germany',
+    { skinTone: 'light', hairStyle: 'short', hairColor: 'black', facialHair: 'beard', headShape: 'oval', expression: 'focused', accessory: 'none' },
+    [
+      ['20-21', 'WORLD CLASS', 88, 'CM/CAM', 'MCI', 'Box-to-Box', [72, 86, 88, 86, 66, 68]],
+    ]),
+  ...player('kinkladze_georgi', 'Georgi Kinkladze', 'Kinkladze', 'Georgia',
+    { skinTone: 'pale', hairStyle: 'short', hairColor: 'black', facialHair: 'none', headShape: 'round', expression: 'smirk', accessory: 'none' },
+    [
+      ['95-96', 'CULT HERO', 85, 'CAM', 'MCI', 'Advanced Playmaker', [80, 78, 84, 92, 30, 56]],
+    ]),
+  ...player('nasri_samir', 'Samir Nasri', 'Nasri', 'France',
+    { skinTone: 'olive', hairStyle: 'short', hairColor: 'black', facialHair: 'stubble', headShape: 'oval', expression: 'smirk', accessory: 'none' },
+    [
+      ['13-14', 'WORLD CLASS', 84, 'CAM/LM', 'MCI', 'Advanced Playmaker', [78, 78, 85, 88, 48, 60]],
+    ]),
+  ...player('butt_nicky', 'Nicky Butt', 'Butt', 'England',
+    { skinTone: 'pale', hairStyle: 'buzz', hairColor: 'darkbrown', facialHair: 'none', headShape: 'long', expression: 'roar', accessory: 'none' },
+    [
+      ['98-99', 'CULT HERO', 82, 'CM/CDM', 'MUN', 'Destroyer', [72, 66, 74, 72, 82, 80]],
+    ]),
+  ...player('park_jisung', 'Park Ji-sung', 'Park', 'Korea Republic',
+    { skinTone: 'light', hairStyle: 'short', hairColor: 'black', facialHair: 'none', headShape: 'oval', expression: 'determined', accessory: 'none' },
+    [
+      ['08-09', 'CULT HERO', 83, 'RM/CM', 'MUN', 'Box-to-Box', [82, 72, 76, 80, 72, 82]],
+    ]),
+  ...player('pogba_paul', 'Paul Pogba', 'Pogba', 'France',
+    { skinTone: 'dark', hairStyle: 'mohawk', hairColor: 'bleached', facialHair: 'none', headShape: 'long', expression: 'grin', accessory: 'none' },
+    [
+      ['18-19', 'WORLD CLASS', 88, 'CM', 'MUN', 'Box-to-Box', [74, 84, 88, 86, 64, 86]],
+    ]),
+  ...player('casemiro_casemiro', 'Casemiro', 'Casemiro', 'Brazil',
+    { skinTone: 'tan', hairStyle: 'short', hairColor: 'black', facialHair: 'beard', headShape: 'square', expression: 'determined', accessory: 'none' },
+    [
+      ['22-23', 'WORLD CLASS', 86, 'CDM', 'MUN', 'Destroyer', [64, 72, 80, 74, 88, 88]],
+    ]),
+  ...player('solano_nolberto', 'Nolberto Solano', 'Solano', 'Peru',
+    { skinTone: 'tan', hairStyle: 'short', hairColor: 'black', facialHair: 'none', headShape: 'oval', expression: 'grin', accessory: 'none' },
+    [
+      ['01-02', 'CULT HERO', 83, 'RM', 'NEW', 'Winger', [80, 78, 86, 82, 50, 64]],
+    ]),
+  ...player('dyer_kieron', 'Kieron Dyer', 'Dyer', 'England',
+    { skinTone: 'dark', hairStyle: 'buzz', hairColor: 'black', facialHair: 'none', headShape: 'oval', expression: 'grin', accessory: 'none' },
+    [
+      ['02-03', 'CULT HERO', 83, 'CM/RM', 'NEW', 'Box-to-Box', [92, 72, 78, 84, 58, 64]],
+    ]),
+  ...player('robert_laurent', 'Laurent Robert', 'Robert', 'France',
+    { skinTone: 'pale', hairStyle: 'buzz', hairColor: 'darkbrown', facialHair: 'none', headShape: 'long', expression: 'cool', accessory: 'none' },
+    [
+      ['01-02', 'CULT HERO', 83, 'LM/LW', 'NEW', 'Winger', [84, 82, 84, 82, 34, 62]],
+    ]),
+  ...player('jenas_jermaine', 'Jermaine Jenas', 'Jenas', 'England',
+    { skinTone: 'brown', hairStyle: 'short', hairColor: 'black', facialHair: 'none', headShape: 'oval', expression: 'grin', accessory: 'none' },
+    [
+      ['02-03', 'RISING STAR', 82, 'CM', 'NEW', 'Box-to-Box', [80, 72, 78, 78, 68, 70]],
+    ]),
+  ...player('tiote_cheick', 'Cheick Tioté', 'Tioté', 'Côte d\'Ivoire',
+    { skinTone: 'dark', hairStyle: 'buzz', hairColor: 'black', facialHair: 'none', headShape: 'round', expression: 'roar', accessory: 'none' },
+    [
+      ['10-11', 'CULT HERO', 81, 'CDM', 'NEW', 'Destroyer', [74, 62, 72, 72, 84, 82]],
+    ]),
+  ...player('joelinton_joelinton', 'Joelinton', 'Joelinton', 'Brazil',
+    { skinTone: 'tan', hairStyle: 'short', hairColor: 'black', facialHair: 'beard', headShape: 'square', expression: 'roar', accessory: 'none' },
+    [
+      ['22-23', 'CULT HERO', 83, 'CM/LW', 'NEW', 'Box-to-Box', [78, 74, 76, 80, 78, 88]],
+    ]),
+  ...player('townsend_andy', 'Andy Townsend', 'Townsend', 'Republic of Ireland',
+    { skinTone: 'pale', hairStyle: 'short', hairColor: 'brown', facialHair: 'none', headShape: 'round', expression: 'determined', accessory: 'none' },
+    [
+      ['93-94', 'CULT HERO', 81, 'CM', 'AVL', 'Box-to-Box', [70, 74, 80, 74, 76, 82]],
+    ]),
+  ...player('petrov_stiliyan', 'Stiliyan Petrov', 'Petrov', 'Bulgaria',
+    { skinTone: 'pale', hairStyle: 'buzz', hairColor: 'darkbrown', facialHair: 'none', headShape: 'long', expression: 'determined', accessory: 'none' },
+    [
+      ['08-09', 'CULT HERO', 81, 'CM/CDM', 'AVL', 'Box-to-Box', [70, 72, 78, 74, 76, 78]],
+    ]),
+  ...player('rogers_morgan', 'Morgan Rogers', 'M. Rogers', 'England',
+    { skinTone: 'brown', hairStyle: 'short', hairColor: 'black', facialHair: 'none', headShape: 'oval', expression: 'determined', accessory: 'none' },
+    [
+      ['24-25', 'RISING STAR', 84, 'CAM/LW', 'AVL', 'Inside Forward', [86, 80, 80, 86, 48, 80]],
+    ]),
+  ...player('anderton_darren', 'Darren Anderton', 'Anderton', 'England',
+    { skinTone: 'pale', hairStyle: 'curtains', hairColor: 'brown', facialHair: 'none', headShape: 'long', expression: 'cool', accessory: 'none' },
+    [
+      ['94-95', 'RISING STAR', 85, 'RM', 'TOT', 'Winger', [84, 78, 84, 82, 48, 64]],
+    ]),
+  ...player('alli_dele', 'Dele Alli', 'Dele', 'England',
+    { skinTone: 'brown', hairStyle: 'short', hairColor: 'black', facialHair: 'none', headShape: 'oval', expression: 'smirk', accessory: 'none' },
+    [
+      ['16-17', 'RISING STAR', 88, 'CAM/CM', 'TOT', 'Shadow Striker', [80, 86, 80, 86, 58, 78]],
+    ]),
+  ...player('vandervaart_rafael', 'Rafael van der Vaart', 'Van der Vaart', 'Netherlands',
+    { skinTone: 'pale', hairStyle: 'slick', hairColor: 'blonde', facialHair: 'none', headShape: 'round', expression: 'smirk', accessory: 'none' },
+    [
+      ['10-11', 'WORLD CLASS', 86, 'CAM', 'TOT', 'Advanced Playmaker', [66, 86, 88, 84, 48, 66]],
+    ]),
+  ...player('zola_gianfranco', 'Gianfranco Zola', 'Zola', 'Italy',
+    { skinTone: 'pale', hairStyle: 'short', hairColor: 'darkbrown', facialHair: 'none', headShape: 'round', expression: 'grin', accessory: 'none' },
+    [
+      ['96-97', 'WORLD CLASS', 90, 'CAM/ST', 'CHE', 'Shadow Striker', [84, 88, 88, 93, 32, 58]],
+    ]),
+  ...player('wise_dennis', 'Dennis Wise', 'Wise', 'England',
+    { skinTone: 'pale', hairStyle: 'short', hairColor: 'darkbrown', facialHair: 'none', headShape: 'round', expression: 'smirk', accessory: 'none' },
+    [
+      ['99-00', 'CULT HERO', 82, 'CM', 'CHE', 'Box-to-Box', [72, 72, 82, 78, 72, 74]],
+    ]),
+  ...player('gullit_ruud', 'Ruud Gullit', 'Gullit', 'Netherlands',
+    { skinTone: 'brown', hairStyle: 'dreads', hairColor: 'black', facialHair: 'moustache', headShape: 'long', expression: 'cool', accessory: 'none' },
+    [
+      ['95-96', 'LEGEND', 86, 'CM/CB', 'CHE', 'Deep-Lying Playmaker', [66, 82, 88, 84, 76, 82]],
+    ]),
+  ...player('dimatteo_roberto', 'Roberto Di Matteo', 'Di Matteo', 'Italy',
+    { skinTone: 'pale', hairStyle: 'short', hairColor: 'darkbrown', facialHair: 'none', headShape: 'long', expression: 'grin', accessory: 'none' },
+    [
+      ['96-97', 'CULT HERO', 83, 'CM', 'CHE', 'Box-to-Box', [72, 80, 82, 78, 72, 76]],
+    ]),
+  ...player('ballack_michael', 'Michael Ballack', 'Ballack', 'Germany',
+    { skinTone: 'pale', hairStyle: 'short', hairColor: 'darkbrown', facialHair: 'none', headShape: 'long', expression: 'determined', accessory: 'none' },
+    [
+      ['07-08', 'WORLD CLASS', 87, 'CM', 'CHE', 'Box-to-Box', [68, 86, 84, 80, 76, 86]],
+    ]),
+  ...player('mata_juan', 'Juan Mata', 'Mata', 'Spain',
+    { skinTone: 'light', hairStyle: 'short', hairColor: 'darkbrown', facialHair: 'stubble', headShape: 'oval', expression: 'grin', accessory: 'none' },
+    [
+      ['12-13', 'WORLD CLASS', 88, 'CAM/RW', 'CHE', 'Advanced Playmaker', [76, 82, 90, 88, 44, 58]],
+    ]),
+  ...player('mount_mason', 'Mason Mount', 'Mount', 'England',
+    { skinTone: 'pale', hairStyle: 'short', hairColor: 'brown', facialHair: 'none', headShape: 'oval', expression: 'determined', accessory: 'none' },
+    [
+      ['20-21', 'RISING STAR', 86, 'CAM/CM', 'CHE', 'Box-to-Box', [78, 80, 84, 84, 62, 70]],
+    ]),
+  ...player('fernandez_enzo', 'Enzo Fernández', 'Enzo', 'Argentina',
+    { skinTone: 'light', hairStyle: 'mullet', hairColor: 'darkbrown', facialHair: 'none', headShape: 'long', expression: 'determined', accessory: 'none' },
+    [
+      ['24-25', 'RISING STAR', 84, 'CM', 'CHE', 'Deep-Lying Playmaker', [72, 76, 86, 82, 72, 74]],
+    ]),
+  ...player('gravesen_thomas', 'Thomas Gravesen', 'Gravesen', 'Denmark',
+    { skinTone: 'pale', hairStyle: 'bald', hairColor: 'brown', facialHair: 'none', headShape: 'round', expression: 'roar', accessory: 'none' },
+    [
+      ['04-05', 'CULT HERO', 83, 'CM/CDM', 'EVE', 'Box-to-Box', [66, 76, 82, 76, 76, 82]],
+    ]),
+  ...player('carsley_lee', 'Lee Carsley', 'Carsley', 'Republic of Ireland',
+    { skinTone: 'pale', hairStyle: 'bald', hairColor: 'brown', facialHair: 'none', headShape: 'long', expression: 'determined', accessory: 'none' },
+    [
+      ['04-05', 'CULT HERO', 79, 'CDM', 'EVE', 'Destroyer', [64, 62, 72, 66, 80, 80]],
+    ]),
+  ...player('osman_leon', 'Leon Osman', 'Osman', 'England',
+    { skinTone: 'pale', hairStyle: 'short', hairColor: 'brown', facialHair: 'none', headShape: 'round', expression: 'grin', accessory: 'none' },
+    [
+      ['07-08', 'CULT HERO', 79, 'CM/RM', 'EVE', 'Box-to-Box', [74, 72, 78, 80, 66, 62]],
+    ]),
+  ...player('barkley_ross', 'Ross Barkley', 'Barkley', 'England',
+    { skinTone: 'pale', hairStyle: 'short', hairColor: 'brown', facialHair: 'none', headShape: 'oval', expression: 'determined', accessory: 'none' },
+    [
+      ['13-14', 'RISING STAR', 83, 'CAM/CM', 'EVE', 'Advanced Playmaker', [80, 80, 80, 84, 50, 78]],
+    ]),
+  ...player('stuart_graham', 'Graham Stuart', 'G. Stuart', 'England',
+    { skinTone: 'pale', hairStyle: 'short', hairColor: 'brown', facialHair: 'none', headShape: 'round', expression: 'grin', accessory: 'none' },
+    [
+      ['93-94', 'CULT HERO', 78, 'RM/ST', 'EVE', 'Box-to-Box', [74, 74, 72, 74, 60, 72]],
+    ]),
+  ...player('gueye_idrissa', 'Idrissa Gueye', 'Gueye', 'Senegal',
+    { skinTone: 'dark', hairStyle: 'buzz', hairColor: 'black', facialHair: 'none', headShape: 'oval', expression: 'determined', accessory: 'none' },
+    [
+      ['18-19', 'CULT HERO', 82, 'CDM', 'EVE', 'Destroyer', [78, 58, 72, 74, 85, 76]],
+    ]),
+  ...player('rodriguez_james', 'James Rodríguez', 'James', 'Colombia',
+    { skinTone: 'light', hairStyle: 'sidepart', hairColor: 'darkbrown', facialHair: 'stubble', headShape: 'oval', expression: 'cool', accessory: 'none' },
+    [
+      ['20-21', 'CULT HERO', 82, 'CAM', 'EVE', 'Advanced Playmaker', [60, 82, 88, 84, 38, 58]],
     ]),
   // ── Forwards ──
   ...player('henry_thierry', 'Thierry Henry', 'Henry', 'France',
@@ -2008,7 +2472,7 @@ export const PLAYERS: PlayerCard[] = [
     [
       ['99-00', 'CULT HERO', 84, 'ST/CAM', 'ARS', 'False Nine', [74, 82, 80, 90, 30, 76]],
       ['07-08', 'VETERAN', 77, 'ST', 'POR', 'Target Man', [56, 78, 72, 80, 30, 76]],
-      ['04-05', 'VETERAN', 78, 'ST', 'WBA', 'Shadow Striker', [60, 76, 76, 84, 36, 70]],
+      ['04-05', 'CULT HERO', 78, 'ST', 'WBA', 'Shadow Striker', [60, 76, 76, 84, 36, 70]],
     ]),
   ...player('anelka_nicolas', 'Nicolas Anelka', 'Anelka', 'France',
     { skinTone: 'deep', hairStyle: 'buzz', hairColor: 'black', facialHair: 'none', headShape: 'long', expression: 'cool', accessory: 'none' },
@@ -2016,6 +2480,7 @@ export const PLAYERS: PlayerCard[] = [
       ['98-99', 'RISING STAR', 85, 'ST', 'ARS', 'Speedster', [94, 84, 70, 84, 30, 72]],
       ['06-07', 'CULT HERO', 82, 'ST', 'BOL', 'Complete Forward', [84, 82, 72, 81, 36, 76]],
       ['02-03', 'SQUAD', 82, 'ST', 'MCI', 'Complete Forward', [86, 84, 74, 82, 30, 72]],
+      ['08-09', 'WORLD CLASS', 87, 'ST', 'CHE', 'Complete Forward', [86, 88, 78, 84, 36, 78]],
     ]),
   ...player('vanpersie_robin', 'Robin van Persie', 'Van Persie', 'Netherlands',
     { skinTone: 'pale', hairStyle: 'short', hairColor: 'darkbrown', facialHair: 'none', headShape: 'oval', expression: 'focused', accessory: 'none' },
@@ -2063,6 +2528,7 @@ export const PLAYERS: PlayerCard[] = [
     { skinTone: 'pale', hairStyle: 'slick', hairColor: 'darkbrown', facialHair: 'stubble', headShape: 'oval', expression: 'smirk', accessory: 'captainband' },
     [
       ['20-21', 'CULT HERO', 86, 'LW/CAM', 'AVL', 'Advanced Playmaker', [81, 77, 88, 93, 41, 73]],
+      ['22-23', 'WORLD CLASS', 85, 'LW', 'MCI', 'Winger', [82, 74, 84, 90, 44, 74]],
     ]),
   ...player('young_ashley', 'Ashley Young', 'Young', 'England',
     { skinTone: 'brown', hairStyle: 'buzz', hairColor: 'black', facialHair: 'none', headShape: 'oval', expression: 'smirk', accessory: 'none' },
@@ -2073,7 +2539,8 @@ export const PLAYERS: PlayerCard[] = [
   ...player('yorke_dwight', 'Dwight Yorke', 'Yorke', 'Trinidad and Tobago',
     { skinTone: 'deep', hairStyle: 'short', hairColor: 'black', facialHair: 'none', headShape: 'round', expression: 'grin', accessory: 'none' },
     [
-      ['97-98', 'RISING STAR', 83, 'ST', 'AVL', 'Complete Forward', [80, 83, 76, 85, 35, 72]],
+      ['97-98', 'CULT HERO', 83, 'ST', 'AVL', 'Complete Forward', [80, 83, 76, 85, 35, 72]],
+      ['98-99', 'WORLD CLASS', 89, 'ST', 'MUN', 'Shadow Striker', [84, 88, 80, 86, 36, 76]],
     ]),
   ...player('agbonlahor_gabriel', 'Gabriel Agbonlahor', 'Agbonlahor', 'England',
     { skinTone: 'brown', hairStyle: 'buzz', hairColor: 'black', facialHair: 'none', headShape: 'oval', expression: 'determined', accessory: 'none' },
@@ -2114,6 +2581,7 @@ export const PLAYERS: PlayerCard[] = [
     [
       ['02-03', 'VETERAN', 79, 'ST', 'BLB', 'Poacher', [78, 82, 66, 76, 30, 70]],
       ['93-94', 'RISING STAR', 86, 'ST', 'NEW', 'Poacher', [90, 92, 64, 82, 30, 72]],
+      ['98-99', 'WORLD CLASS', 88, 'ST', 'MUN', 'Poacher', [86, 89, 72, 84, 34, 76]],
     ]),
   ...player('sutton_chris', 'Chris Sutton', 'Sutton', 'England',
     { skinTone: 'pale', hairStyle: 'short', hairColor: 'darkbrown', facialHair: 'none', headShape: 'long', expression: 'determined', accessory: 'none' },
@@ -2125,6 +2593,8 @@ export const PLAYERS: PlayerCard[] = [
     { skinTone: 'pale', hairStyle: 'short', hairColor: 'blonde', facialHair: 'none', headShape: 'round', expression: 'grin', accessory: 'none' },
     [
       ['02-03', 'RISING STAR', 82, 'LW/LM', 'BLB', 'Winger', [86, 72, 76, 86, 36, 62]],
+      ['06-07', 'SQUAD', 79, 'LW/LM', 'NEW', 'Winger', [80, 72, 76, 80, 42, 62]],
+      ['04-05', 'WORLD CLASS', 87, 'LW', 'CHE', 'Winger', [90, 78, 82, 90, 40, 64]],
     ]),
   ...player('santacruz_roque', 'Roque Santa Cruz', 'Santa Cruz', 'Paraguay',
     { skinTone: 'light', hairStyle: 'short', hairColor: 'darkbrown', facialHair: 'none', headShape: 'long', expression: 'focused', accessory: 'none' },
@@ -2171,6 +2641,7 @@ export const PLAYERS: PlayerCard[] = [
     [
       ['14-15', 'RISING STAR', 76, 'ST', 'BOU', 'Speedster', [86, 76, 60, 74, 36, 68]],
       ['18-19', 'CULT HERO', 82, 'ST', 'BOU', 'Complete Forward', [84, 82, 68, 78, 40, 78]],
+      ['22-23', 'VETERAN', 84, 'ST', 'NEW', 'Poacher', [82, 86, 66, 76, 34, 76]],
     ]),
   ...player('king_joshua', 'Joshua King', 'King', 'Norway',
     { skinTone: 'brown', hairStyle: 'short', hairColor: 'black', facialHair: 'none', headShape: 'oval', expression: 'focused', accessory: 'none' },
@@ -2190,7 +2661,7 @@ export const PLAYERS: PlayerCard[] = [
   ...player('toney_ivan', 'Ivan Toney', 'Toney', 'England',
     { skinTone: 'deep', hairStyle: 'short', hairColor: 'black', facialHair: 'beard', headShape: 'oval', expression: 'smirk', accessory: 'none' },
     [
-      ['21-22', 'RISING STAR', 80, 'ST', 'BRE', 'Complete Forward', [70, 81, 72, 76, 40, 83]],
+      ['21-22', 'CULT HERO', 80, 'ST', 'BRE', 'Complete Forward', [70, 81, 72, 76, 40, 83]],
       ['22-23', 'CULT HERO', 85, 'ST', 'BRE', 'Complete Forward', [71, 87, 76, 79, 40, 85]],
     ]),
   ...player('mbeumo_bryan', 'Bryan Mbeumo', 'Mbeumo', 'Cameroon',
@@ -2207,7 +2678,7 @@ export const PLAYERS: PlayerCard[] = [
   ...player('mitoma_kaoru', 'Kaoru Mitoma', 'Mitoma', 'Japan',
     { skinTone: 'light', hairStyle: 'short', hairColor: 'black', facialHair: 'none', headShape: 'oval', expression: 'focused', accessory: 'none' },
     [
-      ['22-23', 'RISING STAR', 84, 'LW/LM', 'BRI', 'Winger', [87, 79, 75, 89, 40, 63]],
+      ['22-23', 'CULT HERO', 84, 'LW/LM', 'BRI', 'Winger', [87, 79, 75, 89, 40, 63]],
     ]),
   ...player('knockaert_anthony', 'Anthony Knockaert', 'Knockaert', 'France',
     { skinTone: 'light', hairStyle: 'short', hairColor: 'darkbrown', facialHair: 'beard', headShape: 'oval', expression: 'roar', accessory: 'none' },
@@ -2259,14 +2730,14 @@ export const PLAYERS: PlayerCard[] = [
   ...player('drogba_didier', 'Didier Drogba', 'Drogba', 'Côte d\'Ivoire',
     { skinTone: 'deep', hairStyle: 'buzz', hairColor: 'black', facialHair: 'goatee', headShape: 'square', expression: 'roar', accessory: 'none' },
     [
-      ['04-05', 'RISING STAR', 86, 'ST', 'CHE', 'Target Man', [84, 86, 70, 80, 40, 92]],
+      ['04-05', 'WORLD CLASS', 86, 'ST', 'CHE', 'Target Man', [84, 86, 70, 80, 40, 92]],
       ['09-10', 'PRIME', 93, 'ST', 'CHE', 'Target Man', [86, 94, 76, 86, 40, 96], { hairStyle: 'cornrows' }],
       ['14-15', 'LEGEND', 81, 'ST', 'CHE', 'Target Man', [66, 84, 72, 76, 40, 88], { hairStyle: 'dreads', facialHair: 'beard' }],
     ]),
   ...player('torres_fernando', 'Fernando Torres', 'Torres', 'Spain',
     { skinTone: 'pale', hairStyle: 'short', hairColor: 'brown', facialHair: 'none', headShape: 'oval', expression: 'focused', accessory: 'none' },
     [
-      ['13-14', 'VETERAN', 79, 'ST', 'CHE', 'Speedster', [80, 74, 72, 78, 34, 72]],
+      ['13-14', 'CULT HERO', 79, 'ST', 'CHE', 'Speedster', [80, 74, 72, 78, 34, 72]],
       ['07-08', 'PRIME', 91, 'ST', 'LIV', 'Speedster', [94, 92, 72, 88, 34, 80], { hairStyle: 'long', hairColor: 'blonde', accessory: 'alice' }],
     ]),
   ...player('hazard_eden', 'Eden Hazard', 'Hazard', 'Belgium',
@@ -2304,6 +2775,7 @@ export const PLAYERS: PlayerCard[] = [
     { skinTone: 'pale', hairStyle: 'buzz', hairColor: 'brown', facialHair: 'none', headShape: 'round', expression: 'grin', accessory: 'none' },
     [
       ['04-05', 'CULT HERO', 82, 'ST', 'CRY', 'Poacher', [86, 82, 62, 78, 36, 66]],
+      ['06-07', 'CULT HERO', 81, 'ST', 'EVE', 'Speedster', [88, 82, 64, 80, 30, 62]],
     ]),
   ...player('mateta_jeanphilippe', 'Jean-Philippe Mateta', 'Mateta', 'France',
     { skinTone: 'deep', hairStyle: 'short', hairColor: 'black', facialHair: 'beard', headShape: 'long', expression: 'grin', accessory: 'none' },
@@ -2345,6 +2817,7 @@ export const PLAYERS: PlayerCard[] = [
     { skinTone: 'brown', hairStyle: 'buzz', hairColor: 'black', facialHair: 'none', headShape: 'oval', expression: 'focused', accessory: 'none' },
     [
       ['01-02', 'RISING STAR', 81, 'ST', 'FUL', 'Complete Forward', [84, 80, 68, 80, 35, 74]],
+      ['10-11', 'CULT HERO', 80, 'ST', 'EVE', 'Complete Forward', [78, 82, 72, 80, 32, 72]],
     ]),
   ...player('mitrovic_aleksandar', 'Aleksandar Mitrović', 'Mitrović', 'Serbia',
     { skinTone: 'pale', hairStyle: 'short', hairColor: 'darkbrown', facialHair: 'beard', headShape: 'square', expression: 'roar', accessory: 'none' },
@@ -2362,6 +2835,7 @@ export const PLAYERS: PlayerCard[] = [
     [
       ['12-13', 'VETERAN', 82, 'ST/CAM', 'FUL', 'False Nine', [60, 83, 80, 86, 35, 70]],
       ['07-08', 'WORLD CLASS', 86, 'ST', 'TOT', 'Complete Forward', [68, 87, 82, 88, 38, 76]],
+      ['10-11', 'WORLD CLASS', 88, 'ST', 'MUN', 'Complete Forward', [70, 88, 86, 90, 36, 76]],
     ]),
   ...player('mcbride_brian', 'Brian McBride', 'McBride', 'United States',
     { skinTone: 'pale', hairStyle: 'buzz', hairColor: 'brown', facialHair: 'none', headShape: 'square', expression: 'determined', accessory: 'none' },
@@ -2388,8 +2862,9 @@ export const PLAYERS: PlayerCard[] = [
   ...player('hasselbaink_jimmyfloyd', 'Jimmy Floyd Hasselbaink', 'Hasselbaink', 'Netherlands',
     { skinTone: 'deep', hairStyle: 'bald', hairColor: 'black', facialHair: 'none', headShape: 'square', expression: 'determined', accessory: 'none' },
     [
-      ['98-99', 'RISING STAR', 85, 'ST', 'LEE', 'Poacher', [80, 88, 66, 77, 36, 84]],
+      ['98-99', 'WORLD CLASS', 85, 'ST', 'LEE', 'Poacher', [80, 88, 66, 77, 36, 84]],
       ['04-05', 'VETERAN', 81, 'ST', 'MID', 'Complete Forward', [72, 85, 68, 74, 36, 82], { hairStyle: 'buzz', expression: 'roar' }],
+      ['00-01', 'WORLD CLASS', 89, 'ST', 'CHE', 'Complete Forward', [82, 92, 72, 82, 40, 86], { hairStyle: 'buzz', expression: 'roar' }],
     ]),
   ...player('viduka_mark', 'Mark Viduka', 'Viduka', 'Australia',
     { skinTone: 'light', hairStyle: 'short', hairColor: 'black', facialHair: 'none', headShape: 'round', expression: 'cool', accessory: 'none' },
@@ -2402,7 +2877,7 @@ export const PLAYERS: PlayerCard[] = [
     { skinTone: 'pale', hairStyle: 'long', hairColor: 'darkbrown', facialHair: 'none', headShape: 'oval', expression: 'cool', accessory: 'none' },
     [
       ['99-00', 'RISING STAR', 84, 'LW/ST', 'LEE', 'Inside Forward', [86, 80, 79, 87, 40, 68]],
-      ['05-06', 'VETERAN', 78, 'LM/LW', 'LIV', 'Winger', [78, 72, 77, 81, 40, 62], { hairStyle: 'short' }],
+      ['05-06', 'CULT HERO', 78, 'LM/LW', 'LIV', 'Winger', [78, 72, 77, 81, 40, 62], { hairStyle: 'short' }],
     ]),
   ...player('raphinha_raphinha', 'Raphinha', 'Raphinha', 'Brazil',
     { skinTone: 'tan', hairStyle: 'short', hairColor: 'black', facialHair: 'stubble', headShape: 'long', expression: 'grin', accessory: 'none' },
@@ -2429,7 +2904,7 @@ export const PLAYERS: PlayerCard[] = [
     { skinTone: 'pale', hairStyle: 'short', hairColor: 'darkbrown', facialHair: 'none', headShape: 'long', expression: 'tongue', accessory: 'none' },
     [
       ['14-15', 'SQUAD', 76, 'ST', 'LEI', 'Speedster', [90, 72, 64, 74, 40, 72]],
-      ['15-16', 'RISING STAR', 87, 'ST', 'LEI', 'Speedster', [95, 88, 70, 82, 44, 76]],
+      ['15-16', 'CULT HERO', 87, 'ST', 'LEI', 'Speedster', [95, 88, 70, 82, 44, 76]],
       ['19-20', 'LEGEND', 84, 'ST', 'LEI', 'Speedster', [86, 88, 68, 78, 40, 72]],
     ]),
   ...player('mahrez_riyad', 'Riyad Mahrez', 'Mahrez', 'Algeria',
@@ -2437,6 +2912,7 @@ export const PLAYERS: PlayerCard[] = [
     [
       ['14-15', 'SQUAD', 78, 'RW', 'LEI', 'Inside Forward', [82, 70, 74, 84, 30, 54]],
       ['15-16', 'RISING STAR', 89, 'RW/RM', 'LEI', 'Inside Forward', [87, 86, 85, 93, 34, 58]],
+      ['22-23', 'VETERAN', 86, 'RW', 'MCI', 'Inside Forward', [82, 84, 84, 90, 40, 58]],
     ]),
   ...player('okazaki_shinji', 'Shinji Okazaki', 'Okazaki', 'Japan',
     { skinTone: 'light', hairStyle: 'short', hairColor: 'black', facialHair: 'none', headShape: 'oval', expression: 'grin', accessory: 'none' },
@@ -2447,7 +2923,7 @@ export const PLAYERS: PlayerCard[] = [
     { skinTone: 'pale', hairStyle: 'short', hairColor: 'darkbrown', facialHair: 'none', headShape: 'oval', expression: 'focused', accessory: 'none' },
     [
       ['97-98', 'RISING STAR', 87, 'ST', 'LIV', 'Speedster', [95, 87, 68, 85, 30, 60]],
-      ['05-06', 'VETERAN', 80, 'ST', 'NEW', 'Poacher', [84, 84, 66, 78, 30, 60]],
+      ['05-06', 'CULT HERO', 80, 'ST', 'NEW', 'Poacher', [84, 84, 66, 78, 30, 60]],
     ]),
   ...player('suarez_luis', 'Luis Suárez', 'Suárez', 'Uruguay',
     { skinTone: 'light', hairStyle: 'long', hairColor: 'black', facialHair: 'none', headShape: 'oval', expression: 'grin', accessory: 'alice' },
@@ -2494,6 +2970,7 @@ export const PLAYERS: PlayerCard[] = [
     [
       ['06-07', 'SQUAD', 79, 'ST', 'MID', 'Poacher', [74, 81, 62, 74, 32, 84]],
       ['03-04', 'CULT HERO', 82, 'ST', 'POR', 'Poacher', [80, 82, 60, 76, 36, 84]],
+      ['07-08', 'CULT HERO', 83, 'ST', 'EVE', 'Poacher', [78, 86, 64, 80, 30, 84]],
     ]),
   ...player('ronaldo_cristiano', 'Cristiano Ronaldo', 'Ronaldo', 'Portugal',
     { skinTone: 'tan', hairStyle: 'frosted', hairColor: 'darkbrown', facialHair: 'none', headShape: 'oval', expression: 'grin', accessory: 'none' },
@@ -2517,8 +2994,9 @@ export const PLAYERS: PlayerCard[] = [
     { skinTone: 'deep', hairStyle: 'buzz', hairColor: 'black', facialHair: 'none', headShape: 'oval', expression: 'determined', accessory: 'none' },
     [
       ['95-96', 'PRIME', 88, 'ST', 'NEW', 'Complete Forward', [86, 89, 68, 80, 40, 88]],
-      ['92-93', 'RISING STAR', 84, 'ST', 'QPR', 'Complete Forward', [84, 83, 63, 77, 40, 85], { hairStyle: 'short' }],
+      ['92-93', 'CULT HERO', 84, 'ST', 'QPR', 'Complete Forward', [84, 83, 63, 77, 40, 85], { hairStyle: 'short' }],
       ['94-95', 'PRIME', 86, 'ST', 'QPR', 'Complete Forward', [85, 87, 66, 79, 40, 86], { hairStyle: 'short' }],
+      ['01-02', 'VETERAN', 81, 'ST', 'TOT', 'Target Man', [70, 82, 66, 74, 36, 82], { hairStyle: 'short' }],
     ]),
   ...player('isak_alexander', 'Alexander Isak', 'Isak', 'Sweden',
     { skinTone: 'deep', hairStyle: 'short', hairColor: 'black', facialHair: 'none', headShape: 'long', expression: 'cool', accessory: 'none' },
@@ -2662,6 +3140,7 @@ export const PLAYERS: PlayerCard[] = [
     [
       ['94-95', 'PRIME', 85, 'ST/CAM', 'TOT', 'Shadow Striker', [64, 85, 84, 80, 40, 76]],
       ['01-02', 'LEGEND', 81, 'ST', 'TOT', 'Shadow Striker', [52, 82, 83, 76, 40, 72]],
+      ['00-01', 'VETERAN', 87, 'ST/CAM', 'MUN', 'Shadow Striker', [62, 87, 88, 84, 40, 74]],
     ]),
   ...player('deeney_troy', 'Troy Deeney', 'Deeney', 'England',
     { skinTone: 'brown', hairStyle: 'buzz', hairColor: 'black', facialHair: 'fullbeard', headShape: 'square', expression: 'roar', accessory: 'captainband' },
@@ -2708,12 +3187,14 @@ export const PLAYERS: PlayerCard[] = [
     { skinTone: 'pale', hairStyle: 'short', hairColor: 'ginger', facialHair: 'none', headShape: 'square', expression: 'roar', accessory: 'none' },
     [
       ['97-98', 'RISING STAR', 81, 'ST', 'WHU', 'Target Man', [68, 82, 64, 70, 40, 88]],
-      ['99-00', 'VETERAN', 78, 'ST', 'WIM', 'Target Man', [62, 78, 64, 66, 40, 86]],
+      ['99-00', 'CULT HERO', 78, 'ST', 'WIM', 'Target Man', [62, 78, 64, 66, 40, 86]],
     ]),
   ...player('tevez_carlos', 'Carlos Tevez', 'Tevez', 'Argentina',
     { skinTone: 'tan', hairStyle: 'long', hairColor: 'black', facialHair: 'none', headShape: 'round', expression: 'determined', accessory: 'none' },
     [
       ['06-07', 'CULT HERO', 81, 'ST', 'WHU', 'Complete Forward', [80, 79, 74, 84, 46, 80]],
+      ['10-11', 'WORLD CLASS', 88, 'ST', 'MCI', 'Complete Forward', [86, 88, 80, 88, 50, 82]],
+      ['07-08', 'CULT HERO', 85, 'ST', 'MUN', 'Shadow Striker', [84, 84, 78, 86, 52, 80]],
     ]),
   ...player('bowen_jarrod', 'Jarrod Bowen', 'Bowen', 'England',
     { skinTone: 'pale', hairStyle: 'short', hairColor: 'darkbrown', facialHair: 'stubble', headShape: 'oval', expression: 'grin', accessory: 'none' },
@@ -2759,6 +3240,7 @@ export const PLAYERS: PlayerCard[] = [
     { skinTone: 'light', hairStyle: 'short', hairColor: 'darkbrown', facialHair: 'stubble', headShape: 'oval', expression: 'focused', accessory: 'none' },
     [
       ['18-19', 'RISING STAR', 82, 'LW/ST', 'WOL', 'Inside Forward', [84, 80, 72, 84, 40, 72]],
+      ['21-22', 'WORLD CLASS', 87, 'ST/LW', 'LIV', 'Inside Forward', [84, 87, 76, 84, 40, 72]],
     ]),
   ...player('traore_adama', 'Adama Traoré', 'Adama', 'Spain',
     { skinTone: 'dark', hairStyle: 'buzz', hairColor: 'black', facialHair: 'beard', headShape: 'round', expression: 'grin', accessory: 'none' },
@@ -2779,6 +3261,246 @@ export const PLAYERS: PlayerCard[] = [
     { skinTone: 'pale', hairStyle: 'short', hairColor: 'darkbrown', facialHair: 'none', headShape: 'oval', expression: 'determined', accessory: 'none' },
     [
       ['10-11', 'SQUAD', 78, 'ST', 'WOL', 'Complete Forward', [74, 76, 68, 72, 52, 80]],
+    ]),
+  ...player('wright_ian', 'Ian Wright', 'Wright', 'England',
+    { skinTone: 'dark', hairStyle: 'buzz', hairColor: 'black', facialHair: 'none', headShape: 'round', expression: 'grin', accessory: 'none' },
+    [
+      ['96-97', 'WORLD CLASS', 89, 'ST', 'ARS', 'Poacher', [88, 91, 72, 85, 35, 74]],
+    ]),
+  ...player('overmars_marc', 'Marc Overmars', 'Overmars', 'Netherlands',
+    { skinTone: 'pale', hairStyle: 'short', hairColor: 'brown', facialHair: 'none', headShape: 'round', expression: 'grin', accessory: 'none' },
+    [
+      ['97-98', 'WORLD CLASS', 88, 'LW/LM', 'ARS', 'Speedster', [95, 82, 78, 88, 38, 62]],
+    ]),
+  ...player('walcott_theo', 'Theo Walcott', 'Walcott', 'England',
+    { skinTone: 'brown', hairStyle: 'short', hairColor: 'black', facialHair: 'none', headShape: 'oval', expression: 'grin', accessory: 'none' },
+    [
+      ['12-13', 'CULT HERO', 83, 'RW/ST', 'ARS', 'Speedster', [95, 80, 72, 80, 30, 58]],
+    ]),
+  ...player('arshavin_andrey', 'Andrey Arshavin', 'Arshavin', 'Russia',
+    { skinTone: 'pale', hairStyle: 'fringe', hairColor: 'brown', facialHair: 'none', headShape: 'round', expression: 'smirk', accessory: 'none' },
+    [
+      ['08-09', 'CULT HERO', 85, 'LW/CAM', 'ARS', 'Inside Forward', [82, 84, 82, 88, 35, 58]],
+    ]),
+  ...player('aubameyang_pierreemerick', 'Pierre-Emerick Aubameyang', 'Aubameyang', 'Gabon',
+    { skinTone: 'dark', hairStyle: 'short', hairColor: 'black', facialHair: 'goatee', headShape: 'oval', expression: 'grin', accessory: 'none' },
+    [
+      ['18-19', 'WORLD CLASS', 88, 'ST/LW', 'ARS', 'Speedster', [95, 88, 74, 83, 35, 70]],
+    ]),
+  ...player('kuyt_dirk', 'Dirk Kuyt', 'Kuyt', 'Netherlands',
+    { skinTone: 'pale', hairStyle: 'short', hairColor: 'blonde', facialHair: 'none', headShape: 'long', expression: 'determined', accessory: 'none' },
+    [
+      ['08-09', 'CULT HERO', 84, 'RW/ST', 'LIV', 'Inside Forward', [78, 80, 76, 78, 62, 82]],
+    ]),
+  ...player('firmino_roberto', 'Roberto Firmino', 'Firmino', 'Brazil',
+    { skinTone: 'tan', hairStyle: 'short', hairColor: 'black', facialHair: 'beard', headShape: 'oval', expression: 'grin', accessory: 'none' },
+    [
+      ['19-20', 'WORLD CLASS', 88, 'ST/CAM', 'LIV', 'False Nine', [80, 82, 85, 88, 62, 76]],
+    ]),
+  ...player('rush_ian', 'Ian Rush', 'Rush', 'Wales',
+    { skinTone: 'pale', hairStyle: 'short', hairColor: 'darkbrown', facialHair: 'moustache', headShape: 'long', expression: 'determined', accessory: 'none' },
+    [
+      ['92-93', 'LEGEND', 84, 'ST', 'LIV', 'Poacher', [74, 86, 72, 78, 40, 70]],
+    ]),
+  ...player('diaz_luis', 'Luis Díaz', 'L. Díaz', 'Colombia',
+    { skinTone: 'tan', hairStyle: 'curly', hairColor: 'black', facialHair: 'none', headShape: 'oval', expression: 'grin', accessory: 'none' },
+    [
+      ['24-25', 'WORLD CLASS', 86, 'LW', 'LIV', 'Inside Forward', [91, 82, 78, 88, 40, 68]],
+    ]),
+  ...player('silva_bernardo', 'Bernardo Silva', 'Bernardo', 'Portugal',
+    { skinTone: 'light', hairStyle: 'short', hairColor: 'black', facialHair: 'none', headShape: 'oval', expression: 'grin', accessory: 'none' },
+    [
+      ['18-19', 'WORLD CLASS', 89, 'RW/CAM', 'MCI', 'Advanced Playmaker', [80, 80, 88, 92, 60, 62]],
+    ]),
+  ...player('sane_leroy', 'Leroy Sané', 'Sané', 'Germany',
+    { skinTone: 'brown', hairStyle: 'short', hairColor: 'black', facialHair: 'none', headShape: 'oval', expression: 'grin', accessory: 'none' },
+    [
+      ['17-18', 'RISING STAR', 87, 'LW', 'MCI', 'Speedster', [94, 82, 80, 88, 32, 66]],
+    ]),
+  ...player('dzeko_edin', 'Edin Džeko', 'Džeko', 'Bosnia and Herzegovina',
+    { skinTone: 'pale', hairStyle: 'short', hairColor: 'darkbrown', facialHair: 'stubble', headShape: 'long', expression: 'determined', accessory: 'none' },
+    [
+      ['13-14', 'CULT HERO', 85, 'ST', 'MCI', 'Target Man', [72, 86, 76, 80, 38, 86]],
+    ]),
+  ...player('goater_shaun', 'Shaun Goater', 'Goater', 'Bermuda',
+    { skinTone: 'dark', hairStyle: 'buzz', hairColor: 'black', facialHair: 'none', headShape: 'long', expression: 'grin', accessory: 'none' },
+    [
+      ['02-03', 'CULT HERO', 79, 'ST', 'MCI', 'Poacher', [74, 80, 62, 70, 34, 76]],
+    ]),
+  ...player('wrightphillips_shaun', 'Shaun Wright-Phillips', 'Wright-Phillips', 'England',
+    { skinTone: 'dark', hairStyle: 'buzz', hairColor: 'black', facialHair: 'none', headShape: 'round', expression: 'grin', accessory: 'none' },
+    [
+      ['04-05', 'RISING STAR', 84, 'RW', 'MCI', 'Speedster', [92, 74, 74, 86, 38, 58]],
+    ]),
+  ...player('robinho_robinho', 'Robinho', 'Robinho', 'Brazil',
+    { skinTone: 'brown', hairStyle: 'short', hairColor: 'black', facialHair: 'none', headShape: 'oval', expression: 'grin', accessory: 'none' },
+    [
+      ['08-09', 'WORLD CLASS', 85, 'LW', 'MCI', 'Winger', [90, 82, 74, 92, 30, 52]],
+    ]),
+  ...player('balotelli_mario', 'Mario Balotelli', 'Balotelli', 'Italy',
+    { skinTone: 'dark', hairStyle: 'mohawk', hairColor: 'black', facialHair: 'none', headShape: 'long', expression: 'cool', accessory: 'none' },
+    [
+      ['11-12', 'CULT HERO', 84, 'ST', 'MCI', 'Complete Forward', [82, 86, 72, 82, 30, 82]],
+    ]),
+  ...player('jesus_gabriel', 'Gabriel Jesus', 'G. Jesus', 'Brazil',
+    { skinTone: 'brown', hairStyle: 'short', hairColor: 'black', facialHair: 'none', headShape: 'round', expression: 'grin', accessory: 'none' },
+    [
+      ['17-18', 'RISING STAR', 84, 'ST/RW', 'MCI', 'Complete Forward', [86, 82, 74, 86, 48, 70]],
+    ]),
+  ...player('alvarez_julian', 'Julián Álvarez', 'J. Álvarez', 'Argentina',
+    { skinTone: 'light', hairStyle: 'short', hairColor: 'darkbrown', facialHair: 'none', headShape: 'round', expression: 'determined', accessory: 'none' },
+    [
+      ['23-24', 'RISING STAR', 85, 'ST/CAM', 'MCI', 'Shadow Striker', [82, 84, 80, 84, 52, 72]],
+    ]),
+  ...player('solskjaer_olegunnar', 'Ole Gunnar Solskjær', 'Solskjær', 'Norway',
+    { skinTone: 'pale', hairStyle: 'short', hairColor: 'blonde', facialHair: 'none', headShape: 'round', expression: 'grin', accessory: 'none' },
+    [
+      ['96-97', 'CULT HERO', 85, 'ST', 'MUN', 'Poacher', [80, 89, 72, 82, 32, 64]],
+    ]),
+  ...player('nani_nani', 'Nani', 'Nani', 'Portugal',
+    { skinTone: 'tan', hairStyle: 'short', hairColor: 'black', facialHair: 'none', headShape: 'oval', expression: 'grin', accessory: 'none' },
+    [
+      ['10-11', 'WORLD CLASS', 86, 'RW/LW', 'MUN', 'Winger', [90, 82, 82, 90, 38, 66]],
+    ]),
+  ...player('rashford_marcus', 'Marcus Rashford', 'Rashford', 'England',
+    { skinTone: 'dark', hairStyle: 'short', hairColor: 'black', facialHair: 'stubble', headShape: 'oval', expression: 'determined', accessory: 'none' },
+    [
+      ['22-23', 'WORLD CLASS', 87, 'LW/ST', 'MUN', 'Inside Forward', [93, 86, 74, 85, 38, 72]],
+    ]),
+  ...player('hughes_mark', 'Mark Hughes', 'M. Hughes', 'Wales',
+    { skinTone: 'pale', hairStyle: 'mullet', hairColor: 'darkbrown', facialHair: 'none', headShape: 'square', expression: 'roar', accessory: 'none' },
+    [
+      ['93-94', 'CULT HERO', 85, 'ST', 'MUN', 'Target Man', [70, 86, 74, 80, 42, 88]],
+    ]),
+  ...player('hernandez_javier', 'Javier Hernández', 'Chicharito', 'Mexico',
+    { skinTone: 'light', hairStyle: 'short', hairColor: 'black', facialHair: 'none', headShape: 'oval', expression: 'grin', accessory: 'none' },
+    [
+      ['10-11', 'RISING STAR', 83, 'ST', 'MUN', 'Poacher', [86, 85, 62, 76, 30, 62]],
+    ]),
+  ...player('ibrahimovic_zlatan', 'Zlatan Ibrahimović', 'Ibrahimović', 'Sweden',
+    { skinTone: 'olive', hairStyle: 'manbun', hairColor: 'black', facialHair: 'beard', headShape: 'long', expression: 'cool', accessory: 'none' },
+    [
+      ['16-17', 'VETERAN', 87, 'ST', 'MUN', 'Complete Forward', [70, 90, 80, 86, 38, 88]],
+    ]),
+  ...player('asprilla_faustino', 'Faustino Asprilla', 'Asprilla', 'Colombia',
+    { skinTone: 'brown', hairStyle: 'short', hairColor: 'black', facialHair: 'none', headShape: 'long', expression: 'grin', accessory: 'none' },
+    [
+      ['96-97', 'CULT HERO', 85, 'ST/LW', 'NEW', 'Complete Forward', [86, 82, 76, 90, 30, 68]],
+    ]),
+  ...player('ameobi_shola', 'Shola Ameobi', 'Ameobi', 'Nigeria',
+    { skinTone: 'dark', hairStyle: 'buzz', hairColor: 'black', facialHair: 'none', headShape: 'long', expression: 'grin', accessory: 'none' },
+    [
+      ['02-03', 'CULT HERO', 78, 'ST', 'NEW', 'Target Man', [66, 76, 68, 74, 36, 82]],
+    ]),
+  ...player('cisse_papiss', 'Papiss Cissé', 'Cissé', 'Senegal',
+    { skinTone: 'dark', hairStyle: 'buzz', hairColor: 'black', facialHair: 'stubble', headShape: 'long', expression: 'grin', accessory: 'none' },
+    [
+      ['11-12', 'CULT HERO', 84, 'ST', 'NEW', 'Poacher', [82, 88, 64, 78, 30, 74]],
+    ]),
+  ...player('saintmaximin_allan', 'Allan Saint-Maximin', 'Saint-Maximin', 'France',
+    { skinTone: 'dark', hairStyle: 'dreads', hairColor: 'black', facialHair: 'beard', headShape: 'oval', expression: 'grin', accessory: 'headband' },
+    [
+      ['20-21', 'CULT HERO', 82, 'LW', 'NEW', 'Winger', [92, 72, 72, 90, 30, 72]],
+    ]),
+  ...player('gordon_anthony', 'Anthony Gordon', 'A. Gordon', 'England',
+    { skinTone: 'pale', hairStyle: 'sidepart', hairColor: 'brown', facialHair: 'none', headShape: 'oval', expression: 'determined', accessory: 'none' },
+    [
+      ['23-24', 'RISING STAR', 84, 'LW', 'NEW', 'Speedster', [92, 80, 76, 84, 40, 68]],
+    ]),
+  ...player('saunders_dean', 'Dean Saunders', 'Saunders', 'Wales',
+    { skinTone: 'pale', hairStyle: 'short', hairColor: 'darkbrown', facialHair: 'none', headShape: 'round', expression: 'grin', accessory: 'none' },
+    [
+      ['92-93', 'CULT HERO', 83, 'ST', 'AVL', 'Poacher', [82, 84, 70, 80, 32, 68]],
+    ]),
+  ...player('atkinson_dalian', 'Dalian Atkinson', 'Atkinson', 'England',
+    { skinTone: 'dark', hairStyle: 'short', hairColor: 'black', facialHair: 'none', headShape: 'oval', expression: 'grin', accessory: 'none' },
+    [
+      ['92-93', 'CULT HERO', 83, 'ST', 'AVL', 'Complete Forward', [86, 82, 68, 84, 30, 80]],
+    ]),
+  ...player('angel_juanpablo', 'Juan Pablo Ángel', 'Ángel', 'Colombia',
+    { skinTone: 'tan', hairStyle: 'short', hairColor: 'black', facialHair: 'none', headShape: 'long', expression: 'grin', accessory: 'none' },
+    [
+      ['03-04', 'CULT HERO', 84, 'ST', 'AVL', 'Poacher', [76, 86, 68, 80, 32, 74]],
+    ]),
+  ...player('benteke_christian', 'Christian Benteke', 'Benteke', 'Belgium',
+    { skinTone: 'dark', hairStyle: 'short', hairColor: 'black', facialHair: 'stubble', headShape: 'long', expression: 'roar', accessory: 'none' },
+    [
+      ['12-13', 'CULT HERO', 84, 'ST', 'AVL', 'Target Man', [76, 86, 64, 78, 36, 92]],
+    ]),
+  ...player('carew_john', 'John Carew', 'Carew', 'Norway',
+    { skinTone: 'brown', hairStyle: 'bald', hairColor: 'black', facialHair: 'stubble', headShape: 'long', expression: 'determined', accessory: 'none' },
+    [
+      ['07-08', 'CULT HERO', 82, 'ST', 'AVL', 'Target Man', [70, 82, 70, 78, 34, 90]],
+    ]),
+  ...player('vassell_darius', 'Darius Vassell', 'Vassell', 'England',
+    { skinTone: 'dark', hairStyle: 'buzz', hairColor: 'black', facialHair: 'none', headShape: 'round', expression: 'grin', accessory: 'none' },
+    [
+      ['01-02', 'RISING STAR', 80, 'ST', 'AVL', 'Speedster', [90, 78, 64, 78, 30, 66]],
+    ]),
+  ...player('bailey_leon', 'Leon Bailey', 'L. Bailey', 'Jamaica',
+    { skinTone: 'dark', hairStyle: 'buzz', hairColor: 'black', facialHair: 'none', headShape: 'oval', expression: 'grin', accessory: 'none' },
+    [
+      ['23-24', 'CULT HERO', 83, 'RW', 'AVL', 'Speedster', [94, 80, 74, 86, 30, 64]],
+    ]),
+  ...player('keane_robbie', 'Robbie Keane', 'R. Keane', 'Republic of Ireland',
+    { skinTone: 'pale', hairStyle: 'short', hairColor: 'darkbrown', facialHair: 'none', headShape: 'round', expression: 'grin', accessory: 'none' },
+    [
+      ['06-07', 'WORLD CLASS', 86, 'ST/CAM', 'TOT', 'Shadow Striker', [80, 86, 78, 86, 40, 68]],
+    ]),
+  ...player('lennon_aaron', 'Aaron Lennon', 'Lennon', 'England',
+    { skinTone: 'dark', hairStyle: 'buzz', hairColor: 'black', facialHair: 'none', headShape: 'round', expression: 'grin', accessory: 'none' },
+    [
+      ['09-10', 'CULT HERO', 82, 'RW', 'TOT', 'Speedster', [94, 70, 74, 84, 38, 56]],
+    ]),
+  ...player('moura_lucas', 'Lucas Moura', 'Lucas', 'Brazil',
+    { skinTone: 'light', hairStyle: 'short', hairColor: 'black', facialHair: 'beard', headShape: 'oval', expression: 'grin', accessory: 'none' },
+    [
+      ['18-19', 'CULT HERO', 83, 'RW/LW', 'TOT', 'Speedster', [92, 78, 76, 88, 34, 64]],
+    ]),
+  ...player('kulusevski_dejan', 'Dejan Kulusevski', 'Kulusevski', 'Sweden',
+    { skinTone: 'pale', hairStyle: 'curly', hairColor: 'darkbrown', facialHair: 'none', headShape: 'long', expression: 'grin', accessory: 'none' },
+    [
+      ['21-22', 'RISING STAR', 84, 'RW', 'TOT', 'Inside Forward', [80, 80, 82, 84, 52, 80]],
+    ]),
+  ...player('vialli_gianluca', 'Gianluca Vialli', 'Vialli', 'Italy',
+    { skinTone: 'pale', hairStyle: 'bald', hairColor: 'darkbrown', facialHair: 'stubble', headShape: 'long', expression: 'determined', accessory: 'none' },
+    [
+      ['96-97', 'VETERAN', 84, 'ST', 'CHE', 'Complete Forward', [70, 86, 76, 80, 40, 80]],
+    ]),
+  ...player('robben_arjen', 'Arjen Robben', 'Robben', 'Netherlands',
+    { skinTone: 'pale', hairStyle: 'receding', hairColor: 'brown', facialHair: 'none', headShape: 'oval', expression: 'grin', accessory: 'none' },
+    [
+      ['04-05', 'RISING STAR', 88, 'LW/RW', 'CHE', 'Inside Forward', [95, 84, 80, 92, 32, 62]],
+    ]),
+  ...player('gudjohnsen_eidur', 'Eiður Guðjohnsen', 'Guðjohnsen', 'Iceland',
+    { skinTone: 'pale', hairStyle: 'short', hairColor: 'darkbrown', facialHair: 'none', headShape: 'round', expression: 'smirk', accessory: 'none' },
+    [
+      ['01-02', 'CULT HERO', 85, 'ST/CAM', 'CHE', 'Shadow Striker', [74, 86, 82, 84, 40, 76]],
+    ]),
+  ...player('costa_diego', 'Diego Costa', 'D. Costa', 'Spain',
+    { skinTone: 'light', hairStyle: 'short', hairColor: 'darkbrown', facialHair: 'stubble', headShape: 'square', expression: 'roar', accessory: 'none' },
+    [
+      ['14-15', 'WORLD CLASS', 89, 'ST', 'CHE', 'Complete Forward', [80, 89, 72, 82, 42, 90]],
+    ]),
+  ...player('willian_willian', 'Willian', 'Willian', 'Brazil',
+    { skinTone: 'tan', hairStyle: 'short', hairColor: 'black', facialHair: 'beard', headShape: 'oval', expression: 'grin', accessory: 'none' },
+    [
+      ['15-16', 'CULT HERO', 85, 'RW/LW', 'CHE', 'Winger', [88, 80, 82, 88, 56, 66]],
+    ]),
+  ...player('mirallas_kevin', 'Kevin Mirallas', 'Mirallas', 'Belgium',
+    { skinTone: 'light', hairStyle: 'short', hairColor: 'darkbrown', facialHair: 'stubble', headShape: 'oval', expression: 'smirk', accessory: 'none' },
+    [
+      ['13-14', 'CULT HERO', 81, 'LW/RW', 'EVE', 'Inside Forward', [86, 80, 74, 84, 32, 64]],
+    ]),
+  ...player('rideout_paul', 'Paul Rideout', 'Rideout', 'England',
+    { skinTone: 'pale', hairStyle: 'short', hairColor: 'blonde', facialHair: 'none', headShape: 'long', expression: 'grin', accessory: 'none' },
+    [
+      ['94-95', 'CULT HERO', 78, 'ST', 'EVE', 'Target Man', [68, 78, 66, 72, 36, 80]],
+    ]),
+  ...player('campbell_kevin', 'Kevin Campbell', 'K. Campbell', 'England',
+    { skinTone: 'dark', hairStyle: 'short', hairColor: 'black', facialHair: 'goatee', headShape: 'round', expression: 'grin', accessory: 'none' },
+    [
+      ['99-00', 'CULT HERO', 81, 'ST', 'EVE', 'Target Man', [76, 82, 64, 74, 34, 86]],
     ]),
 ];
 
