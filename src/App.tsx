@@ -510,7 +510,9 @@ function KickoffPanel({ teamName, setTeamName, lineup, rating, onKickOff }: { te
 
 function TitleScreen({ onStart, career, vaultCount, onVault }: { onStart: () => void; career: ReturnType<typeof loadCareer>; vaultCount: number; onVault: () => void }) {
   const showcase = useMemo(() => {
-    const ids = ['henry_thierry_0304', 'ronaldo_cristiano_0708', 'gerrard_steven_0506', 'vandijk_virgil_1819', 'salah_mohamed_1718'];
+    // One of each card style, fanned out with a Prime in the middle:
+    // Squad (grey) · Elite (Cult Hero red) · Prime · Gold (Rising Star glow) · Elite (Legend bronze)
+    const ids = ['rooney_wayne_0203', 'ronaldo_cristiano_0304', 'henry_thierry_0304', 'owen_michael_9798', 'shearer_alan_0203'];
     const found = ids.map((id) => PLAYERS.find((p) => p.id === id)).filter(Boolean) as PlayerCard[];
     return found.length >= 3 ? found : PLAYERS.filter((p) => p.tier === 'PRIME_ICON').slice(0, 5);
   }, []);
@@ -527,7 +529,7 @@ function TitleScreen({ onStart, career, vaultCount, onVault }: { onStart: () => 
         Rip 11 packs. Draft one legend from each across every era of the Premier League. Then survive a live 38-game season and chase the holy grail: <b className="text-yellow-300">38-0. Invincible.</b>
       </p>
 
-      <div className="relative mt-8 flex h-[240px] w-full max-w-3xl items-center justify-center">
+      <div className="relative mt-8 flex h-[260px] w-full max-w-3xl items-center justify-center overflow-x-clip">
         {showcase.map((c, i) => {
           const mid = (showcase.length - 1) / 2;
           const off = i - mid;
@@ -535,7 +537,7 @@ function TitleScreen({ onStart, career, vaultCount, onVault }: { onStart: () => 
             <div
               key={c.id}
               className="absolute transition-transform hover:z-30"
-              style={{ transform: `translateX(${off * 110}px) translateY(${Math.abs(off) * 14}px) rotate(${off * 6}deg)`, zIndex: 10 - Math.abs(off) }}
+              style={{ transform: `translateX(calc(${off} * clamp(56px, 16vw, 110px))) translateY(${Math.abs(off) * 14}px) rotate(${off * 6}deg)`, zIndex: 10 - Math.abs(off) }}
             >
               <PlayerCardUI card={c} size="md" />
             </div>
