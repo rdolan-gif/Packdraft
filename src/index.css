@@ -75,20 +75,13 @@ body {
       linear-gradient(150deg, #fff7c2 0%, #facc15 25%, #d97706 60%, #78350f 100%);
     border: 2px solid #fde68a;
     color: #fffbeb;
-    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.35), 0 0 16px rgba(250, 204, 21, 0.4);
-  }
-
-  /* Gold (86–90): trim in the era-label colour, an outer border plus an inner ring. */
-  .gold-trim {
-    position: absolute;
-    inset: 0;
-    border-radius: inherit;
-    pointer-events: none;
-    z-index: 4;
-    border: 3px solid var(--e2);
+    /* Outer glow in the era-label colour (--e2 is set on each card). First line is the
+       fallback for browsers without color-mix. */
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.35), 0 0 16px 4px var(--e2);
     box-shadow:
-      inset 0 0 0 2px rgba(255, 255, 255, 0.55),
-      inset 0 0 0 5px var(--e2);
+      inset 0 0 0 1px rgba(255, 255, 255, 0.35),
+      0 0 14px 3px var(--e2),
+      0 0 30px 6px color-mix(in srgb, var(--e2) 45%, transparent);
   }
 
   /* Prime Icon (91–96): gleaming pearl white */

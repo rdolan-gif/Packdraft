@@ -103,11 +103,10 @@ export function PlayerCardUI({ card, size = 'md', onClick, selected, dimmed, sho
       className={`card-base tier-${card.tier} ${card.tier === 'ELITE' ? 'sweep' : ''} ${prime ? 'aura' : ''} ${
         selected ? 'ring-4 ring-emerald-400 ring-offset-2 ring-offset-black' : ''
       } ${dimmed ? 'opacity-40 grayscale' : ''} ${onClick ? 'cursor-pointer' : ''} select-none shrink-0 ${className}`}
-      // Era label colour: paints Elite (81–85) cards and trims gold (86–90) cards.
+      // Era label colour: paints Elite (81–85) cards and gives gold (86–90) cards their glow.
       style={{ width: d.w, height: d.h, ['--e1' as string]: era.light, ['--e2' as string]: era.mid, ['--e3' as string]: era.dark, ['--eb' as string]: era.border, ...style }}
     >
       {prime && <div className="holo" />}
-      {world && <div className="gold-trim" />}
       <div className="glare" />
       {(world || prime) && (
         <div className="sparkles absolute inset-0 pointer-events-none">
