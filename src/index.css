@@ -398,3 +398,6 @@ html.lite .stadium-bg {
 .animate-leafnext { animation: leafnext .6s cubic-bezier(.45,.05,.35,1) forwards; }
 .animate-leafprev { animation: leafprev .6s cubic-bezier(.45,.05,.35,1) forwards; }
 html.lite .foil-holo, html.lite .foil-gold { animation: none; }
+
+.no-scrollbar { scrollbar-width: none; }
+.no-scrollbar::-webkit-scrollbar { display: none; }

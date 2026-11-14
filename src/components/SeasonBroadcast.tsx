@@ -438,10 +438,13 @@ export function SeasonBroadcast({ sim, onFinish, formationId, lineup, managerId,
               {userRow.won}W-{userRow.drawn}D-{userRow.lost}L · <span className="text-yellow-300">{userRow.points} pts</span>
             </span>
           </div>
-          <ChaseBadges sim={sim} upto={completed} />
-          <span className="rounded-md border border-white/15 px-1.5 py-0.5 text-[10px] font-black uppercase tracking-wider text-white/60" title={sim.era.tagline}>
-            {sim.era.name} · {sim.era.years}
-          </span>
+          {/* one line, fixed height: badges appearing mid-season never re-wrap the header */}
+          <div className="no-scrollbar flex h-[26px] w-full items-center gap-1.5 overflow-x-auto whitespace-nowrap sm:w-auto">
+            <ChaseBadges sim={sim} upto={completed} />
+            <span className="shrink-0 rounded-md border border-white/15 px-1.5 py-0.5 text-[10px] font-black uppercase tracking-wider text-white/60" title={sim.era.tagline}>
+              {sim.era.name} · {sim.era.years}
+            </span>
+          </div>
           <div className="ml-auto flex flex-wrap items-center gap-1.5">
             {!seasonOver && (
               <button
@@ -528,11 +531,10 @@ export function SeasonBroadcast({ sim, onFinish, formationId, lineup, managerId,
         </div>
         <div className="flex min-w-0 flex-col gap-3 lg:col-start-2 lg:row-span-2 lg:row-start-1">
           <AroundTheGrounds sim={sim} live={st.live} minute={st.minute} flashes={st.flashes} before={st.before} />
-          {st.news && isLive && (
-            <div key={st.news} className="animate-pop rounded-xl border border-sky-300/40 bg-sky-500/10 px-3 py-1.5 text-xs font-bold text-sky-100">
-              📡 {st.news}
-            </div>
-          )}
+          {/* always there (fixed height) so a goal alert never shifts the page */}
+          <div key={st.news ?? 'none'} className={`h-8 truncate rounded-xl border px-3 py-1.5 text-xs font-bold ${st.news && isLive ? 'border-sky-300/40 bg-sky-500/10 text-sky-100' : 'border-white/5 bg-white/[0.02] text-white/30'}`}>
+            📡 {st.news && isLive ? st.news : 'Goal alerts from other grounds appear here'}
+          </div>
           <div className="hidden lg:block">
             <TitleRaceChart sim={sim} history={history} upto={completed} />
           </div>
@@ -732,14 +734,15 @@ function InformCard({ card, boost, size = 'xs' }: { card: PlayerCard; boost: num
 
 const TotwPanel = memo(function TotwPanel({ sim, totw, informs }: { sim: SeasonSim; totw: { mw: number; players: TotwPick[] } | null; informs: ReturnType<SeasonSim['activeInforms']> }) {
   const userCards = new Map(sim.teamById[USER_TEAM_ID].players.map((p) => [p.id, p.card]));
-  if (!totw && !informs.length) return null;
   return (
     <section className="grid grid-cols-1 gap-3 rounded-2xl border border-cyan-300/25 bg-black/40 p-3 lg:grid-cols-[1.4fr_1fr]">
       <div className="min-w-0">
         <h3 className="mb-2 font-display text-xl text-white">
-          TEAM OF THE WEEK <span className="text-cyan-300">· MW{totw?.mw}</span>
+          TEAM OF THE WEEK {totw && <span className="text-cyan-300">· MW{totw.mw}</span>}
         </h3>
-        <div className="grid grid-cols-1 gap-1 sm:grid-cols-2">
+        {/* reserved height: the panel is the same size before and after the first Team of the Week */}
+        <div className="grid min-h-[312px] grid-cols-1 content-start gap-1 sm:min-h-[168px] sm:grid-cols-2">
+          {!totw && <div className="text-xs text-white/50">The first Team of the Week is picked after matchweek 1.</div>}
           {totw?.players.map((p) => {
             const team = sim.teamById[p.teamId];
             return (
@@ -758,6 +761,7 @@ const TotwPanel = memo(function TotwPanel({ sim, totw, informs }: { sim: SeasonS
       </div>
       <div className="min-w-0">
         <h3 className="mb-2 font-display text-xl text-white">YOUR IN-FORM PLAYERS</h3>
+        <div className="min-h-[150px]">
         {informs.length === 0 ? (
           <div className="text-xs text-white/55">Get one of your players into the Team of the Week to earn an in-form card: +{INFORM_BOOST} OVR for {INFORM_WEEKS} matchweeks (+1 if he makes it again while in form; up to {INFORM_SLOTS} players at once).</div>
         ) : (
@@ -773,6 +777,7 @@ const TotwPanel = memo(function TotwPanel({ sim, totw, informs }: { sim: SeasonS
             })}
           </div>
         )}
+        </div>
       </div>
     </section>
   );

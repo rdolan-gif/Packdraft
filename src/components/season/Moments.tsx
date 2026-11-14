@@ -42,7 +42,7 @@ export function ChaseBadges({ sim, upto }: { sim: SeasonSim; upto: number }) {
   const s = userStreaks(sim, upto);
   if (!s.played) return null;
   return (
-    <div className="flex flex-wrap items-center gap-1.5">
+    <div className="flex shrink-0 items-center gap-1.5">
       {s.perfect ? (
         <span className="animate-aura rounded-lg bg-gradient-to-r from-cyan-200 via-white to-fuchsia-200 px-2 py-0.5 font-display text-base leading-tight text-black" title="Every game won. Keep it going for 38-0.">
           💎 PERFECT {s.won}-0

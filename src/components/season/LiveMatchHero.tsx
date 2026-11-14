@@ -124,7 +124,7 @@ export function LiveMatchHero({ sim, live, minute, momentum, feed, celebration, 
     >
       {/* pitch stripes */}
       <div className="pointer-events-none absolute inset-0 opacity-[0.07]" style={{ background: 'repeating-linear-gradient(90deg, #fff 0 40px, transparent 40px 80px)' }} />
-      <div className="relative flex items-center justify-between gap-2 text-[10px] font-black uppercase tracking-widest">
+      <div className="relative flex h-7 items-center justify-between gap-2 text-[10px] font-black uppercase tracking-widest">
         <span className="flex items-center gap-1.5 text-white/60">
           {!isFT && <span className="h-2 w-2 animate-pulse rounded-full bg-red-500" />}
           {bigMatch ?? `Matchweek ${live.mw}`}
@@ -158,9 +158,10 @@ export function LiveMatchHero({ sim, live, minute, momentum, feed, celebration, 
       </div>
 
       {/* scorers */}
-      <div className="relative mt-2 grid grid-cols-2 gap-6 text-[11px] text-white/75">
-        <div className="text-right">{scorers(r, r.homeId, clock)}</div>
-        <div>{scorers(r, r.awayId, clock)}</div>
+      {/* fixed height so goals going in never push the page around while you scroll */}
+      <div className="relative mt-2 grid h-[30px] grid-cols-2 gap-6 overflow-hidden text-[11px] leading-[15px] text-white/75">
+        <div className="line-clamp-2 text-right">{scorers(r, r.homeId, clock)}</div>
+        <div className="line-clamp-2">{scorers(r, r.awayId, clock)}</div>
       </div>
 
       {/* timeline + momentum */}
@@ -205,11 +206,12 @@ export function LiveMatchHero({ sim, live, minute, momentum, feed, celebration, 
         ))}
       </div>
 
-      {isFT && next && (
-        <div className="relative mt-2 border-t border-white/10 pt-2 text-center text-[11px] text-white/60">
+      {/* the next fixture is always shown (fixed height) so the panel never changes size */}
+      <div className="relative mt-2 h-[26px] truncate border-t border-white/10 pt-2 text-center text-[11px] text-white/60">
+        {next && (<>
           Next: {sim.matchweek + 1 === 19 ? <b className="text-white/90">your closest title rival · DERBY DAY</b> : <><b className="text-white/90">{next.home ? 'vs' : '@'} {sim.teamById[next.opponentId].name}</b>{sim.matchweek + 1 === 38 && <span className="ml-1 font-black text-yellow-300">· FINAL DAY</span>}</>}
-        </div>
-      )}
+        </>)}
+      </div>
       {celebration && <GoalCelebration c={celebration} />}
     </section>
   );
