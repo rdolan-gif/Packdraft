@@ -126,7 +126,19 @@ export interface Club {
 
 // ───────────────────────────── Managers & formations ─────────────────────────────
 
-export type ManagerId = 'heavy_metal' | 'tiki_taka' | 'low_block' | 'invincible_counter' | 'fergie_time' | 'galactico';
+export type ManagerId =
+  | 'heavy_metal'
+  | 'tiki_taka'
+  | 'low_block'
+  | 'invincible_counter'
+  | 'fergie_time'
+  | 'galactico'
+  | 'long_ball'
+  | 'academy'
+  | 'old_guard'
+  | 'club_dna'
+  | 'global_scout'
+  | 'wing_play';
 
 export interface ManagerCard {
   id: ManagerId;
@@ -138,6 +150,8 @@ export interface ManagerCard {
   emoji: string;
   gradient: string; // tailwind gradient classes
   preferredFormations: FormationId[];
+  /** Relative chance of appearing in the 3-card manager deal (default 1). */
+  dealWeight?: number;
 }
 
 export type FormationId = '4-3-3' | '4-4-2' | '4-2-3-1' | '3-5-2' | '4-1-2-1-2';

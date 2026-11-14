@@ -5,6 +5,7 @@ import { PLAYERS } from '../data/players';
 import { computeTeamRating, fitFor } from '../engine/chemistry';
 import { generatePack } from '../engine/packGenerator';
 import { sfx } from '../engine/soundEffects';
+import { isPulled, recordPulled } from '../engine/stickerBook';
 import type { FormationId, Lineup, ManagerId, PlayerCard } from '../types/game';
 import { PackOpener } from './PackOpener';
 import { TacticalPitch } from './TacticalPitch';
@@ -33,6 +34,7 @@ export function TransferWindow({ formationId, lineup, managerId, position, point
     return generatePack({ packNumber: 8, pool: PLAYERS, draftedBaseIds: inXI, formationId, lineup });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+  const newIds = useMemo(() => new Set(pack.filter((c) => !isPulled(c.id)).map((c) => c.id)), [pack]);
 
   const before = useMemo(() => computeTeamRating(formationId, lineup, managerId), [formationId, lineup, managerId]);
   const slot = outSlot ? FORMATIONS[formationId].slots.find((s) => s.id === outSlot) : null;
@@ -103,6 +105,8 @@ export function TransferWindow({ formationId, lineup, managerId, position, point
                 title="JANUARY TRANSFER PACK"
                 subtitle="Pick one card, then tap the player he replaces"
                 packLabel="January Window"
+                onRip={() => recordPulled(pack.map((c) => c.id))}
+                newIds={newIds}
               />
             </section>
             <section className="flex flex-col gap-3">

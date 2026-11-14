@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Gauge, RotateCcw, Sparkles, Trophy, Volume2, VolumeX } from 'lucide-react';
+import { BookOpen, Gauge, RotateCcw, Sparkles, Trophy, Volume2, VolumeX } from 'lucide-react';
 import { isMuted, onMuteChange, setMuted, sfx } from '../engine/soundEffects';
 import { isLite, onLiteChange, setLite } from '../engine/perf';
 import { TOTAL_PACKS } from '../engine/packGenerator';
@@ -10,10 +10,11 @@ interface Props {
   picksMade: number;
   vaultCount: number;
   onOpenVault: () => void;
+  onOpenBook: () => void;
   onNewRun: () => void;
 }
 
-export function Header({ phase, packNumber, picksMade, vaultCount, onOpenVault, onNewRun }: Props) {
+export function Header({ phase, packNumber, picksMade, vaultCount, onOpenVault, onOpenBook, onNewRun }: Props) {
   const [muted, setM] = useState(isMuted());
   const [armed, setArmed] = useState(false);
   const [lite, setL] = useState(isLite());
@@ -69,6 +70,17 @@ export function Header({ phase, packNumber, picksMade, vaultCount, onOpenVault, 
         )}
         {phase !== 'draft' && <div className="flex-1" />}
 
+        <button
+          onClick={() => {
+            sfx.click();
+            onOpenBook();
+          }}
+          className="flex items-center gap-1.5 rounded-lg border border-amber-200/40 bg-amber-200/10 px-3 py-1.5 text-xs font-black uppercase tracking-wider text-amber-100 transition hover:bg-amber-200/20"
+          aria-label="Sticker book"
+        >
+          <BookOpen className="h-4 w-4" />
+          <span className="hidden sm:inline">Stickers</span>
+        </button>
         <button
           onClick={() => {
             sfx.click();

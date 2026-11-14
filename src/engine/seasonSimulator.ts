@@ -10,6 +10,7 @@ import type {
   MatchResult,
   PlayerCard,
   PlayerSeasonStats,
+  Position,
   SeasonSummary,
   SimTeam,
   TableRow,
@@ -23,6 +24,21 @@ export const TOTAL_MATCHWEEKS = 38;
 export const BIG_MATCH_WEEKS = [19, 38];
 /** The January transfer window opens after this many matchweeks. */
 export const TRANSFER_WINDOW_AFTER = 20;
+/** Team of the Week: in-form boost, its cap when earned again, and how long it lasts. */
+export const INFORM_BOOST = 2;
+export const INFORM_MAX = 3;
+export const INFORM_WEEKS = 3;
+/** At most this many of your players can be in form at once (oldest drop off). */
+export const INFORM_SLOTS = 3;
+
+export interface TotwPick {
+  id: string;
+  name: string;
+  teamId: string;
+  pos: Position;
+  rating: number;
+  isUser: boolean;
+}
 
 // ───────────────────────────── helpers ─────────────────────────────
 
@@ -201,6 +217,16 @@ export class SeasonSim {
   shouts: { mw: number; shout: TacticalShout; result: 'W' | 'D' | 'L' }[] = [];
   transferDone = false;
   transfers: { mw: number; inName: string; outName: string; slot: string }[] = [];
+  // ── Team of the Week
+  /** Match ratings from the matchweek being played (player id -> rating). */
+  private weekRatings: Record<string, number> = {};
+  totwHistory: { mw: number; players: TotwPick[] }[] = [];
+  /** Your in-form players: card id -> boost and the last matchweek it applies to. */
+  informs: Record<string, { boost: number; until: number; name: string }> = {};
+  /** Your players picked in the latest TOTW (for the reveal and the sticker book). */
+  newTotwIds: string[] = [];
+  totwCounts: Record<string, number> = {};
+  private userBase = { attack: 0, defence: 0 };
   managerId: ManagerId;
   rating: TeamRating;
   rng: () => number;
@@ -210,6 +236,8 @@ export class SeasonSim {
     this.managerId = managerId;
     this.rating = rating;
     this.rng = rng;
+    const u = teams.find((t) => t.isUser);
+    if (u) this.userBase = { attack: u.attack, defence: u.defence };
     this.teamById = Object.fromEntries(teams.map((t) => [t.id, t]));
     this.fixtures = buildFixtures(teams.map((t) => t.id), rng);
     this.table = Object.fromEntries(
@@ -239,8 +267,10 @@ export class SeasonSim {
   signPlayer(signed: PlayerCard, out: PlayerCard, formationId: FormationId, lineup: Lineup, rating: TeamRating, slotLabel: string) {
     const user = this.teamById[USER_TEAM_ID];
     user.players = userPlayers(formationId, lineup);
+    this.userBase = { attack: rating.attack, defence: rating.defence };
     user.attack = rating.attack;
     user.defence = rating.defence;
+    this.applyInforms();
     this.rating = rating;
     for (const p of user.players) {
       if (!this.stats[p.id]) this.stats[p.id] = { id: p.id, name: p.name, teamId: USER_TEAM_ID, isUser: true, goals: 0, assists: 0, cleanSheets: 0, apps: 0, ratingSum: 0 };
@@ -512,7 +542,9 @@ export class SeasonSim {
         if (pp) rating += pp.g * 1.0 + pp.a * 0.6;
         if (conceded === 0 && defensive) rating += 0.6;
         if (defensive) rating -= conceded * 0.15;
-        st.ratingSum += Math.max(4, Math.min(10, rating));
+        const r = Math.max(4, Math.min(10, rating));
+        st.ratingSum += r;
+        this.weekRatings[p.id] = r;
       });
       if (conceded === 0) {
         const gk = team.players.find((p) => p.pos === 'GK');
@@ -521,7 +553,54 @@ export class SeasonSim {
     }
   }
 
+  /** Pick the Team of the Week (1 GK, 4 DEF, 3 MID, 3 FWD) and boost your players in it. */
+  private pickTotw(mw: number) {
+    const all: TotwPick[] = [];
+    for (const t of this.teams) for (const p of t.players) {
+      const r = this.weekRatings[p.id];
+      if (r !== undefined) all.push({ id: p.id, name: p.name, teamId: t.id, pos: p.pos, rating: Math.round(r * 10) / 10, isUser: t.isUser });
+    }
+    const best = (group: string, n: number) =>
+      all.filter((p) => positionGroup(p.pos) === group).sort((a, b) => b.rating - a.rating || Number(b.isUser) - Number(a.isUser)).slice(0, n);
+    const xi = [...best('GK', 1), ...best('DEF', 4), ...best('MID', 3), ...best('FWD', 3)];
+    this.totwHistory.push({ mw, players: xi });
+    this.newTotwIds = xi.filter((p) => p.isUser).map((p) => p.id);
+    for (const p of xi.filter((x) => x.isUser)) {
+      const cur = this.informs[p.id];
+      const active = cur && cur.until >= mw;
+      this.informs[p.id] = { boost: active ? Math.min(INFORM_MAX, cur.boost + 1) : INFORM_BOOST, until: mw + INFORM_WEEKS, name: p.name };
+      this.totwCounts[p.id] = (this.totwCounts[p.id] ?? 0) + 1;
+    }
+    // Keep only the most recent INFORM_SLOTS in-form players.
+    const live = Object.entries(this.informs).filter(([, f]) => f.until > mw).sort((a, b) => b[1].until - a[1].until);
+    live.slice(INFORM_SLOTS).forEach(([id]) => delete this.informs[id]);
+  }
+
+  /** Active in-form boosts raise your attack and defence (total boost spread over the XI). */
+  private applyInforms() {
+    const user = this.teamById[USER_TEAM_ID];
+    const onPitch = new Set(user.players.map((p) => p.id));
+    const total = Object.entries(this.informs)
+      .filter(([id, f]) => f.until > this.matchweek && onPitch.has(id))
+      .reduce((s, [, f]) => s + f.boost, 0);
+    user.attack = this.userBase.attack + total / 11;
+    user.defence = this.userBase.defence + total / 11;
+  }
+
+  /** Your players currently in form, with matchweeks left. */
+  activeInforms() {
+    const onPitch = new Set(this.teamById[USER_TEAM_ID].players.map((p) => p.id));
+    return Object.entries(this.informs)
+      .filter(([id, f]) => f.until > this.matchweek && onPitch.has(id))
+      .map(([id, f]) => ({ id, name: f.name, boost: f.boost, weeksLeft: f.until - this.matchweek }));
+  }
+
+  get latestTotw() {
+    return this.totwHistory[this.totwHistory.length - 1] ?? null;
+  }
+
   playMatchweek(shout?: TacticalShout): MatchResult[] {
+    this.weekRatings = {};
     if (this.done) return [];
     const mw = this.matchweek + 1;
     const round = this.fixtures[this.matchweek];
@@ -530,7 +609,9 @@ export class SeasonSim {
     // user's match first
     results.sort((x, y) => Number(y.involvesUser) - Number(x.involvesUser));
     this.results.push(results);
+    this.pickTotw(mw);
     this.matchweek = mw;
+    this.applyInforms();
     if (shout) {
       const ur = results[0];
       const userHome = ur.homeId === USER_TEAM_ID;
@@ -658,6 +739,11 @@ export function buildSummary(sim: SeasonSim, formationId: FormationId, lineup: L
     const b = biggestWin as MatchResult;
     const opp = sim.teamById[b.homeId === USER_TEAM_ID ? b.awayId : b.homeId];
     highlights.push(`Biggest win: ${Math.max(b.homeGoals, b.awayGoals)}-${Math.min(b.homeGoals, b.awayGoals)} vs ${opp.name}`);
+  }
+  const totwTotal = Object.values(sim.totwCounts).reduce((a, b) => a + b, 0);
+  if (totwTotal) {
+    const [topId, topN] = Object.entries(sim.totwCounts).sort((a, b) => b[1] - a[1])[0];
+    highlights.push(`${totwTotal} Team of the Week selection${totwTotal === 1 ? '' : 's'} (most: ${sim.stats[topId]?.name ?? 'your star'} ×${topN})`);
   }
   sim.transfers.forEach((t) => highlights.push(`January signing: ${t.inName} replaced ${t.outName} at ${t.slot}`));
   sim.shouts.forEach((s) => {

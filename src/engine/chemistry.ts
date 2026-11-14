@@ -173,6 +173,75 @@ function evalManager(managerId: ManagerId | null, formation: Formation, lineup: 
         ],
       };
     }
+    case 'long_ball': {
+      const target = cards.filter((c) => c.archetype === 'Target Man');
+      const strong = cards.filter((c) => c.positions[0] !== 'GK' && c.stats.phy >= 80);
+      const active = target.length > 0 && strong.length >= 5;
+      return {
+        bonus: active ? 1.5 : 0,
+        active,
+        note: `${target.length ? '✓' : '✗'} Target Man · ${Math.min(strong.length, 5)}/5 strong (80+ PHY)`,
+        checks: [
+          { label: 'A Target Man in the XI', done: target.length > 0, progress: target.length ? '✓' : '0/1', who: names(target) },
+          { label: '5+ outfield players with 80+ Physical', done: strong.length >= 5, progress: `${strong.length}/5`, who: names(strong) },
+        ],
+      };
+    }
+    case 'academy':
+    case 'old_guard': {
+      const want = managerId === 'academy' ? ['RISING STAR'] : ['VETERAN', 'LEGEND'];
+      const hits = cards.filter((c) => want.includes(c.era));
+      const bonus = Math.min(1.5, hits.length * 0.35);
+      return {
+        bonus: Math.round(bonus * 100) / 100,
+        active: bonus >= 1.5,
+        note: `${hits.length} ${want.join('/')} card${hits.length === 1 ? '' : 's'} × +0.35 (max +1.5)`,
+        checks: [
+          { label: `+0.35 per ${want.join(' or ')} card (${hits.length} = +${(hits.length * 0.35).toFixed(2)})`, done: hits.length > 0, progress: `${hits.length}`, who: names(hits) },
+          { label: 'Maximum bonus +1.5 (5 cards)', done: bonus >= 1.5, progress: `+${bonus.toFixed(2)}` },
+        ],
+      };
+    }
+    case 'club_dna': {
+      const byClub = new Map<string, PlayerCard[]>();
+      cards.forEach((c) => byClub.set(c.club, [...(byClub.get(c.club) ?? []), c]));
+      const [club, core] = [...byClub.entries()].sort((a, b) => b[1].length - a[1].length)[0] ?? ['', []];
+      const active = core.length >= 4;
+      return {
+        bonus: active ? 1.5 : 0,
+        active,
+        note: `${Math.min(core.length, 4)}/4 from one club${club ? ` (best: ${club})` : ''}`,
+        checks: [{ label: '4+ players from the same club', done: active, progress: `${core.length}/4${club ? ` ${club}` : ''}`, who: names(core) }],
+      };
+    }
+    case 'global_scout': {
+      const nations = new Set(cards.map((c) => c.nation));
+      const active = nations.size >= 7;
+      return {
+        bonus: active ? 1.5 : 0,
+        active,
+        note: `${Math.min(nations.size, 7)}/7 nations`,
+        checks: [{ label: 'Players from 7+ different nations', done: active, progress: `${nations.size}/7`, who: [...nations].join(', ') }],
+      };
+    }
+    case 'wing_play': {
+      const wide = (side: 'L' | 'R') =>
+        placed.filter((p) => p.slot.label !== 'GK' && (side === 'L' ? p.slot.x < 30 : p.slot.x > 70) && p.card.stats.pac >= 84).map((p) => p.card);
+      const left = wide('L');
+      const right = wide('R');
+      const finisher = cards.filter((c) => ['Target Man', 'Poacher', 'Complete Forward'].includes(c.archetype));
+      const active = left.length > 0 && right.length > 0 && finisher.length > 0;
+      return {
+        bonus: active ? 1.5 : 0,
+        active,
+        note: `${left.length ? '✓' : '✗'} left flank · ${right.length ? '✓' : '✗'} right flank · ${finisher.length ? '✓' : '✗'} finisher`,
+        checks: [
+          { label: 'An 84+ Pace player on the left flank', done: left.length > 0, progress: left.length ? '✓' : '0/1', who: names(left) },
+          { label: 'An 84+ Pace player on the right flank', done: right.length > 0, progress: right.length ? '✓' : '0/1', who: names(right) },
+          { label: 'A Target Man, Poacher or Complete Forward', done: finisher.length > 0, progress: finisher.length ? '✓' : '0/1', who: names(finisher) },
+        ],
+      };
+    }
     default:
       return { bonus: 0, active: false, note: '', checks: [] };
   }
@@ -201,6 +270,26 @@ export function managerContribution(managerId: ManagerId | null, card: PlayerCar
       break;
     case 'galactico':
       if (isStar(card)) out.push('Galáctico: +0.6');
+      break;
+    case 'long_ball':
+      if (card.archetype === 'Target Man') out.push('Target Man');
+      if (card.positions[0] !== 'GK' && card.stats.phy >= 80) out.push(`Strong: ${card.stats.phy} Physical (80+)`);
+      break;
+    case 'academy':
+      if (card.era === 'RISING STAR') out.push('Rising Star: +0.35');
+      break;
+    case 'old_guard':
+      if (card.era === 'VETERAN' || card.era === 'LEGEND') out.push(`${card.era === 'VETERAN' ? 'Veteran' : 'Legend'}: +0.35`);
+      break;
+    case 'club_dna':
+      out.push(`Counts towards a ${card.club} core`);
+      break;
+    case 'global_scout':
+      out.push(`Adds ${card.nation} to your nations`);
+      break;
+    case 'wing_play':
+      if (['Target Man', 'Poacher', 'Complete Forward'].includes(card.archetype)) out.push(`${card.archetype}: the finisher`);
+      if (slot !== 'GK' && card.stats.pac >= 84 && ['LW', 'RW', 'LM', 'RM', 'LB', 'RB'].includes(slot)) out.push(`Flank pace: ${card.stats.pac}`);
       break;
   }
   return out;

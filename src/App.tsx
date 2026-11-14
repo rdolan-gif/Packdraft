@@ -10,6 +10,8 @@ import { SeasonReviewCard } from './components/SeasonReviewCard';
 import { TrophyVaultModal } from './components/TrophyVaultModal';
 import { PlayerCardUI } from './components/PlayerCardUI';
 import { ManagerObjectivePanel, PlayerInspectPanel } from './components/InspectPanels';
+import { StickerBookModal } from './components/StickerBookModal';
+import { isPulled, recordDrafted, recordPulled } from './engine/stickerBook';
 import { MANAGERS, MANAGERS_BY_ID } from './data/managers';
 import { FORMATIONS } from './data/formations';
 import { PLAYERS } from './data/players';
@@ -43,8 +45,17 @@ function remapLineup(old: Lineup, to: FormationId): Lineup {
   return next;
 }
 
+/** Deal 3 different managers; dealWeight makes some (the Galáctico Collector) rarer. */
 function dealManagers(): ManagerCard[] {
-  return [...MANAGERS].sort(() => Math.random() - 0.5).slice(0, 3);
+  const pool = [...MANAGERS];
+  const hand: ManagerCard[] = [];
+  while (hand.length < 3 && pool.length) {
+    const total = pool.reduce((s, m) => s + (m.dealWeight ?? 1), 0);
+    let r = Math.random() * total;
+    const i = pool.findIndex((m) => (r -= m.dealWeight ?? 1) <= 0);
+    hand.push(pool.splice(i < 0 ? pool.length - 1 : i, 1)[0]);
+  }
+  return hand;
 }
 
 export default function App() {
@@ -71,6 +82,8 @@ export default function App() {
   const [vaultOpen, setVaultOpen] = useState(false);
   const [inspectSlot, setInspectSlot] = useState<string | null>(null);
   const [managerInfoOpen, setManagerInfoOpen] = useState(false);
+  const [bookOpen, setBookOpen] = useState(false);
+  const [newIds, setNewIds] = useState<Set<string>>(new Set());
   // Between placing a card and the next pack arriving, the old pack is locked:
   // before, clicking during that gap could draft twice from one pack (even the same player).
   const [dealing, setDealing] = useState(false);
@@ -94,7 +107,9 @@ export default function App() {
 
   const dealPack = useCallback(
     (num: number, lu: Lineup, draftedIds: Set<string>, f: FormationId) => {
-      setPackCards(generatePack({ packNumber: num, pool: PLAYERS, draftedBaseIds: draftedIds, formationId: f, lineup: lu }));
+      const cards = generatePack({ packNumber: num, pool: PLAYERS, draftedBaseIds: draftedIds, formationId: f, lineup: lu });
+      setNewIds(new Set(cards.filter((c) => !isPulled(c.id)).map((c) => c.id)));
+      setPackCards(cards);
       setPackKey((k) => k + 1);
       setSelected(null);
     },
@@ -137,6 +152,7 @@ export default function App() {
 
   const place = (card: PlayerCard, slotId: string) => {
     if (dealing || drafted.has(card.basePlayerId)) return;
+    recordDrafted(card.id);
     const nextLineup = { ...lineup, [slotId]: card };
     const nextDrafted = new Set(drafted).add(card.basePlayerId);
     setLineup(nextLineup);
@@ -221,6 +237,7 @@ export default function App() {
     const nextRating = computeTeamRating(formationId, next, managerId);
     const label = FORMATIONS[formationId].slots.find((s) => s.id === slotId)?.label ?? slotId;
     sim.signPlayer(card, out, formationId, next, nextRating, label);
+    recordDrafted(card.id);
     setLineup(next);
     setDrafted((d) => new Set(d).add(card.basePlayerId));
     if (card.tier === 'PRIME_ICON') goldConfetti(0.8);
@@ -260,6 +277,7 @@ export default function App() {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
+        setBookOpen(false);
         setSwapSource(null);
         setSelected(null);
         setVaultOpen(false);
@@ -271,7 +289,7 @@ export default function App() {
 
   return (
     <div className="stadium-bg min-h-screen">
-      <Header phase={phase} packNumber={packNumber} picksMade={picksMade} vaultCount={vault.length} onOpenVault={() => setVaultOpen(true)} onNewRun={newRun} />
+      <Header phase={phase} packNumber={packNumber} picksMade={picksMade} vaultCount={vault.length} onOpenVault={() => setVaultOpen(true)} onOpenBook={() => setBookOpen(true)} onNewRun={newRun} />
       <main id="app-shell" className="pb-16">
         {phase === 'title' && <TitleScreen onStart={() => (sfx.unlock(), sfx.select(), setPhase('manager'))} career={career} vaultCount={vault.length} onVault={() => setVaultOpen(true)} />}
 
@@ -332,6 +350,8 @@ export default function App() {
                       setSwapSource(null);
                     }}
                     rerollAvailable={!rerollUsed && !dealing}
+                    onRip={() => recordPulled(packCards.map((c) => c.id))}
+                    newIds={newIds}
                     onReroll={reroll}
                   />
                   {selected && (
@@ -426,6 +446,8 @@ export default function App() {
       )}
 
       {managerInfoOpen && managerId && <ManagerObjectivePanel managerId={managerId} rating={rating} onClose={() => setManagerInfoOpen(false)} />}
+
+      {bookOpen && <StickerBookModal onClose={() => setBookOpen(false)} />}
 
       {vaultOpen && (
         <TrophyVaultModal

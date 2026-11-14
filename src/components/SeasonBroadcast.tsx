@@ -1,8 +1,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { FastForward, Pause, Play, Radio, Shield, Swords, Scale, Target, Footprints, Hand, Flame } from 'lucide-react';
 import type { FormationId, Lineup, ManagerId, MatchResult, PlayerCard, PlayerSeasonStats, TacticalShout } from '../types/game';
-import { formatMinute, ordinal, SeasonSim, TOTAL_MATCHWEEKS, TRANSFER_WINDOW_AFTER, USER_TEAM_ID, type DecisionContext } from '../engine/seasonSimulator';
+import { formatMinute, INFORM_BOOST, INFORM_SLOTS, INFORM_WEEKS, ordinal, SeasonSim, TOTAL_MATCHWEEKS, TRANSFER_WINDOW_AFTER, USER_TEAM_ID, type DecisionContext } from '../engine/seasonSimulator';
 import { TransferWindow } from './TransferWindow';
+import { PlayerCardUI } from './PlayerCardUI';
+import { recordTotw } from '../engine/stickerBook';
 import { sfx } from '../engine/soundEffects';
 import { goldConfetti, shakeScreen } from '../engine/fx';
 
@@ -22,6 +24,7 @@ interface Props {
 
 export function SeasonBroadcast({ sim, onFinish, formationId, lineup, managerId, onTransfer }: Props) {
   const [transferOpen, setTransferOpen] = useState(false);
+  const [informReveal, setInformReveal] = useState<{ key: number; cards: { card: PlayerCard; boost: number }[] } | null>(null);
   const [, setVersion] = useState(0);
   const bump = () => setVersion((v) => v + 1);
   const [playing, setPlaying] = useState(false);
@@ -73,6 +76,20 @@ export function SeasonBroadcast({ sim, onFinish, formationId, lineup, managerId,
       }
       const results = sim.playMatchweek(shout);
       const out = userOutcome(results[0]);
+      // Team of the Week: honours go in the sticker book; reveal your in-form players.
+      if (sim.newTotwIds.length) {
+        recordTotw(sim.newTotwIds);
+        if (!quiet) {
+          const userPlayers = sim.teamById[USER_TEAM_ID].players;
+          const cards = sim.newTotwIds
+            .map((id) => ({ card: userPlayers.find((p) => p.id === id)?.card, boost: sim.informs[id]?.boost ?? 0 }))
+            .filter((x): x is { card: PlayerCard; boost: number } => !!x.card);
+          if (cards.length) {
+            setInformReveal({ key: Date.now(), cards });
+            sfx.stinger('ELITE');
+          }
+        }
+      }
       if (!quiet) {
         setFlashResult(out);
         if (out === 'W') sfx.goal(sim.matchweek === 19 || sim.matchweek === 38);
@@ -120,6 +137,12 @@ export function SeasonBroadcast({ sim, onFinish, formationId, lineup, managerId,
     }, 40);
     return () => clearTimeout(id);
   });
+
+  useEffect(() => {
+    if (!informReveal) return;
+    const id = window.setTimeout(() => setInformReveal(null), 2600);
+    return () => clearTimeout(id);
+  }, [informReveal]);
 
   useEffect(() => {
     if (!flashResult) return;
@@ -349,6 +372,9 @@ export function SeasonBroadcast({ sim, onFinish, formationId, lineup, managerId,
         </div>
       </div>
 
+      {/* Team of the Week + your in-form players */}
+      <TotwPanel sim={sim} />
+
       {/* Leaderboards */}
       <section className="rounded-2xl border border-white/10 bg-black/40 p-3">
         <div className="mb-2 flex flex-wrap items-center gap-2">
@@ -392,6 +418,20 @@ export function SeasonBroadcast({ sim, onFinish, formationId, lineup, managerId,
           >
             REVEAL SEASON REVIEW CARD
           </button>
+        </div>
+      )}
+
+      {informReveal && (
+        <div key={informReveal.key} className="pointer-events-none fixed left-1/2 top-20 z-[85] -translate-x-1/2 animate-pop">
+          <div className="flex flex-col items-center gap-2 rounded-2xl border-2 border-cyan-300/70 bg-black/90 px-5 py-3 shadow-[0_0_40px_rgba(34,211,238,.45)]">
+            <div className="font-display text-2xl tracking-wider text-cyan-200">TEAM OF THE WEEK!</div>
+            <div className="flex gap-2">
+              {informReveal.cards.map(({ card, boost }) => (
+                <InformCard key={card.id} card={card} boost={boost} />
+              ))}
+            </div>
+            <div className="text-[11px] font-bold text-white/70">In form: +{informReveal.cards[0].boost} OVR for {INFORM_WEEKS} matchweeks</div>
+          </div>
         </div>
       )}
 
@@ -542,5 +582,67 @@ function DecisionOverlay({ d, sim, onChoose }: { d: DecisionContext; sim: Season
       </div>
       </div>
     </div>
+  );
+}
+
+/** An in-form version of a card: boosted OVR inside a neon TOTW frame. */
+function InformCard({ card, boost, size = 'xs' }: { card: PlayerCard; boost: number; size?: 'xs' | 'sm' }) {
+  return (
+    <div className="relative rounded-[16px] p-[3px] shadow-[0_0_18px_rgba(34,211,238,.6)]" style={{ background: 'conic-gradient(from 0deg, #22d3ee, #a855f7, #f43f5e, #facc15, #22d3ee)' }}>
+      <PlayerCardUI card={{ ...card, ovr: Math.min(99, card.ovr + boost) }} size={size} tilt={false} />
+      <span className="absolute -top-2 left-1/2 z-20 -translate-x-1/2 whitespace-nowrap rounded-full bg-black px-1.5 text-[9px] font-black uppercase tracking-wider text-cyan-200 ring-1 ring-cyan-300">
+        TOTW +{boost}
+      </span>
+    </div>
+  );
+}
+
+function TotwPanel({ sim }: { sim: SeasonSim }) {
+  const totw = sim.latestTotw;
+  const informs = sim.activeInforms();
+  const userCards = new Map(sim.teamById[USER_TEAM_ID].players.map((p) => [p.id, p.card]));
+  if (!totw && !informs.length) return null;
+  return (
+    <section className="grid grid-cols-1 gap-3 rounded-2xl border border-cyan-300/25 bg-black/40 p-3 lg:grid-cols-[1.4fr_1fr]">
+      <div className="min-w-0">
+        <h3 className="mb-2 font-display text-xl text-white">
+          TEAM OF THE WEEK <span className="text-cyan-300">· MW{totw?.mw}</span>
+        </h3>
+        <div className="grid grid-cols-1 gap-1 sm:grid-cols-2">
+          {totw?.players.map((p) => {
+            const team = sim.teamById[p.teamId];
+            return (
+              <div key={p.id} className={`flex items-center gap-2 rounded-lg px-2 py-1 text-xs ${p.isUser ? 'bg-cyan-400/15 ring-1 ring-cyan-300/60' : 'bg-white/[0.03]'}`}>
+                <span className="w-8 font-black text-white/50">{p.pos}</span>
+                <span className="h-3 w-3 shrink-0 rounded-sm" style={{ background: `linear-gradient(135deg, ${team.primary} 50%, ${team.secondary} 50%)` }} />
+                <span className={`min-w-0 flex-1 truncate ${p.isUser ? 'font-black text-white' : 'text-white/85'}`}>
+                  {p.isUser && '★ '}
+                  {p.name} <span className="text-white/40">· {team.short}</span>
+                </span>
+                <span className="font-display text-base leading-none text-cyan-200 tabular-nums">{p.rating.toFixed(1)}</span>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+      <div className="min-w-0">
+        <h3 className="mb-2 font-display text-xl text-white">YOUR IN-FORM PLAYERS</h3>
+        {informs.length === 0 ? (
+          <div className="text-xs text-white/55">Get one of your players into the Team of the Week to earn an in-form card: +{INFORM_BOOST} OVR for {INFORM_WEEKS} matchweeks (+1 if he makes it again while in form; up to {INFORM_SLOTS} players at once).</div>
+        ) : (
+          <div className="flex flex-wrap gap-3 pt-2">
+            {informs.map((f) => {
+              const card = userCards.get(f.id);
+              return card ? (
+                <div key={f.id} className="flex flex-col items-center gap-1">
+                  <InformCard card={card} boost={f.boost} />
+                  <span className="text-[10px] font-bold text-white/60">{f.weeksLeft} MW left</span>
+                </div>
+              ) : null;
+            })}
+          </div>
+        )}
+      </div>
+    </section>
   );
 }
