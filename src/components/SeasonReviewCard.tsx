@@ -6,7 +6,7 @@ import type { FormationId, Grade, Lineup, ManagerId, SeasonSummary, TeamRating }
 import { gradeLabel, ordinal } from '../engine/seasonSimulator';
 import { sfx } from '../engine/soundEffects';
 import { goldConfetti, rainbowConfetti, shakeScreen } from '../engine/fx';
-import { PlayerCardUI, TIER_EMOJI } from './PlayerCardUI';
+import { PlayerCardUI, cardEmoji } from './PlayerCardUI';
 
 export const GRADE_STYLE: Record<Grade, { stamp: string; text: string; glow: string }> = {
   'S+': { stamp: 'bg-[conic-gradient(from_0deg,#facc15,#f472b6,#22d3ee,#a3e635,#facc15)] text-black border-yellow-100', text: 'text-yellow-200', glow: 'shadow-[0_0_60px_rgba(250,204,21,.8)]' },
@@ -39,7 +39,7 @@ export function buildShareText(opts: { summary: SeasonSummary; teamName: string;
     .forEach((s) => {
       const c = lineup[s.id];
       const key = Math.round(s.y / 9);
-      rowsByY.set(key, [...(rowsByY.get(key) ?? []), c ? TIER_EMOJI[c.tier] : '⬛']);
+      rowsByY.set(key, [...(rowsByY.get(key) ?? []), c ? cardEmoji(c) : '⬛']);
     });
   const grid = [...rowsByY.entries()].sort((a, b) => a[0] - b[0]).map(([, r]) => r.join('')).join('\n');
   const r = summary.record;
@@ -52,7 +52,7 @@ export function buildShareText(opts: { summary: SeasonSummary; teamName: string;
     '',
     grid,
     '',
-    '⬜ Prime  🟨 World Class  🟪 Veteran  🟥 Cult Hero  ⬛ Squad',
+    '⬜ Prime  🟨 Gold  ⬛ Squad · 81–85 by era: 🟥 Cult Hero 🟪 Veteran 🟩 Rising Star 🟦 World Class 🩷 Prime 🟫 Legend 🔲 Squad',
   ].join('\n');
 }
 

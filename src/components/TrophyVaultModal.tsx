@@ -6,7 +6,7 @@ import { MANAGERS_BY_ID } from '../data/managers';
 import { PLAYERS_BY_ID } from '../data/players';
 import { ordinal } from '../engine/seasonSimulator';
 import { sfx } from '../engine/soundEffects';
-import { PlayerCardUI, TIER_EMOJI } from './PlayerCardUI';
+import { PlayerCardUI, cardEmoji } from './PlayerCardUI';
 import { GRADE_STYLE } from './SeasonReviewCard';
 
 interface Props {
@@ -27,7 +27,7 @@ function flexText(e: VaultEntry) {
     `${m.emoji} ${m.name} · ${e.formationId} · ${e.teamRating.toFixed(1)} rated`,
     `Stars: ${stars.map((c) => `${c.season} ${c.shortName} (${c.ovr})`).join(', ')}`,
     e.topScorer ? `Top scorer: ${e.topScorer.name} (${e.topScorer.goals})` : '',
-    cards.map((c) => TIER_EMOJI[c.tier]).join(''),
+    cards.map((c) => cardEmoji(c)).join(''),
   ]
     .filter(Boolean)
     .join('\n');
@@ -133,7 +133,7 @@ export function TrophyVaultModal({ vault, career, onClose, onDelete }: Props) {
                       <div className="relative text-xs text-white/70">
                         {MANAGERS_BY_ID[e.managerId].emoji} {e.formationId} · Star: {best ? `${best.season} ${best.shortName}` : '—'}
                       </div>
-                      <div className="relative text-sm tracking-tight">{cards.map((c) => TIER_EMOJI[c.tier]).join('')}</div>
+                      <div className="relative text-sm tracking-tight">{cards.map((c) => cardEmoji(c)).join('')}</div>
                     </button>
                   );
                 })}

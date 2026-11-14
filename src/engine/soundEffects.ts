@@ -200,9 +200,7 @@ export const sfx = {
         noise({ dur: 0.25, vol: 0.18, freq: 2500, q: 0.6, type: 'highpass' });
         tone({ freq: 660, type: 'triangle', dur: 0.2, vol: 0.12 });
         break;
-      case 'CULT_HERO':
-      case 'VETERAN':
-        if (tier === 'VETERAN') chord([523, 659, 784], { type: 'triangle', dur: 1.0, vol: 0.06 }); // deeper, regal under-chord
+      case 'ELITE':
         chord([1046, 1318, 1568], { type: 'sine', dur: 0.8, vol: 0.09 });
         tone({ freq: 2093, type: 'triangle', start: 0.05, dur: 0.6, vol: 0.06 });
         noise({ dur: 0.5, vol: 0.12, freq: 6000, q: 4 });

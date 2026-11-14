@@ -15,7 +15,7 @@ from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
 from openpyxl.utils import get_column_letter as L
 from openpyxl.worksheet.datavalidation import DataValidation
 
-from pd38_schema import (BASE_COLS, ACCESSORIES, ARCHETYPES, CLUB_HEADERS, CLUB_ROWS, CLUBS, COL, ERAS, EXPRESSIONS, FACIAL_HAIR, HAIR_COLOURS, HAIR_STYLES, HEAD_SHAPES, HEADERS,
+from pd38_schema import (ERA_COLOUR_NAMES, BASE_COLS, ACCESSORIES, ARCHETYPES, CLUB_HEADERS, CLUB_ROWS, CLUBS, COL, ERAS, EXPRESSIONS, FACIAL_HAIR, HAIR_COLOURS, HAIR_STYLES, HEAD_SHAPES, HEADERS,
                          OVR_MAX, OVR_MIN, POSITION_GROUP, POSITIONS, ROOT, SKIN, STAT_KEYS, STAT_MAX, STAT_MIN, TIERS, TRAIT_COLS)
 
 OUT = sys.argv[1] if len(sys.argv) > 1 else str(ROOT / "PackDraft38_Players.xlsx")
@@ -60,7 +60,8 @@ for code, name, lo, hi in TIERS:
     guide.append((f"{name} ({code}): OVR {lo}–{hi}", ""))
 guide += [
     ("To move a card to a different tier, change its OVR. The Tier column updates automatically.", ""),
-    ("Drop rates: Squad 63.5% · Cult Hero 15% · Veteran 11% · World Class 8.5% · Prime 2% (4% in pack 11).", ""),
+    ("Drop rates: Squad 63.5% · Elite 26% · Gold 8.5% · Prime 2% (4% in pack 11).", ""),
+    ("Card colour: 81–85 cards take their Era Label's colour; 86–90 cards are gold with a trim in that colour. See the Card Colour column and the Lists tab.", ""),
     ("", ""),
     ("ADDING, REMOVING, RENAMING", "h"),
     ("Add a card: copy an existing row to a new row at the bottom, then edit it. Keep the formulas in the grey columns.", ""),
@@ -87,6 +88,7 @@ g.column_dimensions["A"].width = 120
 ls = wb.create_sheet("Lists")
 lists = [
     ("Era Label", ERAS),
+    ("Era Colour", [ERA_COLOUR_NAMES[e] for e in ERAS]),
     ("Archetype", ARCHETYPES),
     ("Club Code", [c for c, _ in CLUBS]),
     ("Club Name", [n for _, n in CLUBS]),
@@ -116,7 +118,7 @@ ls.cell(row=1, column=len(lists) + 2, value="Allowed values come from the game c
 
 # ───────────────────────── Players ─────────────────────────
 ws = wb.create_sheet("Players", 1)
-auto_cols = {"Card ID", "Tier (auto)", "Primary Pos (auto)", "Group (auto)", *BASE_COLS}
+auto_cols = {"Card ID", "Tier (auto)", "Card Colour (auto)", "Primary Pos (auto)", "Group (auto)", *BASE_COLS}
 for h, ci in COL.items():
     c = ws.cell(row=1, column=ci, value=h)
     c.font = f_head
@@ -131,6 +133,9 @@ pos_list, grp_list = list_range["Position"], list_range["Position Group"]
 def put_formulas(r: int):
     B, F, H, J, Z = (f"{L(COL[x])}{r}" for x in ("Player ID", "Season", "OVR", "Positions", "Primary Pos (auto)"))
     ws.cell(row=r, column=COL["Card ID"], value=f'=IF({B}="","",{B}&"_"&SUBSTITUTE({F},"-",""))')
+    T = f"{L(COL['Tier (auto)'])}{r}"; G = f"{L(COL['Era Label'])}{r}"
+    colour = f"INDEX({list_range['Era Colour']},MATCH({G},{list_range['Era Label']},0))"
+    ws.cell(row=r, column=COL["Card Colour (auto)"], value=f'=IF({T}="","",IFERROR(IF({T}="ELITE",{colour},IF({T}="RISING_WORLD","Gold, "&LOWER({colour})&" trim",IF({T}="PRIME_ICON","Pearl white","Grey"))),""))')
     ws.cell(row=r, column=COL["Tier (auto)"], value=f'=IF({H}="","",IFERROR(INDEX({tier_list},MATCH({H},{tier_min},1)),"OVR too low"))')
     ws.cell(row=r, column=COL["Primary Pos (auto)"], value=f'=IF({J}="","",LEFT({J},FIND("/",{J}&"/")-1))')
     ws.cell(row=r, column=COL["Group (auto)"], value=f'=IF({Z}="","",IFERROR(INDEX({grp_list},MATCH({Z},{pos_list},0)),"Bad position"))')
@@ -175,7 +180,7 @@ for r in range(len(players) + 2, LAST_ROW + 1):
     ws.cell(row=r, column=COL["Season"]).number_format = "@"
 
 # Column widths
-widths = {"Card ID": 24, "Player ID": 22, "Full Name": 24, "Short Name": 16, "Nation": 18, "Season": 9, "Era Label": 13, "OVR": 7, "Tier (auto)": 16,
+widths = {"Card ID": 24, "Player ID": 22, "Full Name": 24, "Short Name": 16, "Nation": 18, "Season": 9, "Era Label": 13, "OVR": 7, "Tier (auto)": 14, "Card Colour (auto)": 22,
           "Positions": 12, "Club": 8, "Archetype": 21, "Primary Pos (auto)": 11, "Group (auto)": 9}
 for h, ci in COL.items():
     ws.column_dimensions[L(ci)].width = widths.get(h, 7 if h in dict(STAT_KEYS) else 13)
@@ -222,7 +227,7 @@ ws.add_data_validation(posv)
 
 # Tier colours (cards' own palette)
 tcol = L(COL["Tier (auto)"])
-for code, colour, fg in [("PRIME_ICON", "F8FAFC", "0F172A"), ("RISING_WORLD", "F59E0B", "000000"), ("VETERAN", "7C3AED", "FFFFFF"), ("CULT_HERO", "DC2626", "FFFFFF"), ("STANDARD", "374151", "FFFFFF")]:
+for code, colour, fg in [("PRIME_ICON", "F8FAFC", "0F172A"), ("RISING_WORLD", "F59E0B", "000000"), ("ELITE", "2563EB", "FFFFFF"), ("STANDARD", "374151", "FFFFFF")]:
     ws.conditional_formatting.add(f"{tcol}2:{tcol}{LAST_ROW}", FormulaRule(formula=[f'${tcol}2="{code}"'], fill=PatternFill("solid", fgColor=colour), font=Font(name=FONT, color=fg, bold=True)))
 
 ws.cell(row=1, column=COL["Card ID"]).comment = Comment("Calculated from Player ID + Season. This is the card's unique ID in the game.", "PackDraft 38")

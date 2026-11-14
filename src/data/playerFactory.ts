@@ -11,8 +11,7 @@ import type {
 export function tierFromOvr(ovr: number): Tier {
   if (ovr >= 91) return 'PRIME_ICON';
   if (ovr >= 86) return 'RISING_WORLD';
-  if (ovr >= 84) return 'VETERAN';
-  if (ovr >= 81) return 'CULT_HERO';
+  if (ovr >= 81) return 'ELITE';
   return 'STANDARD';
 }
 

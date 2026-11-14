@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState, type PointerEvent as RPointerEvent } from 'react';
 import { RefreshCw, Scissors, Sparkles } from 'lucide-react';
 import type { PlayerCard, Tier } from '../types/game';
+import { eraColour } from '../data/eraColours';
 import { highestTier, TOTAL_PACKS, tierRates } from '../engine/packGenerator';
 import { sfx } from '../engine/soundEffects';
 import { burstAt, goldConfetti, shakeScreen } from '../engine/fx';
@@ -26,11 +27,17 @@ interface Props {
 
 const FLASH: Record<Tier, { color: string; max: number }> = {
   STANDARD: { color: '#ffffff', max: 0.7 },
-  CULT_HERO: { color: 'radial-gradient(circle, #fecaca 0%, #dc2626 45%, #450a0a 100%)', max: 0.85 },
-  VETERAN: { color: 'radial-gradient(circle, #ede9fe 0%, #7c3aed 45%, #2e1065 100%)', max: 0.85 },
+  ELITE: { color: '', max: 0.85 }, // coloured by the best card's era label (see flashColour)
   RISING_WORLD: { color: 'radial-gradient(circle, #fffbeb 0%, #facc15 35%, #b45309 70%, #451a03 100%)', max: 0.9 },
   PRIME_ICON: { color: 'radial-gradient(circle, #ffffff 0%, #ffffff 30%, #e0f2fe 55%, #94a3b8 100%)', max: 1 },
 };
+
+/** Flash fill: Elite pulls glow in the best card's era-label colour. */
+function flashColour(tier: Tier, best: PlayerCard | undefined) {
+  if (tier !== 'ELITE' || !best) return FLASH[tier].color;
+  const e = eraColour(best.era);
+  return `radial-gradient(circle, ${e.border} 0%, ${e.mid} 45%, ${e.dark} 100%)`;
+}
 
 function raysFor(tier: Tier) {
   const prime = tier === 'PRIME_ICON';
@@ -60,6 +67,8 @@ export function PackOpener({ packNumber, cards, packKey, selectedId, onSelect, r
   const timers = useRef<number[]>([]);
   const packRef = useRef<HTMLDivElement>(null);
   const top = useMemo(() => highestTier(cards), [cards]);
+  const best = useMemo(() => [...cards].sort((a, b) => b.ovr - a.ovr)[0], [cards]);
+  const bestEra = best ? eraColour(best.era) : eraColour('SQUAD');
   const finale = packNumber >= TOTAL_PACKS;
 
   // Reset whenever a new pack arrives.
@@ -158,10 +167,8 @@ export function PackOpener({ packNumber, cards, packKey, selectedId, onSelect, r
     if (top === 'RISING_WORLD') {
       shakeScreen('micro');
       burstAt(cx, cy + 100, ['#facc15', '#fde68a', '#ffffff'], 70);
-    } else if (top === 'VETERAN') {
-      burstAt(cx, cy + 100, ['#c4b5fd', '#e5e7eb', '#7c3aed'], 45);
-    } else if (top === 'CULT_HERO') {
-      burstAt(cx, cy + 100, ['#fca5a5', '#e5e7eb', '#dc2626'], 45);
+    } else if (top === 'ELITE') {
+      burstAt(cx, cy + 100, [bestEra.light, '#e5e7eb', bestEra.mid], 45);
     }
     later(1400, () => {
       setStage('fanned');
@@ -236,7 +243,7 @@ export function PackOpener({ packNumber, cards, packKey, selectedId, onSelect, r
           <div
             className="absolute inset-0 animate-flash"
             // Rays are painted into the same layer as the flash: one full-screen layer, not two.
-            style={{ background: flash.tier === 'RISING_WORLD' || flash.tier === 'PRIME_ICON' ? `${raysFor(flash.tier)}, ${FLASH[flash.tier].color}` : FLASH[flash.tier].color, ['--flash-max' as string]: FLASH[flash.tier].max, animationDuration: flash.tier === 'PRIME_ICON' ? '1.6s' : flash.tier === 'STANDARD' ? '0.6s' : '1.1s' }}
+            style={{ background: flash.tier === 'RISING_WORLD' || flash.tier === 'PRIME_ICON' ? `${raysFor(flash.tier)}, ${FLASH[flash.tier].color}` : flashColour(flash.tier, best), ['--flash-max' as string]: FLASH[flash.tier].max, animationDuration: flash.tier === 'PRIME_ICON' ? '1.6s' : flash.tier === 'STANDARD' ? '0.6s' : '1.1s' }}
           />
           {/* Shockwave: drawn at full size and shrunk, so it animates by scaling DOWN (never up). */}
           {(flash.tier === 'RISING_WORLD' || flash.tier === 'PRIME_ICON') && (
@@ -258,13 +265,13 @@ export function PackOpener({ packNumber, cards, packKey, selectedId, onSelect, r
               </div>
             </>
           )}
-          {(flash.tier === 'CULT_HERO' || flash.tier === 'VETERAN') && (
+          {flash.tier === 'ELITE' && (
             <div className="absolute inset-0 overflow-hidden">
               {Array.from({ length: 24 }).map((_, i) => (
                 <span
                   key={i}
                   className="particle animate-rise"
-                  style={{ left: `${30 + ((i * 41) % 40)}%`, bottom: `${30 + ((i * 17) % 20)}%`, width: 4, height: 4, background: i % 2 ? (flash.tier === 'CULT_HERO' ? '#fecaca' : '#ddd6fe') : '#e5e7eb', boxShadow: `0 0 8px ${flash.tier === 'CULT_HERO' ? '#ef4444' : '#8b5cf6'}`, animationDelay: `${(i % 6) * 0.08}s` }}
+                  style={{ left: `${30 + ((i * 41) % 40)}%`, bottom: `${30 + ((i * 17) % 20)}%`, width: 4, height: 4, background: i % 2 ? bestEra.border : '#e5e7eb', boxShadow: `0 0 8px ${bestEra.mid}`, animationDelay: `${(i % 6) * 0.08}s` }}
                 />
               ))}
             </div>
@@ -297,14 +304,13 @@ export function PackOpener({ packNumber, cards, packKey, selectedId, onSelect, r
         <div className="hidden text-right text-[10px] leading-tight text-white/60 sm:block">
           <div className={TIER_TEXT.PRIME_ICON}>Prime {rates.PRIME_ICON}%</div>
           <div className={TIER_TEXT.RISING_WORLD}>World Class {rates.RISING_WORLD}%</div>
-          <div className={TIER_TEXT.VETERAN}>Veteran {rates.VETERAN}%</div>
-          <div className={TIER_TEXT.CULT_HERO}>Cult Hero {rates.CULT_HERO}%</div>
+          <div className={TIER_TEXT.ELITE}>Elite (81–85) {rates.ELITE}%</div>
           <div className={TIER_TEXT.STANDARD}>Squad {rates.STANDARD}%</div>
         </div>
       </div>
 
       {!showCards && (
-        <div data-shake-zone className={`relative flex flex-1 flex-col items-center justify-center ${stage === 'tell' && (top === 'CULT_HERO' || top === 'VETERAN') ? 'animate-pop' : ''}`}>
+        <div data-shake-zone className={`relative flex flex-1 flex-col items-center justify-center ${stage === 'tell' && top === 'ELITE' ? 'animate-pop' : ''}`}>
           {/* The foil pack */}
           <div
             ref={packRef}
@@ -340,7 +346,7 @@ export function PackOpener({ packNumber, cards, packKey, selectedId, onSelect, r
               {stage === 'tell' && (
                 <div
                   className="absolute inset-x-0 top-0 h-2"
-                  style={{ background: top === 'PRIME_ICON' ? '#ffffff' : top === 'RISING_WORLD' ? '#facc15' : top === 'VETERAN' ? '#8b5cf6' : top === 'CULT_HERO' ? '#ef4444' : '#fff', boxShadow: '0 0 40px 18px currentColor' }}
+                  style={{ background: top === 'PRIME_ICON' ? '#ffffff' : top === 'RISING_WORLD' ? '#facc15' : top === 'ELITE' ? bestEra.mid : '#fff', boxShadow: '0 0 40px 18px currentColor' }}
                 />
               )}
             </div>

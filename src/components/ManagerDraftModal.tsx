@@ -17,7 +17,7 @@ export function ManagerDraftModal({ offers, onPick }: Props) {
     if (revealed.has(i)) return;
     sfx.unlock();
     sfx.flip();
-    window.setTimeout(() => sfx.stinger('VETERAN'), 250);
+    window.setTimeout(() => sfx.stinger('ELITE'), 250);
     if (e) burstAt(e.clientX, e.clientY, ['#facc15', '#ffffff', '#34d399'], 25);
     setRevealed((s) => new Set(s).add(i));
   };

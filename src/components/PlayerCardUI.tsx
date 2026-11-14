@@ -4,27 +4,20 @@ import type { PlayerCard, Tier } from '../types/game';
 import { getClub } from '../data/clubs';
 import { PlayerCaricature } from './PlayerCaricature';
 import { sfx } from '../engine/soundEffects';
+import { eraColour } from '../data/eraColours';
 
 export const TIER_LABEL: Record<Tier, string> = {
   STANDARD: 'Squad Regular',
-  CULT_HERO: 'Cult Hero',
-  VETERAN: 'Veteran',
-  RISING_WORLD: 'Rising Star / World Class',
+  ELITE: 'Elite',
+  RISING_WORLD: 'Gold',
   PRIME_ICON: 'Prime Icon',
 };
 
-export const TIER_EMOJI: Record<Tier, string> = {
-  STANDARD: '⬛',
-  CULT_HERO: '🟥',
-  VETERAN: '🟪',
-  RISING_WORLD: '🟨',
-  PRIME_ICON: '⬜',
-};
+export { cardEmoji } from '../data/eraColours';
 
 export const TIER_TEXT: Record<Tier, string> = {
   STANDARD: 'text-slate-300',
-  CULT_HERO: 'text-red-400',
-  VETERAN: 'text-violet-300',
+  ELITE: 'text-sky-300',
   RISING_WORLD: 'text-amber-300',
   PRIME_ICON: 'text-white',
 };
@@ -74,6 +67,7 @@ export function PlayerCardUI({ card, size = 'md', onClick, selected, dimmed, sho
   const d = DIM[size];
   const club = getClub(card.club);
   const prime = card.tier === 'PRIME_ICON';
+  const era = eraColour(card.era);
   const world = card.tier === 'RISING_WORLD';
   const isGK = card.positions[0] === 'GK';
   const tiny = size === 'xs' || size === 'sm';
@@ -106,12 +100,14 @@ export function PlayerCardUI({ card, size = 'md', onClick, selected, dimmed, sho
       onPointerEnter={(e) => onClick && e.pointerType === 'mouse' && sfx.hover()}
       onPointerLeave={onLeave}
       onPointerCancel={onLeave}
-      className={`card-base tier-${card.tier} ${card.tier === 'CULT_HERO' || card.tier === 'VETERAN' ? 'sweep' : ''} ${prime ? 'aura' : ''} ${
+      className={`card-base tier-${card.tier} ${card.tier === 'ELITE' ? 'sweep' : ''} ${prime ? 'aura' : ''} ${
         selected ? 'ring-4 ring-emerald-400 ring-offset-2 ring-offset-black' : ''
       } ${dimmed ? 'opacity-40 grayscale' : ''} ${onClick ? 'cursor-pointer' : ''} select-none shrink-0 ${className}`}
-      style={{ width: d.w, height: d.h, ...style }}
+      // Era label colour: paints Elite (81–85) cards and trims gold (86–90) cards.
+      style={{ width: d.w, height: d.h, ['--e1' as string]: era.light, ['--e2' as string]: era.mid, ['--e3' as string]: era.dark, ['--eb' as string]: era.border, ...style }}
     >
       {prime && <div className="holo" />}
+      {world && <div className="gold-trim" />}
       <div className="glare" />
       {(world || prime) && (
         <div className="sparkles absolute inset-0 pointer-events-none">
@@ -135,8 +131,11 @@ export function PlayerCardUI({ card, size = 'md', onClick, selected, dimmed, sho
 
       {/* top-right: season era badge */}
       <div className="absolute right-1 top-1 z-10 flex flex-col items-end gap-0.5">
-        <span className={`rounded px-1 py-[1px] font-black ${d.small} uppercase tracking-wider bg-black/60 text-white`}>
-          {size === 'xs' ? card.season : `${card.season} ${card.era}`}
+        <span
+          className={`rounded px-1 py-[1px] font-black ${d.small} uppercase tracking-wider text-white`}
+          style={{ background: card.tier === 'ELITE' || world ? era.dark : 'rgba(0,0,0,.6)', boxShadow: card.tier === 'ELITE' || world ? `inset 0 0 0 1px ${era.light}` : undefined }}
+        >
+          {tiny ? card.season : `${card.season} ${card.era}`}
         </span>
         {!tiny && (
           <span className="rounded px-1 text-[9px] font-black" style={{ background: club.primary, color: club.secondary === club.primary ? '#fff' : club.secondary, border: `1px solid ${club.accent}` }}>

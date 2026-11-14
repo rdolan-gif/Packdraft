@@ -20,6 +20,8 @@ def union(name: str) -> list[str]:
 
 POSITIONS = union("Position")
 ERAS = union("EraLabel")
+_ERA_TS = (ROOT / "src/data/eraColours.ts").read_text(encoding="utf-8")
+ERA_COLOUR_NAMES = {e: re.search(rf"'?{re.escape(e)}'?: \{{ name: '([^']+)'", _ERA_TS).group(1) for e in ERAS}
 ARCHETYPES = union("Archetype")
 SKIN = union("SkinTone")
 HAIR_STYLES = union("HairStyle")
@@ -55,7 +57,7 @@ TRAIT_COLS = [
 ]
 
 HEADERS = (
-    ["Card ID", "Player ID", "Full Name", "Short Name", "Nation", "Season", "Era Label", "OVR", "Tier (auto)", "Positions", "Club", "Archetype"]
+    ["Card ID", "Player ID", "Full Name", "Short Name", "Nation", "Season", "Era Label", "OVR", "Tier (auto)", "Card Colour (auto)", "Positions", "Club", "Archetype"]
     + [h for h, _ in STAT_KEYS]
     + [h for h, _, _ in TRAIT_COLS]
     + ["Primary Pos (auto)", "Group (auto)"]
@@ -68,4 +70,4 @@ COL = {h: i + 1 for i, h in enumerate(HEADERS)}  # 1-based column numbers
 
 OVR_MIN, OVR_MAX = 74, 96
 STAT_MIN, STAT_MAX = 30, 99
-TIERS = [("STANDARD", "Squad Regular", 74, 80), ("CULT_HERO", "Cult Hero", 81, 83), ("VETERAN", "Veteran", 84, 85), ("RISING_WORLD", "Rising Star / World Class", 86, 90), ("PRIME_ICON", "Prime Icon", 91, 96)]
+TIERS = [("STANDARD", "Squad Regular", 74, 80), ("ELITE", "Elite (colour = era label)", 81, 85), ("RISING_WORLD", "Gold (trim = era label)", 86, 90), ("PRIME_ICON", "Prime Icon", 91, 96)]

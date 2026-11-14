@@ -3,7 +3,8 @@
 export type Position = 'GK' | 'RB' | 'CB' | 'LB' | 'CDM' | 'CM' | 'CAM' | 'RM' | 'LM' | 'RW' | 'LW' | 'ST';
 export type PositionGroup = 'GK' | 'DEF' | 'MID' | 'FWD';
 
-export type Tier = 'STANDARD' | 'CULT_HERO' | 'VETERAN' | 'RISING_WORLD' | 'PRIME_ICON';
+/** Rarity by OVR: 74–80 Standard · 81–85 Elite (coloured by era label) · 86–90 gold · 91–96 Prime Icon. */
+export type Tier = 'STANDARD' | 'ELITE' | 'RISING_WORLD' | 'PRIME_ICON';
 
 export type EraLabel =
   | 'SQUAD'
