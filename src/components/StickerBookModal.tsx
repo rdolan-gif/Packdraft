@@ -36,7 +36,7 @@ const pct = (a: number, b: number) => (b ? Math.floor((a / b) * 100) : 0);
 const hash = (s: string) => [...s].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) | 0, 7);
 const tilt = (id: string) => ((Math.abs(hash(id)) % 50) - 25) / 10; // -2.5..2.5 deg
 
-type Cell = { kind: 'label'; pos: Position } | { kind: 'card'; card: PlayerCard } | { kind: 'honour'; card: PlayerCard; count: number };
+type Cell = { kind: 'label'; pos: Position } | { kind: 'card'; card: PlayerCard } | { kind: 'honour'; card: PlayerCard; count: number } | { kind: 'gap' };
 type Page =
   | { kind: 'contents'; part: 0 | 1 }
   | { kind: 'club'; code: string; part: number; parts: number; cells: Cell[] }
@@ -104,16 +104,18 @@ function paginate(cells: Cell[], cols: number, bannerRows: number, rows: number)
   return out;
 }
 
-/** A club's cells: a printed position label before each position group, then its cards. */
-function clubCells(cards: PlayerCard[]): Cell[] {
+/**
+ * A club's cells, row by row: every position group starts at the left of a new row with its printed
+ * label, and the rest of its last row is left blank. Rows are always full, so pages break between rows.
+ */
+function clubCells(cards: PlayerCard[], cols: number): Cell[] {
   const cells: Cell[] = [];
-  let last: Position | null = null;
-  cards.forEach((c) => {
-    if (c.positions[0] !== last) {
-      last = c.positions[0];
-      cells.push({ kind: 'label', pos: last });
-    }
-    cells.push({ kind: 'card', card: c });
+  POSITION_ORDER.forEach((pos) => {
+    const group = cards.filter((c) => c.positions[0] === pos);
+    if (!group.length) return;
+    cells.push({ kind: 'label', pos });
+    group.forEach((card) => cells.push({ kind: 'card', card }));
+    while (cells.length % cols) cells.push({ kind: 'gap' });
   });
   return cells;
 }
@@ -166,7 +168,7 @@ export function StickerBookModal({ onClose }: { onClose: () => void }) {
     clubs.forEach((c) => {
       startLeft('AUTOGRAPHS');
       firstPageOf[c.code] = pages.length;
-      const parts = paginate(clubCells(byClub.get(c.code)!), layout.cols, layout.bannerRows, layout.rows);
+      const parts = paginate(clubCells(byClub.get(c.code)!, layout.cols), layout.cols, layout.bannerRows, layout.rows);
       parts.forEach((cells, part) => pages.push({ kind: 'club', code: c.code, part, parts: parts.length, cells }));
     });
     startLeft('AUTOGRAPHS');
@@ -441,6 +443,7 @@ function Grid({ layout, cells, club, has, drafted, numberOf, onOpen }: { layout:
   return (
     <div className="grid content-start justify-center" style={{ gridTemplateColumns: `repeat(${layout.cols}, ${w}px)`, columnGap: GAP, rowGap: GAP }}>
       {cells.map((cell, i) => {
+        if (cell.kind === 'gap') return <div key={`g${i}`} style={{ width: w }} aria-hidden="true" />;
         if (cell.kind === 'label') return <PositionLabel key={`l${cell.pos}${i}`} pos={cell.pos} scale={layout.scale} colour={club?.primary ?? INK} />;
         if (cell.kind === 'honour')
           return (
