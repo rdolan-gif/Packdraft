@@ -27,7 +27,31 @@ if "Players" not in wb.sheetnames:
 ws = wb["Players"]
 header = [str(c.value).strip() if c.value is not None else "" for c in ws[1]]
 col = {h: i for i, h in enumerate(header)}
-missing = [h for h in COL if h not in col and "(auto)" not in h and h != "Card ID"]
+missing = [h for h in COL if h not in col and "(auto)" not in h and h != "Card ID" and not h.startswith("Base ")]
+# Stat cells may be formulas (stat follows OVR). Use the value the spreadsheet app calculated;
+# if the file was never opened in one (no saved results), work it out from the Base columns.
+vws = load_workbook(SRC, data_only=True)["Players"]
+STAT_HEADERS = {h for h, _ in STAT_KEYS}
+
+
+def resolve(r, row):
+    out = list(row)
+    for i, v in enumerate(out):
+        if not (isinstance(v, str) and v.startswith("=")):
+            continue
+        cached = vws.cell(row=r, column=i + 1).value
+        h = header[i]
+        if cached is not None:
+            out[i] = cached
+        elif h in STAT_HEADERS and f"Base {h}" in col and "Base OVR" in col:
+            try:
+                base, ovr, base_ovr = (float(row[col[x]]) for x in (f"Base {h}", "OVR", "Base OVR"))
+                out[i] = int(max(STAT_MIN, min(STAT_MAX, base + ovr - base_ovr)))
+            except (TypeError, ValueError):
+                out[i] = None
+        else:
+            out[i] = None
+    return out
 if missing:
     raise SystemExit(f"Missing columns on the Players tab: {', '.join(missing)}")
 
@@ -101,6 +125,7 @@ def number(row, h, lo, hi, r):
 
 
 for r, row in enumerate(ws.iter_rows(min_row=2, values_only=True), start=2):
+    row = resolve(r, row)
     pid = text(row, "Player ID")
     if not pid:
         if any(text(row, h) for h in ("Full Name", "Season", "OVR")):

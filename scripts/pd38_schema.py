@@ -59,7 +59,11 @@ HEADERS = (
     + [h for h, _ in STAT_KEYS]
     + [h for h, _, _ in TRAIT_COLS]
     + ["Primary Pos (auto)", "Group (auto)"]
+    + ["Base OVR"] + [f"Base {h}" for h, _ in STAT_KEYS]
 )
+# "Base" columns snapshot each card's OVR and stats at export. Stat cells are formulas:
+# stat = base stat + (OVR - base OVR), clamped to the stat range. Typing a number overrides it.
+BASE_COLS = ["Base OVR"] + [f"Base {h}" for h, _ in STAT_KEYS]
 COL = {h: i + 1 for i, h in enumerate(HEADERS)}  # 1-based column numbers
 
 OVR_MIN, OVR_MAX = 74, 96

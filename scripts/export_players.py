@@ -15,7 +15,7 @@ from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
 from openpyxl.utils import get_column_letter as L
 from openpyxl.worksheet.datavalidation import DataValidation
 
-from pd38_schema import (ACCESSORIES, ARCHETYPES, CLUB_HEADERS, CLUB_ROWS, CLUBS, COL, ERAS, EXPRESSIONS, FACIAL_HAIR, HAIR_COLOURS, HAIR_STYLES, HEAD_SHAPES, HEADERS,
+from pd38_schema import (BASE_COLS, ACCESSORIES, ARCHETYPES, CLUB_HEADERS, CLUB_ROWS, CLUBS, COL, ERAS, EXPRESSIONS, FACIAL_HAIR, HAIR_COLOURS, HAIR_STYLES, HEAD_SHAPES, HEADERS,
                          OVR_MAX, OVR_MIN, POSITION_GROUP, POSITIONS, ROOT, SKIN, STAT_KEYS, STAT_MAX, STAT_MIN, TIERS, TRAIT_COLS)
 
 OUT = sys.argv[1] if len(sys.argv) > 1 else str(ROOT / "PackDraft38_Players.xlsx")
@@ -50,6 +50,7 @@ guide = [
     ("Positions: primary first, extras after a slash, e.g. ST/LW or CB/RB. Valid codes are on the Lists tab.", ""),
     ("Club: three-letter code from the dropdown (names on the Lists tab). It sets kit colours and club chemistry.", ""),
     ("Archetype: from the dropdown. Managers' bonuses look for specific archetypes.", ""),
+    ("PAC to PHY follow OVR: change a card's OVR and every stat moves by the same amount from its starting value (the grey Base columns at the far right). Type a number into a stat to set it by hand instead.", ""),
     (f"PAC to PHY: {STAT_MIN} to {STAT_MAX}. Goalkeepers: PAC = speed, SHO = not used (leave 30-40), PAS = kicking, DRI = handling, DEF = shot-stopping, PHY = positioning.", ""),
     ("Look columns (Skin Tone to Accessory): change the caricature. Pick from the dropdowns.", ""),
     ("", ""),
@@ -115,7 +116,7 @@ ls.cell(row=1, column=len(lists) + 2, value="Allowed values come from the game c
 
 # ───────────────────────── Players ─────────────────────────
 ws = wb.create_sheet("Players", 1)
-auto_cols = {"Card ID", "Tier (auto)", "Primary Pos (auto)", "Group (auto)"}
+auto_cols = {"Card ID", "Tier (auto)", "Primary Pos (auto)", "Group (auto)", *BASE_COLS}
 for h, ci in COL.items():
     c = ws.cell(row=1, column=ci, value=h)
     c.font = f_head
@@ -152,6 +153,22 @@ for r, p in enumerate(players, start=2):
         c.border = border
         if h == "Season":
             c.number_format = "@"  # keep "08-09" as text
+    # Snapshot of the starting numbers, then stats follow OVR: base + (OVR - base OVR), kept within range.
+    ws.cell(row=r, column=COL["Base OVR"], value=p["ovr"])
+    ovr_ref, base_ovr_ref = f"{L(COL['OVR'])}{r}", f"{L(COL['Base OVR'])}{r}"
+    is_gk = p["positions"][0] == "GK"
+    for h, k in STAT_KEYS:
+        ws.cell(row=r, column=COL[f"Base {h}"], value=p["stats"][k])
+        sc = ws.cell(row=r, column=COL[h])
+        if is_gk and k == "sho":
+            sc.value = p["stats"][k]  # keepers don't use shooting: stays fixed
+        else:
+            base_ref = f"{L(COL['Base ' + h])}{r}"
+            sc.value = f'=IF({ovr_ref}="","",MAX({STAT_MIN},MIN({STAT_MAX},{base_ref}+{ovr_ref}-{base_ovr_ref})))'
+            sc.font = Font(name=FONT, size=10, color="000000")
+    for h in BASE_COLS:
+        bc = ws.cell(row=r, column=COL[h])
+        bc.font, bc.fill = f_auto, fill_auto
     put_formulas(r)
 for r in range(len(players) + 2, LAST_ROW + 1):
     put_formulas(r)
@@ -162,6 +179,10 @@ widths = {"Card ID": 24, "Player ID": 22, "Full Name": 24, "Short Name": 16, "Na
           "Positions": 12, "Club": 8, "Archetype": 21, "Primary Pos (auto)": 11, "Group (auto)": 9}
 for h, ci in COL.items():
     ws.column_dimensions[L(ci)].width = widths.get(h, 7 if h in dict(STAT_KEYS) else 13)
+for h in BASE_COLS:
+    ws.column_dimensions[L(COL[h])].width = 7
+ws.column_dimensions.group(L(COL["Base OVR"]), L(COL[BASE_COLS[-1]]), hidden=False, outline_level=1)
+ws.cell(row=1, column=COL["Base OVR"]).comment = Comment("Starting OVR and stats when this sheet was exported. Stat columns add (OVR - Base OVR) to these. Don't edit.", "PackDraft 38")
 ws.freeze_panes = ws.cell(row=2, column=COL["Short Name"] + 0)  # keep IDs and names visible while scrolling
 ws.auto_filter.ref = f"A1:{L(len(HEADERS))}{len(players) + 1}"
 
