@@ -366,3 +366,35 @@ html.lite .stadium-bg {
     opacity: 0;
   }
 }
+
+/* ── Sticker album foils ── */
+@layer components {
+  .foil-holo {
+    background: linear-gradient(115deg, #f0abfc, #93c5fd 20%, #a7f3d0 38%, #fde68a 55%, #fca5a5 72%, #c4b5fd 90%);
+    background-size: 220% 220%;
+    animation: foilshift 5s ease-in-out infinite alternate;
+  }
+  .foil-gold {
+    background: linear-gradient(120deg, #a16207, #facc15 25%, #fff7c2 40%, #eab308 55%, #854d0e 80%, #facc15);
+    background-size: 200% 200%;
+    animation: foilshift 6s ease-in-out infinite alternate;
+  }
+  .foil-silver {
+    background: linear-gradient(120deg, #9ca3af, #f9fafb 30%, #d1d5db 50%, #ffffff 65%, #9ca3af);
+  }
+}
+@keyframes foilshift {
+  from { background-position: 0% 50%; }
+  to { background-position: 100% 50%; }
+}
+@keyframes leafnext {
+  from { transform: rotateY(0deg); }
+  to { transform: rotateY(-180deg); }
+}
+@keyframes leafprev {
+  from { transform: rotateY(0deg); }
+  to { transform: rotateY(180deg); }
+}
+.animate-leafnext { animation: leafnext .6s cubic-bezier(.45,.05,.35,1) forwards; }
+.animate-leafprev { animation: leafprev .6s cubic-bezier(.45,.05,.35,1) forwards; }
+html.lite .foil-holo, html.lite .foil-gold { animation: none; }

@@ -170,7 +170,6 @@ export function SeasonBroadcast({ sim, onFinish, formationId, lineup, managerId,
             return 900 * k;
           }
         }
-        if (!quiet && speedRef.current === 1) sfx.newsflash();
         return 0;
       }
       const { us, them } = scoreAt(e.minute, i);
