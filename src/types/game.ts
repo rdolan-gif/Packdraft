@@ -56,7 +56,13 @@ export type HairStyle =
   | 'spiky'
   | 'manbun'
   | 'fringe'
-  | 'cornrows';
+  | 'cornrows'
+  | 'receding'
+  | 'mullet'
+  | 'curtains'
+  | 'sidepart'
+  | 'frosted'
+  | 'gelled';
 export type HairColor = 'black' | 'darkbrown' | 'brown' | 'blonde' | 'ginger' | 'grey' | 'bleached';
 export type FacialHair = 'none' | 'stubble' | 'goatee' | 'beard' | 'fullbeard' | 'moustache';
 export type HeadShape = 'round' | 'oval' | 'square' | 'long' | 'heart';
@@ -73,12 +79,16 @@ export interface CaricatureTraits {
   accessory: Accessory;
 }
 
+export type CollarStyle = 'crew' | 'v' | 'polo';
+
 export interface CaricatureProps {
   traits: CaricatureTraits;
   kitPrimaryColor: string;
   kitSecondaryColor: string;
   kitSleeveColor?: string; // defaults to kitSecondaryColor
   kitCollarColor?: string; // defaults to kitSecondaryColor
+  /** Neckline: polo collar (90s), V-neck (2000s) or crew neck (modern). Defaults from the seed. */
+  collarStyle?: CollarStyle;
   seed: string;
   size?: number;
   className?: string;

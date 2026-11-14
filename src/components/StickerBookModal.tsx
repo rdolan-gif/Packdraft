@@ -8,6 +8,7 @@ import { loadBook } from '../engine/stickerBook';
 import { sfx } from '../engine/soundEffects';
 import type { Club, PlayerCard, Position, Tier } from '../types/game';
 import { PlayerCaricature } from './PlayerCaricature';
+import { collarForSeason } from '../data/kits';
 
 // A retro football sticker album: hardback cover, contents, one spread per club (stickers ordered
 // by position, then rarity), printed empty slots, page turns, and foil honours at the back.
@@ -436,7 +437,7 @@ function Sticker({ card, number, drafted, totw }: { card: PlayerCard; number?: n
           <div className="absolute inset-0" style={{ background: `linear-gradient(180deg, ${club.primary} 0%, ${club.primary} 62%, ${club.secondary} 62%)` }} />
           <div className="absolute inset-0 opacity-25" style={{ background: 'radial-gradient(rgba(255,255,255,.6) 1px, transparent 1.3px) 0 0/4px 4px' }} />
           <div className="absolute left-1/2 top-2 -translate-x-1/2">
-            <PlayerCaricature traits={card.traits} kitPrimaryColor={club.primary} kitSecondaryColor={club.secondary} kitSleeveColor={club.sleeve} kitCollarColor={club.collar} seed={card.id} size={60} />
+            <PlayerCaricature traits={card.traits} kitPrimaryColor={club.primary} kitSecondaryColor={club.secondary} kitSleeveColor={club.sleeve} kitCollarColor={club.collar} collarStyle={collarForSeason(card.season)} seed={card.id} size={60} />
           </div>
           <div className="absolute left-0.5 top-0.5 rounded-sm bg-black/60 px-0.5 text-[7px] font-black leading-tight text-white">{card.season}</div>
           <div className="absolute right-0.5 top-0.5 rounded-sm bg-white/85 px-0.5 font-display text-[10px] leading-tight text-black">{card.ovr}</div>
