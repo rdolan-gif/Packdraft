@@ -255,6 +255,17 @@ export const sfx = {
     sfx.whistle(true);
     sfx.fanfare();
   },
+  /** Firework rocket: a rising whistle. */
+  fireworkLaunch() {
+    tone({ freq: 500, type: 'sine', dur: 0.45, vol: 0.05, slideTo: 1900 });
+    noise({ dur: 0.45, vol: 0.06, freq: 2500, freqTo: 6000, q: 2 });
+  },
+  /** Firework burst: a soft boom with crackle. */
+  fireworkPop() {
+    tone({ freq: 140, type: 'sine', dur: 0.35, vol: 0.35, slideTo: 60 });
+    noise({ dur: 0.3, vol: 0.25, freq: 900, q: 0.6, type: 'lowpass', color: 'brown' });
+    for (let i = 0; i < 6; i++) noise({ start: 0.08 + i * 0.05, dur: 0.04, vol: 0.08, freq: 4000 + Math.random() * 3000, q: 4 });
+  },
   stamp() {
     tone({ freq: 90, type: 'sine', dur: 0.4, vol: 0.9, slideTo: 40 });
     noise({ dur: 0.18, vol: 0.4, freq: 500, q: 0.5, type: 'lowpass', color: 'brown' });

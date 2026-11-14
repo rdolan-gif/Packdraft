@@ -355,3 +355,21 @@ html.lite .sweep:hover::after {
 html.lite .stadium-bg {
   background: linear-gradient(180deg, #071a10 0%, #05110b 55%, #03140c 100%);
 }
+
+/* Pack-reveal fireworks: rocket climbs to its tile position, then fades. */
+@keyframes rocket {
+  0% {
+    transform: translate(-50%, 62vh) scale(0.8);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, 0) scale(1.2);
+    opacity: 0;
+  }
+}

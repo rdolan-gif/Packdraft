@@ -2,6 +2,8 @@ import { useEffect, useMemo, useRef, useState, type PointerEvent as RPointerEven
 import { RefreshCw, Scissors, Sparkles } from 'lucide-react';
 import type { PlayerCard, Tier } from '../types/game';
 import { eraColour } from '../data/eraColours';
+import { getClub } from '../data/clubs';
+import { Flag } from './Flag';
 import { highestTier, TOTAL_PACKS, tierRates } from '../engine/packGenerator';
 import { sfx } from '../engine/soundEffects';
 import { burstAt, goldConfetti, shakeScreen } from '../engine/fx';
@@ -33,20 +35,30 @@ const FLASH: Record<Tier, { color: string; max: number }> = {
 };
 
 /** Flash fill: Elite pulls glow in the best card's era-label colour. */
+const FW_GAP = 650; // between rockets
+const FW_FLIGHT = 450; // rocket climb
+const FW_TOTAL = 2 * FW_GAP + FW_FLIGHT + 1100; // last tile lands, then a beat to read them
+const TILE_Y = 0.24; // tiles sit this far down the screen
+
 function flashColour(tier: Tier, best: PlayerCard | undefined) {
   if (tier !== 'ELITE' || !best) return FLASH[tier].color;
   const e = eraColour(best.era);
   return `radial-gradient(circle, ${e.border} 0%, ${e.mid} 45%, ${e.dark} 100%)`;
 }
 
-function raysFor(tier: Tier) {
+/** Gold explosion with a ring of the card's era-label colour inside it. */
+function goldFlash(accent: string) {
+  return `radial-gradient(circle, #fffbeb 0%, #facc15 28%, ${accent} 44%, #facc15 54%, #b45309 75%, #451a03 100%)`;
+}
+
+function raysFor(tier: Tier, accent?: string) {
   const prime = tier === 'PRIME_ICON';
   const n = prime ? 18 : 10;
   const step = 360 / n;
   const stops: string[] = [];
   for (let i = 0; i < n; i++) {
     const a = i * step;
-    const c = prime ? `hsla(${(i * 40) % 360},100%,75%,.85)` : i % 2 ? 'rgba(250,204,21,.85)' : 'rgba(255,247,194,.85)';
+    const c = prime ? `hsla(${(i * 40) % 360},100%,75%,.85)` : i % 2 ? 'rgba(250,204,21,.85)' : accent ?? 'rgba(255,247,194,.85)';
     stops.push(`transparent ${a}deg`, `${c} ${a + 1}deg`, `${c} ${a + 2.2}deg`, `transparent ${a + 3.4}deg`);
   }
   return `conic-gradient(from 0deg at 50% 50%, ${stops.join(', ')}, transparent 360deg)`;
@@ -69,6 +81,25 @@ export function PackOpener({ packNumber, cards, packKey, selectedId, onSelect, r
   const top = useMemo(() => highestTier(cards), [cards]);
   const best = useMemo(() => [...cards].sort((a, b) => b.ovr - a.ovr)[0], [cards]);
   const bestEra = best ? eraColour(best.era) : eraColour('SQUAD');
+  // 86+ pulls: three fireworks, left to right, each bursting into a tile (flag, position, club).
+  const [rockets, setRockets] = useState(0);
+  const [tiles, setTiles] = useState(0);
+  const fireworksFor = !!best && best.ovr >= 86;
+  const launchFireworks = (start: number) => {
+    const xs = [0.2, 0.5, 0.8];
+    const colors = best!.tier === 'PRIME_ICON' ? ['#ffffff', '#e0f2fe', '#f9a8d4', '#fde68a'] : ['#facc15', '#fde68a', bestEra.mid, bestEra.light];
+    xs.forEach((x, i) => {
+      later(start + i * FW_GAP, () => {
+        setRockets(i + 1);
+        sfx.fireworkLaunch();
+      });
+      later(start + i * FW_GAP + FW_FLIGHT, () => {
+        setTiles(i + 1);
+        sfx.fireworkPop();
+        burstAt(window.innerWidth * x, window.innerHeight * TILE_Y, colors, 45);
+      });
+    });
+  };
   const finale = packNumber >= TOTAL_PACKS;
 
   // Reset whenever a new pack arrives.
@@ -81,6 +112,8 @@ export function PackOpener({ packNumber, cards, packKey, selectedId, onSelect, r
     tearRef.current = 0;
     primeShown.current = false;
     setFlash(null);
+    setRockets(0);
+    setTiles(0);
   }, [packKey]);
 
   useEffect(() => () => timers.current.forEach(clearTimeout), []);
@@ -152,7 +185,9 @@ export function PackOpener({ packNumber, cards, packKey, selectedId, onSelect, r
         goldConfetti(0.7);
         burstAt(cx, cy + 120, ['#ffffff', '#e0f2fe', '#f472b6', '#22d3ee', '#fde68a'], 60);
       });
-      later(350 + 1400, () => {
+      // BOOM settles, then the three fireworks, then the cards fan out.
+      launchFireworks(350 + 900);
+      later(350 + 900 + FW_TOTAL, () => {
         setStage('fanned');
         sfx.slide();
         startReveal(500);
@@ -166,11 +201,12 @@ export function PackOpener({ packNumber, cards, packKey, selectedId, onSelect, r
     sfx.stinger(top);
     if (top === 'RISING_WORLD') {
       shakeScreen('micro');
-      burstAt(cx, cy + 100, ['#facc15', '#fde68a', '#ffffff'], 70);
+      burstAt(cx, cy + 100, ['#facc15', '#fde68a', bestEra.mid, bestEra.light], 70);
     } else if (top === 'ELITE') {
       burstAt(cx, cy + 100, [bestEra.light, '#e5e7eb', bestEra.mid], 45);
     }
-    later(1400, () => {
+    if (fireworksFor) launchFireworks(500);
+    later(fireworksFor ? 500 + FW_TOTAL : 1400, () => {
       setStage('fanned');
       sfx.slide();
       startReveal(450);
@@ -243,14 +279,14 @@ export function PackOpener({ packNumber, cards, packKey, selectedId, onSelect, r
           <div
             className="absolute inset-0 animate-flash"
             // Rays are painted into the same layer as the flash: one full-screen layer, not two.
-            style={{ background: flash.tier === 'RISING_WORLD' || flash.tier === 'PRIME_ICON' ? `${raysFor(flash.tier)}, ${FLASH[flash.tier].color}` : flashColour(flash.tier, best), ['--flash-max' as string]: FLASH[flash.tier].max, animationDuration: flash.tier === 'PRIME_ICON' ? '1.6s' : flash.tier === 'STANDARD' ? '0.6s' : '1.1s' }}
+            style={{ background: flash.tier === 'RISING_WORLD' || flash.tier === 'PRIME_ICON' ? `${raysFor(flash.tier, flash.tier === 'RISING_WORLD' ? bestEra.mid : undefined)}, ${flash.tier === 'RISING_WORLD' ? goldFlash(bestEra.mid) : FLASH[flash.tier].color}` : flashColour(flash.tier, best), ['--flash-max' as string]: FLASH[flash.tier].max, animationDuration: flash.tier === 'PRIME_ICON' ? '1.6s' : flash.tier === 'STANDARD' ? '0.6s' : '1.1s' }}
           />
           {/* Shockwave: drawn at full size and shrunk, so it animates by scaling DOWN (never up). */}
           {(flash.tier === 'RISING_WORLD' || flash.tier === 'PRIME_ICON') && (
             <div
               className="absolute left-1/2 top-1/2 h-[80vmin] w-[80vmin] rounded-full"
               style={{
-                background: `radial-gradient(circle, transparent 62%, ${flash.tier === 'PRIME_ICON' ? 'rgba(255,255,255,.95)' : 'rgba(253,224,71,.95)'} 66%, transparent 71%)`,
+                background: `radial-gradient(circle, transparent 62%, ${flash.tier === 'PRIME_ICON' ? 'rgba(255,255,255,.95)' : bestEra.light} 66%, transparent 71%)`,
                 animation: `shock ${flash.tier === 'PRIME_ICON' ? 1.2 : 1}s ease-out forwards`,
               }}
             />
@@ -276,6 +312,51 @@ export function PackOpener({ packNumber, cards, packKey, selectedId, onSelect, r
               ))}
             </div>
           )}
+        </div>
+      )}
+
+      {fireworksFor && best && (stage === 'tell' || stage === 'dimming') && rockets > 0 && (
+        <div className="pointer-events-none fixed inset-0 z-[83]" aria-live="polite">
+          {[0, 1, 2].map((i) => {
+            const left = `${[20, 50, 80][i]}%`;
+            const prime = best.tier === 'PRIME_ICON';
+            const ring = prime ? '#ffffff' : bestEra.mid;
+            const club = getClub(best.club);
+            return (
+              <div key={i} className="absolute" style={{ left, top: `${TILE_Y * 100}%` }}>
+                {rockets > i && tiles <= i && (
+                  <span
+                    className="absolute block h-3 w-3 rounded-full"
+                    style={{ background: prime ? '#fff' : '#fde68a', boxShadow: `0 0 14px 5px ${ring}, 0 18px 18px -4px ${ring}`, animation: `rocket ${FW_FLIGHT}ms ease-out forwards` }}
+                  />
+                )}
+                {tiles > i && (
+                  <div className="absolute -translate-x-1/2 -translate-y-1/2">
+                    <div
+                      className="flex h-[92px] w-[92px] animate-pop flex-col items-center justify-center gap-1 rounded-2xl bg-zinc-950/95 sm:h-[110px] sm:w-[110px]"
+                      style={{ border: `3px solid ${ring}`, boxShadow: `0 0 28px 4px ${ring}88, inset 0 0 0 2px ${prime ? '#facc15' : '#facc15aa'}` }}
+                    >
+                      {i === 0 && (
+                        <>
+                          <Flag nation={best.nation} width={66} className="rounded-sm" />
+                          <span className="max-w-[86px] truncate text-[9px] font-black uppercase tracking-wider text-white/80">{best.nation}</span>
+                        </>
+                      )}
+                      {i === 1 && <span className="font-display text-5xl leading-none text-white sm:text-6xl">{best.positions[0]}</span>}
+                      {i === 2 && (
+                        <span
+                          className="rounded-lg px-2 py-1 font-display text-4xl leading-none sm:text-5xl"
+                          style={{ background: club.primary, color: club.secondary === club.primary ? '#fff' : club.secondary, border: `2px solid ${club.accent}` }}
+                        >
+                          {club.short}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </div>
       )}
 
@@ -314,11 +395,23 @@ export function PackOpener({ packNumber, cards, packKey, selectedId, onSelect, r
           {/* The foil pack */}
           <div
             ref={packRef}
+            data-pack
             onPointerMove={onPackMove}
             onPointerLeave={() => setTilt({ rx: 0, ry: 0, gx: 50, gy: 30 })}
             className="relative h-[300px] w-[210px] transition-transform duration-100 sm:h-[340px] sm:w-[236px]"
             style={{ transform: `perspective(900px) rotateX(${tilt.rx}deg) rotateY(${tilt.ry}deg)`, transformStyle: 'preserve-3d' }}
           >
+            {/* 81–85 pulls: name the card type above the pack, in its colour (smaller than BOOM!) */}
+            {stage === 'tell' && top === 'ELITE' && best && (
+              <div className="pointer-events-none absolute -top-16 left-1/2 z-30 -translate-x-1/2 whitespace-nowrap">
+                <div
+                  className="animate-pop font-display text-4xl leading-none tracking-wider sm:text-5xl"
+                  style={{ color: bestEra.border, textShadow: `0 0 14px ${bestEra.mid}, 0 0 4px #000, 0 2px 0 ${bestEra.dark}` }}
+                >
+                  {best.era}
+                </div>
+              </div>
+            )}
             {/* top flap (tears away) */}
             <div
               className="foil absolute inset-x-0 top-0 h-[44px] rounded-t-2xl border-2 border-b-0 border-emerald-300/40 transition-all duration-500"
