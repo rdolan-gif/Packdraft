@@ -2,11 +2,11 @@ import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { FastForward, Pause, Play, Radio, Shield, Swords, Scale, Target, Footprints, Hand, Flame } from 'lucide-react';
 import type { FormationId, Lineup, ManagerId, PlayerCard, PlayerSeasonStats, TableRow, TacticalShout } from '../types/game';
 import { INFORM_BOOST, INFORM_SLOTS, INFORM_WEEKS, ordinal, SeasonSim, TOTAL_MATCHWEEKS, TRANSFER_WINDOW_AFTER, USER_TEAM_ID, type DecisionContext, type TotwPick } from '../engine/seasonSimulator';
-import { buildLiveMatchweek, chanceText, checkMilestones, liveTable, type LiveEvent, type LiveMatchweek, type Milestone, pointsHistory, snapshotTable } from '../engine/liveMatch';
+import { buildLiveMatchweek, chanceText, checkMilestones, liveTable, type LiveEvent, type LiveMatchweek, type Milestone, snapshotTable } from '../engine/liveMatch';
 import { TransferWindow } from './TransferWindow';
 import { PlayerCardUI } from './PlayerCardUI';
 import { LiveMatchHero, type Celebration, type FeedItem } from './season/LiveMatchHero';
-import { AroundTheGrounds, LiveTable, TitleRaceChart } from './season/LivePanels';
+import { LiveTable } from './season/LivePanels';
 import { ChaseBadges, MidSeasonAwards, MilestonePop } from './season/Moments';
 import { recordTotw } from '../engine/stickerBook';
 import { sfx } from '../engine/soundEffects';
@@ -406,7 +406,6 @@ export function SeasonBroadcast({ sim, onFinish, formationId, lineup, managerId,
   const shownWeek = isLive ? st.live!.mw : Math.min(sim.matchweek + (sim.done ? 0 : 1), TOTAL_MATCHWEEKS);
   const completed = isLive ? sim.matchweek - 1 : sim.matchweek;
   const seasonOver = sim.done && st.phase !== 'live';
-  const history = useMemo(() => pointsHistory(sim), [sim, completed]); // eslint-disable-line react-hooks/exhaustive-deps
   const leaders = st.leaders ? st.leaders[tab] : sim.leaders(tab, 10);
   const totw = isLive ? st.totw : sim.latestTotw;
   const informs = isLive && st.informs ? st.informs : sim.activeInforms();
@@ -512,7 +511,8 @@ export function SeasonBroadcast({ sim, onFinish, formationId, lineup, managerId,
         </div>
       </div>
 
-      {/* Phone order: your match, around the grounds, table, title race. Desktop: two columns. */}
+      {/* Desktop: your match, Team of the Week and the leaderboards on the left; the league table on the right.
+          Phone: match, table, Team of the Week, leaderboards. */}
       <div className="grid grid-cols-1 items-start gap-3 lg:grid-cols-[1.35fr_1fr]">
         <div className="flex min-w-0 flex-col gap-3 lg:col-start-1 lg:row-start-1">
           <LiveMatchHero sim={sim} live={st.live} minute={st.minute} momentum={st.momentum} feed={st.feed} celebration={st.celebration} finished={st.phase === 'ft'} onSkip={skipToFT} bigMatch={bigMatch} />
@@ -529,54 +529,43 @@ export function SeasonBroadcast({ sim, onFinish, formationId, lineup, managerId,
             </button>
           )}
         </div>
-        <div className="flex min-w-0 flex-col gap-3 lg:col-start-2 lg:row-span-2 lg:row-start-1">
-          <AroundTheGrounds sim={sim} live={st.live} minute={st.minute} flashes={st.flashes} before={st.before} />
-          {/* always there (fixed height) so a goal alert never shifts the page */}
-          <div key={st.news ?? 'none'} className={`h-8 truncate rounded-xl border px-3 py-1.5 text-xs font-bold ${st.news && isLive ? 'border-sky-300/40 bg-sky-500/10 text-sky-100' : 'border-white/5 bg-white/[0.02] text-white/30'}`}>
-            📡 {st.news && isLive ? st.news : 'Goal alerts from other grounds appear here'}
-          </div>
-          <div className="hidden lg:block">
-            <TitleRaceChart sim={sim} history={history} upto={completed} />
-          </div>
-        </div>
-        <div className="flex min-w-0 flex-col gap-3 lg:col-start-1 lg:row-start-2">
+        <div className="min-w-0 lg:col-start-2 lg:row-span-3 lg:row-start-1">
           <LiveTable sim={sim} rows={rows} before={st.before} live={isLive} />
-          <div className="lg:hidden">
-            <TitleRaceChart sim={sim} history={history} upto={completed} />
-          </div>
+        </div>
+        <div className="min-w-0 lg:col-start-1 lg:row-start-2">
+          {/* Team of the Week + your in-form players */}
+          <TotwPanel sim={sim} totw={totw} informs={informs} />
+        </div>
+        <div className="min-w-0 lg:col-start-1 lg:row-start-3">
+          {/* Leaderboards */}
+          <section className="rounded-2xl border border-white/10 bg-black/40 p-3">
+            <div className="mb-2 flex flex-wrap items-center gap-2">
+              <h3 className="font-display text-xl text-white">LEAGUE LEADERS</h3>
+              <div className="ml-auto flex gap-1">
+                {(
+                  [
+                    ['goals', 'Golden Boot', Target],
+                    ['assists', 'Playmaker', Footprints],
+                    ['cleanSheets', 'Golden Glove', Hand],
+                  ] as const
+                ).map(([k, label, Icon]) => (
+                  <button
+                    key={k}
+                    onClick={() => {
+                      sfx.click();
+                      setTab(k);
+                    }}
+                    className={`flex items-center gap-1 rounded-lg border px-2 py-1 text-xs font-black ${tab === k ? 'border-yellow-300 bg-yellow-300/20 text-yellow-200' : 'border-white/10 bg-white/5 text-white/60'}`}
+                  >
+                    <Icon className="h-3.5 w-3.5" /> {label}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <Leaders rows={leaders} kind={tab} sim={sim} />
+          </section>
         </div>
       </div>
-
-      {/* Team of the Week + your in-form players */}
-      <TotwPanel sim={sim} totw={totw} informs={informs} />
-
-      {/* Leaderboards */}
-      <section className="rounded-2xl border border-white/10 bg-black/40 p-3">
-        <div className="mb-2 flex flex-wrap items-center gap-2">
-          <h3 className="font-display text-xl text-white">LEAGUE LEADERS</h3>
-          <div className="ml-auto flex gap-1">
-            {(
-              [
-                ['goals', 'Golden Boot', Target],
-                ['assists', 'Playmaker', Footprints],
-                ['cleanSheets', 'Golden Glove', Hand],
-              ] as const
-            ).map(([k, label, Icon]) => (
-              <button
-                key={k}
-                onClick={() => {
-                  sfx.click();
-                  setTab(k);
-                }}
-                className={`flex items-center gap-1 rounded-lg border px-2 py-1 text-xs font-black ${tab === k ? 'border-yellow-300 bg-yellow-300/20 text-yellow-200' : 'border-white/10 bg-white/5 text-white/60'}`}
-              >
-                <Icon className="h-3.5 w-3.5" /> {label}
-              </button>
-            ))}
-          </div>
-        </div>
-        <Leaders rows={leaders} kind={tab} sim={sim} />
-      </section>
 
       {seasonOver && (
         <div className="sticky bottom-3 z-40 mx-auto flex animate-pop flex-col items-center gap-2 rounded-2xl border border-yellow-300/60 bg-black/85 px-6 py-4 text-center shadow-2xl">
