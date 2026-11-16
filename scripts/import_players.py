@@ -23,16 +23,28 @@ DRY = "--dry-run" in sys.argv
 OUT = ROOT / "src/data/players.ts"
 
 wb = load_workbook(SRC)  # inputs only; calculated columns are recomputed here
-if "Players" not in wb.sheetnames:
-    raise SystemExit("The workbook has no 'Players' tab.")
-ws = wb["Players"]
-header = [str(c.value).strip() if c.value is not None else "" for c in ws[1]]
-col = {h: i for i, h in enumerate(header)}
-missing = [h for h in COL if h not in col and "(auto)" not in h and h not in ("Card ID", "Born") and not h.startswith("Base ")]  # Born is optional (older sheets)
+# Player rows can live on one "Players" tab (older sheets) or on one tab per club: any tab whose
+# first row has the player columns is read. The tab is only for organising; the Club column decides the club.
+def _is_player_tab(sh):
+    first = {str(c.value).strip() for c in sh[1] if c.value is not None}
+    return {"Player ID", "Season", "OVR"} <= first
+PLAYER_TABS = [n for n in wb.sheetnames if _is_player_tab(wb[n])]
+if not PLAYER_TABS:
+    raise SystemExit("The workbook has no player tabs (a tab whose first row includes Player ID, Season and OVR).")
 # Stat cells may be formulas (stat follows OVR). Use the value the spreadsheet app calculated;
 # if the file was never opened in one (no saved results), work it out from the Base columns.
-vws = load_workbook(SRC, data_only=True)["Players"]
+vwb = load_workbook(SRC, data_only=True)
 STAT_HEADERS = {h for h, _ in STAT_KEYS}
+
+
+def use_tab(name):
+    global ws, vws, header, col
+    ws, vws = wb[name], vwb[name]
+    header = [str(c.value).strip() if c.value is not None else "" for c in ws[1]]
+    col = {h: i for i, h in enumerate(header)}
+    missing = [h for h in COL if h not in col and "(auto)" not in h and h not in ("Card ID", "Born") and not h.startswith("Base ")]  # Born is optional (older sheets)
+    if missing:
+        raise SystemExit(f"Missing columns on the {name} tab: {', '.join(missing)}")
 
 
 def resolve(r, row):
@@ -53,8 +65,6 @@ def resolve(r, row):
         else:
             out[i] = None
     return out
-if missing:
-    raise SystemExit(f"Missing columns on the Players tab: {', '.join(missing)}")
 
 errors: list[str] = []
 
@@ -111,61 +121,62 @@ def text(row, h):
     return str(v).strip()
 
 
-def number(row, h, lo, hi, r):
+def number(row, h, lo, hi, where):
     v = row[col[h]]
     try:
         n = int(float(v))
         if float(v) != n:
             raise ValueError
     except (TypeError, ValueError):
-        errors.append(f"Row {r}: {h} must be a whole number (got {v!r}).")
+        errors.append(f"{where}: {h} must be a whole number (got {v!r}).")
         return None
     if not lo <= n <= hi:
-        errors.append(f"Row {r}: {h} must be {lo}–{hi} (got {n}).")
+        errors.append(f"{where}: {h} must be {lo}–{hi} (got {n}).")
     return n
 
 
-for r, row in enumerate(ws.iter_rows(min_row=2, values_only=True), start=2):
+for tab, r, row in ((t, r, row) for t in PLAYER_TABS if use_tab(t) is None for r, row in enumerate(wb[t].iter_rows(min_row=2, values_only=True), start=2)):
+    where = f"Row {r}" if PLAYER_TABS == ["Players"] else f"{tab} row {r}"
     row = resolve(r, row)
     pid = text(row, "Player ID")
     if not pid:
         if any(text(row, h) for h in ("Full Name", "Season", "OVR")):
-            errors.append(f"Row {r}: has data but no Player ID.")
+            errors.append(f"{where}: has data but no Player ID.")
         continue
     if not re.fullmatch(r"[a-z0-9]+(_[a-z0-9]+)+", pid):
-        errors.append(f"Row {r}: Player ID '{pid}' should look like surname_firstname (lowercase letters/digits, underscores, no accents).")
+        errors.append(f"{where}: Player ID '{pid}' should look like surname_firstname (lowercase letters/digits, underscores, no accents).")
     season = text(row, "Season")
     if not re.fullmatch(r"\d\d-\d\d", season):
-        errors.append(f"Row {r}: Season must look like 08-09 (got '{season}'). In Excel, type it with a leading apostrophe if it turns into a date.")
+        errors.append(f"{where}: Season must look like 08-09 (got '{season}'). In Excel, type it with a leading apostrophe if it turns into a date.")
     era = text(row, "Era Label").upper()
     if era not in ERAS:
-        errors.append(f"Row {r}: Era Label '{era}' isn't allowed. Use one of: {', '.join(ERAS)}.")
-    ovr = number(row, "OVR", OVR_MIN, OVR_MAX, r)
+        errors.append(f"{where}: Era Label '{era}' isn't allowed. Use one of: {', '.join(ERAS)}.")
+    ovr = number(row, "OVR", OVR_MIN, OVR_MAX, where)
     positions = [p.strip().upper() for p in text(row, "Positions").replace(",", "/").split("/") if p.strip()]
     bad = [p for p in positions if p not in POSITIONS]
     if not positions or bad:
-        errors.append(f"Row {r}: Positions '{text(row, 'Positions')}' must be codes like ST/LW. Unknown: {', '.join(bad) or '(empty)'}.")
+        errors.append(f"{where}: Positions '{text(row, 'Positions')}' must be codes like ST/LW. Unknown: {', '.join(bad) or '(empty)'}.")
     if len(set(positions)) != len(positions):
-        errors.append(f"Row {r}: Positions lists the same position twice.")
+        errors.append(f"{where}: Positions lists the same position twice.")
     club = text(row, "Club").upper()
     if club not in club_codes:
-        errors.append(f"Row {r}: Club '{club}' isn't a known code (see the Lists tab).")
+        errors.append(f"{where}: Club '{club}' isn't a known code (see the Lists tab).")
     arch = text(row, "Archetype")
     if arch not in ARCHETYPES:
-        errors.append(f"Row {r}: Archetype '{arch}' isn't allowed (see the Lists tab).")
+        errors.append(f"{where}: Archetype '{arch}' isn't allowed (see the Lists tab).")
     if positions and positions[0] == "GK" and arch not in ("Shot Stopper", "Sweeper Keeper"):
-        errors.append(f"Row {r}: a goalkeeper's Archetype must be Shot Stopper or Sweeper Keeper.")
-    stats = {k: number(row, h, STAT_MIN, STAT_MAX, r) for h, k in STAT_KEYS}
+        errors.append(f"{where}: a goalkeeper's Archetype must be Shot Stopper or Sweeper Keeper.")
+    stats = {k: number(row, h, STAT_MIN, STAT_MAX, where) for h, k in STAT_KEYS}
     traits = {}
     for h, k, allowed in TRAIT_COLS:
         v = text(row, h)
         if v not in allowed:
-            errors.append(f"Row {r}: {h} '{v}' isn't allowed. Use one of: {', '.join(allowed)}.")
+            errors.append(f"{where}: {h} '{v}' isn't allowed. Use one of: {', '.join(allowed)}.")
         traits[k] = v
     name, short, nation = text(row, "Full Name"), text(row, "Short Name"), text(row, "Nation")
     for h, v in (("Full Name", name), ("Short Name", short), ("Nation", nation)):
         if not v:
-            errors.append(f"Row {r}: {h} is empty.")
+            errors.append(f"{where}: {h} is empty.")
     born = ""
     if "Born" in col and row[col["Born"]] not in (None, ""):
         v = row[col["Born"]]
@@ -176,10 +187,10 @@ for r, row in enumerate(ws.iter_rows(min_row=2, values_only=True), start=2):
         try:
             d = datetime.date.fromisoformat(born)
             if not 1940 <= d.year <= 2015:
-                errors.append(f"Row {r}: Born {born} looks wrong (year should be 1940–2015).")
+                errors.append(f"{where}: Born {born} looks wrong (year should be 1940–2015).")
         except ValueError:
-            errors.append(f"Row {r}: Born '{born}' must be a date like 1977-08-17.")
-    cards.append(dict(r=r, pid=pid, name=name, short=short, nation=nation, season=season, era=era, ovr=ovr, positions=positions, club=club, arch=arch, stats=stats, traits=traits, born=born))
+            errors.append(f"{where}: Born '{born}' must be a date like 1977-08-17.")
+    cards.append(dict(r=where, pid=pid, name=name, short=short, nation=nation, season=season, era=era, ovr=ovr, positions=positions, club=club, arch=arch, stats=stats, traits=traits, born=born))
 
 # Cross-row checks
 seen = {}
@@ -187,17 +198,17 @@ players: "OrderedDict[str, list]" = OrderedDict()
 for c in cards:
     key = (c["pid"], c["season"])
     if key in seen:
-        errors.append(f"Row {c['r']}: {c['pid']} {c['season']} duplicates row {seen[key]}. Each player can have only one card per season.")
+        errors.append(f"{c['r']}: {c['pid']} {c['season']} duplicates {seen[key]}. Each player can have only one card per season.")
     seen[key] = c["r"]
     players.setdefault(c["pid"], []).append(c)
 for pid, cs in players.items():
     first = cs[0]
     for c in cs[1:]:
         if c["born"] and first["born"] and c["born"] != first["born"]:
-            errors.append(f"Row {c['r']}: Born {c['born']} differs from row {first['r']} ({first['born']}) for the same Player ID {pid}.")
+            errors.append(f"{c['r']}: Born {c['born']} differs from {first['r']} ({first['born']}) for the same Player ID {pid}.")
         for f, label in (("name", "Full Name"), ("short", "Short Name"), ("nation", "Nation")):
             if c[f] != first[f]:
-                errors.append(f"Row {c['r']}: {label} '{c[f]}' differs from row {first['r']} ('{first[f]}') for the same Player ID {pid}.")
+                errors.append(f"{c['r']}: {label} '{c[f]}' differs from {first['r']} ('{first[f]}') for the same Player ID {pid}.")
 
 if not cards:
     errors.append("No cards found on the Players tab.")
