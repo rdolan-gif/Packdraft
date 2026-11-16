@@ -6,6 +6,8 @@ import { PlayerCaricature } from './PlayerCaricature';
 import { collarForSeason } from '../data/kits';
 import { sfx } from '../engine/soundEffects';
 import { eraColour } from '../data/eraColours';
+import { devTheme } from '../data/devThemes';
+import { DevScene } from './DevScene';
 
 export const TIER_LABEL: Record<Tier, string> = {
   STANDARD: 'Squad Regular',
@@ -71,6 +73,9 @@ export function PlayerCardUI({ card, size = 'md', onClick, selected, dimmed, sho
   const club = getClub(card.club);
   const prime = card.tier === 'PRIME_ICON';
   const secret = card.tier === 'SECRET_DEV';
+  // Secret dev cards can carry a personal theme: a background scene, a banner and their club's kit.
+  const theme = secret ? devTheme(card.basePlayerId) : undefined;
+  const kit = theme ? getClub(theme.fanClub) : club;
   const era = eraColour(card.era);
   const world = card.tier === 'RISING_WORLD';
   const isGK = card.positions[0] === 'GK';
@@ -110,6 +115,7 @@ export function PlayerCardUI({ card, size = 'md', onClick, selected, dimmed, sho
       // Era label colour: paints Elite (81–85) cards and gives gold (86–90) cards their glow.
       style={{ width: d.w, height: d.h, ['--e1' as string]: era.light, ['--e2' as string]: era.mid, ['--e3' as string]: era.dark, ['--eb' as string]: era.border, ...style }}
     >
+      {theme && <DevScene scene={theme.scene} />}
       {(prime || secret) && <div className="holo" />}
       <div className="glare" />
       {(world || prime || secret) && (
@@ -121,7 +127,7 @@ export function PlayerCardUI({ card, size = 'md', onClick, selected, dimmed, sho
       )}
 
       {/* club colour sash */}
-      <div className="absolute -right-6 top-0 h-full w-10 rotate-12 opacity-40" style={{ background: `linear-gradient(${club.primary}, ${club.secondary})` }} />
+      <div className="absolute -right-6 top-0 h-full w-10 rotate-12 opacity-40" style={{ background: `linear-gradient(${kit.primary}, ${kit.secondary})` }} />
 
       {/* top-left: OVR + position */}
       <div className={`absolute left-1.5 top-1 z-10 flex flex-col items-center leading-none ${prime ? 'text-slate-900 [text-shadow:0_1px_0_rgba(255,255,255,.9)]' : 'text-shadow'}`}>
@@ -135,21 +141,21 @@ export function PlayerCardUI({ card, size = 'md', onClick, selected, dimmed, sho
       {/* top-right: season era badge */}
       <div className="absolute right-1 top-1 z-10 flex flex-col items-end gap-0.5">
         <span
-          className={`rounded px-1 py-[1px] font-black ${d.small} uppercase tracking-wider text-white`}
+          className={`rounded px-1 py-[1px] font-black ${theme && size === 'md' ? 'text-[7px] tracking-normal' : `${d.small} tracking-wider`} uppercase text-white`}
           style={{ background: card.tier === 'ELITE' || world ? era.dark : 'rgba(0,0,0,.6)', boxShadow: card.tier === 'ELITE' || world ? `inset 0 0 0 1px ${era.light}` : undefined }}
         >
-          {tiny ? card.season : `${card.season} ${card.era}`}
+          {theme ? (tiny ? theme.emoji : `${theme.emoji} ${theme.banner}`) : tiny ? card.season : `${card.season} ${card.era}`}
         </span>
         {!tiny && (
-          <span className="rounded px-1 text-[9px] font-black" style={{ background: club.primary, color: club.secondary === club.primary ? '#fff' : club.secondary, border: `1px solid ${club.accent}` }}>
-            {club.short}
+          <span className="rounded px-1 text-[9px] font-black" style={{ background: kit.primary, color: kit.secondary === kit.primary ? '#fff' : kit.secondary, border: `1px solid ${kit.accent}` }}>
+            {kit.short}
           </span>
         )}
       </div>
 
       {/* portrait */}
       <div className="absolute left-1/2 z-[5] -translate-x-1/2" style={{ top: tiny ? d.h * 0.1 : d.h * 0.09 }}>
-        <PlayerCaricature traits={card.traits} kitPrimaryColor={club.primary} kitSecondaryColor={club.secondary} kitSleeveColor={club.sleeve} kitCollarColor={club.collar} collarStyle={collarForSeason(card.season)} seed={card.id} size={d.face} />
+        <PlayerCaricature traits={card.traits} kitPrimaryColor={kit.primary} kitSecondaryColor={kit.secondary} kitSleeveColor={kit.sleeve} kitCollarColor={kit.collar} collarStyle={collarForSeason(card.season)} seed={card.id} size={d.face} />
       </div>
 
       {/* name panel */}
@@ -158,7 +164,7 @@ export function PlayerCardUI({ card, size = 'md', onClick, selected, dimmed, sho
         {!tiny && (
           <>
             <div className="mt-0.5 truncate text-[9px] font-semibold opacity-80">
-              {club.name} · {card.nation}
+              {theme ? `Dev Team · ${theme.fanLabel}` : `${club.name} · ${card.nation}`}
             </div>
             <div className="mt-1 inline-block rounded-full border border-white/30 bg-white/10 px-2 py-[1px] text-[9px] font-bold uppercase tracking-wide">
               {card.archetype}

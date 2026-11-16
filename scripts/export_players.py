@@ -272,7 +272,7 @@ for p in players:
 club_tabs = []  # (code, name, sheet title, last row, cards, players)
 by_club.setdefault("DEV", [])  # the secret dev team always has a tab, ready for its cards
 for code in sorted(by_club, key=lambda c: club_name.get(c, c)):
-    plist = sorted(by_club[code], key=lambda p: (POSITION_ORDER.index(p["positions"][0]), -TIER_RANK[p["tier"]], -p["ovr"], p["season"]))
+    plist = sorted(by_club[code], key=lambda p: (POSITION_ORDER.index(p["positions"][0]), -TIER_RANK.get(p["tier"], len(TIER_RANK)), -p["ovr"], p["season"]))
     title = club_name.get(code, code)[:31]
     _, last = player_sheet(title, plist)
     club_tabs.append((code, club_name.get(code, code), title, last, len(plist), len({p["basePlayerId"] for p in plist})))

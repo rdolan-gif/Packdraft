@@ -12,6 +12,8 @@ import { PlayerCaricature } from './PlayerCaricature';
 import { PlayerCardUI } from './PlayerCardUI';
 import { Flag } from './Flag';
 import { collarForSeason } from '../data/kits';
+import { devTheme } from '../data/devThemes';
+import { DevScene } from './DevScene';
 
 // A retro football sticker album that always fits the screen. Each club runs across as many pages as
 // it needs: its first (left-hand) page carries the club banner and 3 rows of stickers, every page after
@@ -663,7 +665,8 @@ function ClubFoil({ club }: { club: Club }) {
 
 /** A collected sticker: white border, portrait on a club-colour panel, name strip, finish by rarity. */
 function Sticker({ card, drafted, totw, onClick }: { card: PlayerCard; drafted?: number; totw?: number; onClick?: () => void }) {
-  const club = getClub(card.club);
+  const theme = card.tier === 'SECRET_DEV' ? devTheme(card.basePlayerId) : undefined;
+  const club = theme ? getClub(theme.fanClub) : getClub(card.club);
   const era = eraColour(card.era);
   const finish = card.tier === 'SECRET_DEV' ? 'foil-holo' : totw ? 'foil-holo' : card.tier === 'PRIME_ICON' ? 'foil-holo' : card.tier === 'RISING_WORLD' ? 'foil-gold' : '';
   const frame = totw || card.tier === 'PRIME_ICON' || card.tier === 'RISING_WORLD' || card.tier === 'SECRET_DEV' ? undefined : card.tier === 'ELITE' ? era.mid : '#ffffff';
@@ -677,12 +680,18 @@ function Sticker({ card, drafted, totw, onClick }: { card: PlayerCard; drafted?:
     >
       <div className={`relative h-[104px] w-[78px] rounded-[4px] p-[3px] shadow-[1px_2px_3px_rgba(0,0,0,.35)] ${finish}`} style={frame ? { background: frame } : undefined}>
         <div className="relative h-full w-full overflow-hidden rounded-[2px] bg-white">
-          <div className="absolute inset-0" style={{ background: `linear-gradient(180deg, ${club.primary} 0%, ${club.primary} 62%, ${club.secondary} 62%)` }} />
+          {theme ? (
+            <div className="absolute inset-0 bg-black">
+              <DevScene scene={theme.scene} opacity={0.8} />
+            </div>
+          ) : (
+            <div className="absolute inset-0" style={{ background: `linear-gradient(180deg, ${club.primary} 0%, ${club.primary} 62%, ${club.secondary} 62%)` }} />
+          )}
           <div className="absolute inset-0 opacity-25" style={{ background: 'radial-gradient(rgba(255,255,255,.6) 1px, transparent 1.3px) 0 0/4px 4px' }} />
           <div className="absolute left-1/2 top-2 -translate-x-1/2">
             <PlayerCaricature traits={card.traits} kitPrimaryColor={club.primary} kitSecondaryColor={club.secondary} kitSleeveColor={club.sleeve} kitCollarColor={club.collar} collarStyle={collarForSeason(card.season)} seed={card.id} size={60} />
           </div>
-          <div className="absolute left-0.5 top-0.5 rounded-sm bg-black/60 px-0.5 text-[7px] font-black leading-tight text-white">{card.season}</div>
+          <div className="absolute left-0.5 top-0.5 rounded-sm bg-black/60 px-0.5 text-[7px] font-black leading-tight text-white">{theme ? theme.emoji : card.season}</div>
           <div className="absolute right-0.5 top-0.5 rounded-sm bg-white/85 px-0.5 font-display text-[10px] leading-tight text-black">{card.ovr}</div>
           <div className="absolute inset-x-0 bottom-0 bg-white px-0.5 py-[1px] text-center">
             <div className="truncate font-display text-[11px] leading-tight text-black">{card.shortName.toUpperCase()}</div>
