@@ -461,6 +461,9 @@ function PlayerCaricatureImpl({ traits, kitPrimaryColor, kitSecondaryColor, kitS
         </clipPath>
       </defs>
 
+      {/* hair that falls behind the head goes underneath everything, so the neck and shoulders sit in front of it */}
+      {hairBack}
+
       {/* neck first, so the shirt's neckline frames it */}
       <path d="M 41 70 L 41 79 Q 40.5 83 35 85 L 35 102 L 65 102 L 65 85 Q 59.5 83 59 79 L 59 70 Z" fill={skin.shade} />
       <path d="M 41 74 Q 50 82 59 74 L 59 80 Q 50 86 41 80 Z" fill={skin.line} opacity="0.25" />
@@ -497,8 +500,6 @@ function PlayerCaricatureImpl({ traits, kitPrimaryColor, kitSecondaryColor, kitS
       <path d={shirt} fill="none" stroke="rgba(0,0,0,.35)" strokeWidth="0.8" />
       {acc === 'captainband' && <rect x="12" y="98" width="11" height="5" rx="1" fill="#facc15" stroke="#000" strokeWidth="0.5" transform="rotate(-14 17 100)" />}
       {acc === 'snood' && <path d="M 39 74 L 39 88 Q 50 93 61 88 L 61 74 Q 50 78 39 74 Z" fill="#111" />}
-
-      {hairBack}
 
       {/* ears */}
       <ellipse cx={50 - g.w - 0.5} cy={eyeY + 2} rx="4" ry="6" fill={skin.shade} />
