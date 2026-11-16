@@ -6,7 +6,7 @@ import { getClub } from '../data/clubs';
 import { Flag } from './Flag';
 import { highestTier, TOTAL_PACKS, tierRates } from '../engine/packGenerator';
 import { sfx } from '../engine/soundEffects';
-import { burstAt, goldConfetti, shakeScreen } from '../engine/fx';
+import { burstAt, goldConfetti, rainbowConfetti, shakeScreen } from '../engine/fx';
 import { CardBack, PlayerCardUI, TIER_TEXT } from './PlayerCardUI';
 
 type Stage = 'sealed' | 'dimming' | 'tell' | 'fanned' | 'revealed';
@@ -36,7 +36,11 @@ const FLASH: Record<Tier, { color: string; max: number }> = {
   ELITE: { color: '', max: 0.85 }, // coloured by the best card's era label (see flashColour)
   RISING_WORLD: { color: 'radial-gradient(circle, #fffbeb 0%, #facc15 35%, #b45309 70%, #451a03 100%)', max: 0.9 },
   PRIME_ICON: { color: 'radial-gradient(circle, #ffffff 0%, #ffffff 30%, #e0f2fe 55%, #94a3b8 100%)', max: 1 },
+  SECRET_DEV: { color: 'radial-gradient(circle, #ffffff 0%, rgba(255,255,255,.85) 14%, rgba(0,0,0,0) 42%), conic-gradient(from 0deg, #f472b6, #fbbf24, #22d3ee, #a78bfa, #f472b6)', max: 1 },
 };
+/** Prime and the secret dev cards both get the full walkout. */
+const walkoutTier = (t: Tier) => t === 'PRIME_ICON' || t === 'SECRET_DEV';
+const RAINBOW = ['#f472b6', '#fbbf24', '#22d3ee', '#a78bfa', '#ffffff'];
 
 /** Flash fill: Elite pulls glow in the best card's era-label colour. */
 const FW_GAP = 650; // between rockets
@@ -56,7 +60,7 @@ function goldFlash(accent: string) {
 }
 
 function raysFor(tier: Tier, accent?: string) {
-  const prime = tier === 'PRIME_ICON';
+  const prime = walkoutTier(tier);
   const n = prime ? 18 : 10;
   const step = 360 / n;
   const stops: string[] = [];
@@ -83,15 +87,17 @@ export function PackOpener({ packNumber, cards, packKey, selectedId, onSelect, r
   const timers = useRef<number[]>([]);
   const packRef = useRef<HTMLDivElement>(null);
   const top = useMemo(() => highestTier(cards), [cards]);
-  const best = useMemo(() => [...cards].sort((a, b) => b.ovr - a.ovr)[0], [cards]);
+  // The card the reveal is built around: a secret dev card beats everything, then the highest OVR.
+  const best = useMemo(() => [...cards].sort((a, b) => Number(b.tier === 'SECRET_DEV') - Number(a.tier === 'SECRET_DEV') || b.ovr - a.ovr)[0], [cards]);
+  const secret = top === 'SECRET_DEV';
   const bestEra = best ? eraColour(best.era) : eraColour('SQUAD');
   // 86+ pulls: three fireworks, left to right, each bursting into a tile (flag, position, club).
   const [rockets, setRockets] = useState(0);
   const [tiles, setTiles] = useState(0);
-  const fireworksFor = !!best && best.ovr >= 86;
+  const fireworksFor = !!best && (best.ovr >= 86 || best.tier === 'SECRET_DEV');
   const launchFireworks = (start: number) => {
     const xs = [0.2, 0.5, 0.8];
-    const colors = best!.tier === 'PRIME_ICON' ? ['#ffffff', '#e0f2fe', '#f9a8d4', '#fde68a'] : ['#facc15', '#fde68a', bestEra.mid, bestEra.light];
+    const colors = best!.tier === 'SECRET_DEV' ? RAINBOW : best!.tier === 'PRIME_ICON' ? ['#ffffff', '#e0f2fe', '#f9a8d4', '#fde68a'] : ['#facc15', '#fde68a', bestEra.mid, bestEra.light];
     xs.forEach((x, i) => {
       later(start + i * FW_GAP, () => {
         setRockets(i + 1);
@@ -133,14 +139,15 @@ export function PackOpener({ packNumber, cards, packKey, selectedId, onSelect, r
     sfx.roar();
     setFlipped((s) => new Set(s).add(idx));
     shakeScreen('heavy');
-    goldConfetti(0.9);
+    if (secret) rainbowConfetti();
+    else goldConfetti(0.9);
   };
 
   // Flip order: weakest first, best card last. Prime icons hold back for a dramatic beat.
   const flipOrder = useMemo(() => cards.map((c, i) => ({ c, i })).sort((a, b) => a.c.ovr - b.c.ovr).map((x) => x.i), [cards]);
 
-  // Only the single best Prime card is held back for the walkout beat.
-  const heldIdx = top === 'PRIME_ICON' ? flipOrder[flipOrder.length - 1] : -1;
+  // Only the single best card is held back for the walkout beat (a secret dev card always goes last).
+  const heldIdx = walkoutTier(top) ? (secret ? cards.findIndex((c) => c.tier === 'SECRET_DEV') : flipOrder[flipOrder.length - 1]) : -1;
 
   const startReveal = (baseDelay: number) => {
     const primeIdx = heldIdx;
@@ -177,7 +184,7 @@ export function PackOpener({ packNumber, cards, packKey, selectedId, onSelect, r
     burstAt(cx, cy, ['#e5e7eb', '#a7f3d0', '#ffffff'], 30);
     setTearProgress(1);
 
-    if (top === 'PRIME_ICON') {
+    if (walkoutTier(top)) {
       // THE WALKOUT FLARE
       setStage('dimming');
       sfx.heartbeat();
@@ -187,8 +194,9 @@ export function PackOpener({ packNumber, cards, packKey, selectedId, onSelect, r
         later(1700, () => setFlash(null));
         sfx.stinger(top);
         shakeScreen('heavy');
-        goldConfetti(0.7);
-        burstAt(cx, cy + 120, ['#ffffff', '#e0f2fe', '#f472b6', '#22d3ee', '#fde68a'], 60);
+        if (secret) rainbowConfetti();
+        else goldConfetti(0.7);
+        burstAt(cx, cy + 120, secret ? RAINBOW : ['#ffffff', '#e0f2fe', '#f472b6', '#22d3ee', '#fde68a'], 60);
       });
       // BOOM settles, then the three fireworks, then the cards fan out.
       launchFireworks(350 + 900);
@@ -284,25 +292,31 @@ export function PackOpener({ packNumber, cards, packKey, selectedId, onSelect, r
           <div
             className="absolute inset-0 animate-flash"
             // Rays are painted into the same layer as the flash: one full-screen layer, not two.
-            style={{ background: flash.tier === 'RISING_WORLD' || flash.tier === 'PRIME_ICON' ? `${raysFor(flash.tier, flash.tier === 'RISING_WORLD' ? bestEra.mid : undefined)}, ${flash.tier === 'RISING_WORLD' ? goldFlash(bestEra.mid) : FLASH[flash.tier].color}` : flashColour(flash.tier, best), ['--flash-max' as string]: FLASH[flash.tier].max, animationDuration: flash.tier === 'PRIME_ICON' ? '1.6s' : flash.tier === 'STANDARD' ? '0.6s' : '1.1s' }}
+            style={{ background: flash.tier === 'RISING_WORLD' || walkoutTier(flash.tier) ? `${raysFor(flash.tier, flash.tier === 'RISING_WORLD' ? bestEra.mid : undefined)}, ${flash.tier === 'RISING_WORLD' ? goldFlash(bestEra.mid) : FLASH[flash.tier].color}` : flashColour(flash.tier, best), ['--flash-max' as string]: FLASH[flash.tier].max, animationDuration: walkoutTier(flash.tier) ? '1.6s' : flash.tier === 'STANDARD' ? '0.6s' : '1.1s' }}
           />
           {/* Shockwave: drawn at full size and shrunk, so it animates by scaling DOWN (never up). */}
-          {(flash.tier === 'RISING_WORLD' || flash.tier === 'PRIME_ICON') && (
+          {(flash.tier === 'RISING_WORLD' || walkoutTier(flash.tier)) && (
             <div
               className="absolute left-1/2 top-1/2 h-[80vmin] w-[80vmin] rounded-full"
               style={{
-                background: `radial-gradient(circle, transparent 62%, ${flash.tier === 'PRIME_ICON' ? 'rgba(255,255,255,.95)' : bestEra.light} 66%, transparent 71%)`,
-                animation: `shock ${flash.tier === 'PRIME_ICON' ? 1.2 : 1}s ease-out forwards`,
+                background: `radial-gradient(circle, transparent 62%, ${flash.tier === 'SECRET_DEV' ? '#f0abfc' : flash.tier === 'PRIME_ICON' ? 'rgba(255,255,255,.95)' : bestEra.light} 66%, transparent 71%)`,
+                animation: `shock ${walkoutTier(flash.tier) ? 1.2 : 1}s ease-out forwards`,
               }}
             />
           )}
-          {flash.tier === 'PRIME_ICON' && (
+          {walkoutTier(flash.tier) && (
             <>
               <div className="absolute left-0 right-0 top-[45%] h-4 animate-flash" style={{ background: 'linear-gradient(90deg, transparent, rgba(255,255,255,.95), transparent)', animationDuration: '1.6s' }} />
               <div className="absolute inset-0 flex items-center justify-center">
-                <div className="animate-pop font-display text-6xl text-white sm:text-8xl" style={{ textShadow: '0 0 18px rgba(186,230,253,.95), 0 0 4px rgba(15,23,42,.7)' }}>
-                  BOOM!
-                </div>
+                {flash.tier === 'SECRET_DEV' ? (
+                  <div className="animate-pop text-center font-display text-6xl leading-none sm:text-8xl" style={{ background: 'linear-gradient(90deg, #f472b6, #fbbf24, #22d3ee, #a78bfa)', WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent', filter: 'drop-shadow(0 0 14px rgba(244,114,182,.7))' }}>
+                    SECRET RARE
+                  </div>
+                ) : (
+                  <div className="animate-pop font-display text-6xl text-white sm:text-8xl" style={{ textShadow: '0 0 18px rgba(186,230,253,.95), 0 0 4px rgba(15,23,42,.7)' }}>
+                    BOOM!
+                  </div>
+                )}
               </div>
             </>
           )}
@@ -324,8 +338,8 @@ export function PackOpener({ packNumber, cards, packKey, selectedId, onSelect, r
         <div className="pointer-events-none fixed inset-0 z-[83]" aria-live="polite">
           {[0, 1, 2].map((i) => {
             const left = `${[20, 50, 80][i]}%`;
-            const prime = best.tier === 'PRIME_ICON';
-            const ring = prime ? '#ffffff' : bestEra.mid;
+            const prime = walkoutTier(best.tier);
+            const ring = best.tier === 'SECRET_DEV' ? RAINBOW[i] : prime ? '#ffffff' : bestEra.mid;
             const club = getClub(best.club);
             return (
               <div key={i} className="absolute" style={{ left, top: `${TILE_Y * 100}%` }}>
@@ -444,7 +458,7 @@ export function PackOpener({ packNumber, cards, packKey, selectedId, onSelect, r
               {stage === 'tell' && (
                 <div
                   className="absolute inset-x-0 top-0 h-2"
-                  style={{ background: top === 'PRIME_ICON' ? '#ffffff' : top === 'RISING_WORLD' ? '#facc15' : top === 'ELITE' ? bestEra.mid : '#fff', boxShadow: '0 0 40px 18px currentColor' }}
+                  style={{ background: top === 'SECRET_DEV' ? '#f0abfc' : top === 'PRIME_ICON' ? '#ffffff' : top === 'RISING_WORLD' ? '#facc15' : top === 'ELITE' ? bestEra.mid : '#fff', boxShadow: '0 0 40px 18px currentColor' }}
                 />
               )}
             </div>

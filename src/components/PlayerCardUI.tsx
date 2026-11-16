@@ -12,6 +12,7 @@ export const TIER_LABEL: Record<Tier, string> = {
   ELITE: 'Elite',
   RISING_WORLD: 'Gold',
   PRIME_ICON: 'Prime Icon',
+  SECRET_DEV: 'Secret Rare',
 };
 
 export { cardEmoji } from '../data/eraColours';
@@ -21,6 +22,7 @@ export const TIER_TEXT: Record<Tier, string> = {
   ELITE: 'text-sky-300',
   RISING_WORLD: 'text-amber-300',
   PRIME_ICON: 'text-white',
+  SECRET_DEV: 'text-fuchsia-300',
 };
 
 type Size = 'xs' | 'sm' | 'md' | 'lg';
@@ -68,6 +70,7 @@ export function PlayerCardUI({ card, size = 'md', onClick, selected, dimmed, sho
   const d = DIM[size];
   const club = getClub(card.club);
   const prime = card.tier === 'PRIME_ICON';
+  const secret = card.tier === 'SECRET_DEV';
   const era = eraColour(card.era);
   const world = card.tier === 'RISING_WORLD';
   const isGK = card.positions[0] === 'GK';
@@ -107,11 +110,11 @@ export function PlayerCardUI({ card, size = 'md', onClick, selected, dimmed, sho
       // Era label colour: paints Elite (81–85) cards and gives gold (86–90) cards their glow.
       style={{ width: d.w, height: d.h, ['--e1' as string]: era.light, ['--e2' as string]: era.mid, ['--e3' as string]: era.dark, ['--eb' as string]: era.border, ...style }}
     >
-      {prime && <div className="holo" />}
+      {(prime || secret) && <div className="holo" />}
       <div className="glare" />
-      {(world || prime) && (
+      {(world || prime || secret) && (
         <div className="sparkles absolute inset-0 pointer-events-none">
-          {Array.from({ length: prime ? 8 : 5 }).map((_, i) => (
+          {Array.from({ length: prime || secret ? 8 : 5 }).map((_, i) => (
             <i key={i} style={{ left: `${(i * 37 + 11) % 90 + 5}%`, top: `${(i * 53 + 7) % 85 + 5}%`, animationDelay: `${(i * 0.37) % 2.4}s` }} />
           ))}
         </div>

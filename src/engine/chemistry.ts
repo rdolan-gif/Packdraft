@@ -80,7 +80,7 @@ const isConductor = (c: PlayerCard) => c.archetype === 'Regista' || c.archetype 
 const isFocal = (c: PlayerCard) => c.archetype === 'Target Man' || c.archetype === 'Complete Forward';
 const isRunner = (c: PlayerCard) => c.archetype === 'Speedster' || c.archetype === 'Inside Forward';
 const isClassic = (c: PlayerCard) => c.decade === '1990s' || c.decade === '2000s';
-const isStar = (c: PlayerCard) => c.tier === 'RISING_WORLD' || c.tier === 'PRIME_ICON';
+const isStar = (c: PlayerCard) => c.tier === 'RISING_WORLD' || c.tier === 'PRIME_ICON' || c.tier === 'SECRET_DEV';
 const isAttackSlot = (label: Position) => positionGroup(label) === 'FWD' || label === 'CAM';
 const isDestroyerAtBase = (c: PlayerCard, label: Position) =>
   c.archetype === 'Destroyer' && (label === 'CDM' || (label === 'CM' && c.positions.includes('CDM')));

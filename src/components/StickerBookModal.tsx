@@ -23,8 +23,11 @@ const GROUP_NAME: Record<Position, string> = {
   CAM: 'Playmakers', RM: 'Right mids', LM: 'Left mids', RW: 'Right wing', LW: 'Left wing', ST: 'Strikers',
 };
 const TIERS: Tier[] = ['PRIME_ICON', 'RISING_WORLD', 'ELITE', 'STANDARD'];
-const TIER_NAME: Record<Tier, string> = { PRIME_ICON: 'Prime holo', RISING_WORLD: 'Gold foil', ELITE: 'Elite colour', STANDARD: 'Squad' };
-const TIER_ODDS: Record<Tier, string> = { PRIME_ICON: '2% of pack cards', RISING_WORLD: '8.5% of pack cards', ELITE: '26% of pack cards', STANDARD: '63.5% of pack cards' };
+const TIER_NAME: Record<Tier, string> = { PRIME_ICON: 'Prime holo', RISING_WORLD: 'Gold foil', ELITE: 'Elite colour', STANDARD: 'Squad', SECRET_DEV: 'Secret rare' };
+const TIER_ODDS: Record<Tier, string> = { PRIME_ICON: '2% of pack cards', RISING_WORLD: '8.5% of pack cards', ELITE: '26% of pack cards', STANDARD: '63.5% of pack cards', SECRET_DEV: 'Classified' };
+// Secret dev cards are an easter egg: they're kept out of every count and page until you've pulled one.
+const ALBUM = PLAYERS.filter((p) => p.tier !== 'SECRET_DEV');
+const SECRETS = PLAYERS.filter((p) => p.tier === 'SECRET_DEV');
 
 const PAPER = '#f3ead3';
 const INK = '#2b2118';
@@ -36,11 +39,12 @@ const pct = (a: number, b: number) => (b ? Math.floor((a / b) * 100) : 0);
 const hash = (s: string) => [...s].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) | 0, 7);
 const tilt = (id: string) => ((Math.abs(hash(id)) % 50) - 25) / 10; // -2.5..2.5 deg
 
-type Cell = { kind: 'label'; pos: Position } | { kind: 'card'; card: PlayerCard } | { kind: 'honour'; card: PlayerCard; count: number } | { kind: 'gap' };
+type Cell = { kind: 'label'; pos: Position } | { kind: 'card'; card: PlayerCard } | { kind: 'honour'; card: PlayerCard; count: number } | { kind: 'secret'; card: PlayerCard } | { kind: 'gap' };
 type Page =
   | { kind: 'contents'; part: 0 | 1 }
   | { kind: 'club'; code: string; part: number; parts: number; cells: Cell[] }
   | { kind: 'honours'; part: number; parts: number; cells: Cell[] }
+  | { kind: 'secret'; part: number; parts: number; cells: Cell[] }
   | { kind: 'blank'; label: string };
 
 // ───────────────────────────── layout: fit the screen ─────────────────────────────
@@ -131,7 +135,7 @@ export function StickerBookModal({ onClose }: { onClose: () => void }) {
   // club -> its cards, ordered by position, then rarity (best first), then OVR; numbered through the album
   const { clubs, byClub, numberOf } = useMemo(() => {
     const m = new Map<string, PlayerCard[]>();
-    PLAYERS.forEach((p) => m.set(p.club, [...(m.get(p.club) ?? []), p]));
+    ALBUM.forEach((p) => m.set(p.club, [...(m.get(p.club) ?? []), p]));
     m.forEach((cards) =>
       cards.sort(
         (a, b) =>
@@ -180,11 +184,19 @@ export function StickerBookModal({ onClose }: { onClose: () => void }) {
       layout.rows,
     );
     hparts.forEach((cells, part) => pages.push({ kind: 'honours', part, parts: hparts.length, cells }));
-    if (layout.twoUp && pages.length % 2 === 1) pages.push({ kind: 'blank', label: 'MORE SPACE FOR LEGENDS' });
+    // The secret files: only exist once you've found at least one dev card.
+    const found = SECRETS.filter((c) => book.pulled[c.id]);
+    if (found.length) {
+      startLeft('');
+      firstPageOf['__secret'] = pages.length;
+      const sparts = paginate(found.map((card) => ({ kind: 'secret' as const, card })), layout.cols, layout.bannerRows, layout.rows);
+      sparts.forEach((cells, part) => pages.push({ kind: 'secret', part, parts: sparts.length, cells }));
+    }
+    if (layout.twoUp && pages.length % 2 === 1) pages.push({ kind: 'blank', label: found.length ? '' : 'MORE SPACE FOR LEGENDS' });
     const views: number[][] = [[-1]]; // -1 = the cover
     for (let i = 0; i < pages.length; i += layout.twoUp ? 2 : 1) views.push(layout.twoUp ? [i, i + 1] : [i]);
     return { pages, views, firstPageOf };
-  }, [clubs, byClub, totw, layout.twoUp, layout.cols, layout.rows, layout.bannerRows]);
+  }, [clubs, byClub, totw, book, layout.twoUp, layout.cols, layout.rows, layout.bannerRows]);
 
   const [view, setView] = useState(0);
   const anchor = useRef<number>(-1); // first page on screen, so a resize keeps your place
@@ -221,8 +233,8 @@ export function StickerBookModal({ onClose }: { onClose: () => void }) {
   }, [go, view, profile]);
 
   const swipe = useRef<{ x: number; y: number } | null>(null);
-  const total = PLAYERS.length;
-  const got = PLAYERS.filter(has).length;
+  const total = ALBUM.length;
+  const got = ALBUM.filter(has).length;
   const shown = views[view] ?? [-1];
   const firstShown = shown[0] >= 0 ? pages[shown[0]] : null;
   const currentClub = firstShown?.kind === 'club' ? firstShown.code : '';
@@ -253,6 +265,13 @@ export function StickerBookModal({ onClose }: { onClose: () => void }) {
         </PaperPage>
       );
     }
+    if (p.kind === 'secret')
+      return (
+        <PaperPage key={i} side={side} layout={layout} pageNo={pageNo}>
+          {p.part === 0 ? <SecretBanner count={p.cells.length} /> : <RunningHeader club={null} part={p.part} parts={p.parts} />}
+          <Grid layout={layout} cells={p.cells} club={null} has={has} drafted={book.drafted} numberOf={numberOf} onOpen={openProfile} />
+        </PaperPage>
+      );
     return (
       <PaperPage key={i} side={side} layout={layout} pageNo={pageNo}>
         {p.part === 0 ? <HonoursBanner count={totw.length} /> : <RunningHeader club={null} part={p.part} parts={p.parts} />}
@@ -425,6 +444,18 @@ function HonoursBanner({ count }: { count: number }) {
   );
 }
 
+function SecretBanner({ count }: { count: number }) {
+  return (
+    <div className="relative mb-2 shrink-0 overflow-hidden rounded-md px-3 py-2 text-white" style={{ background: '#09090b' }}>
+      <div className="pointer-events-none absolute inset-0 opacity-50" style={{ background: 'linear-gradient(110deg, #f472b6, #fbbf24, #22d3ee, #a78bfa)', filter: 'blur(18px)' }} />
+      <div className="relative">
+        <div className="font-display text-4xl leading-none">SECRET FILES</div>
+        <div className="text-xs font-bold text-white/85">Classified · {count} found · tell nobody</div>
+      </div>
+    </div>
+  );
+}
+
 /** Small header on a club's follow-on pages, like a real album's running head. */
 function RunningHeader({ club, part, parts }: { club: Club | null; part: number; parts: number }) {
   return (
@@ -445,6 +476,12 @@ function Grid({ layout, cells, club, has, drafted, numberOf, onOpen }: { layout:
       {cells.map((cell, i) => {
         if (cell.kind === 'gap') return <div key={`g${i}`} style={{ width: w }} aria-hidden="true" />;
         if (cell.kind === 'label') return <PositionLabel key={`l${cell.pos}${i}`} pos={cell.pos} scale={layout.scale} colour={club?.primary ?? INK} />;
+        if (cell.kind === 'secret')
+          return (
+            <Scaled key={cell.card.id} scale={layout.scale} label={undefined}>
+              <Sticker card={cell.card} drafted={drafted[cell.card.id]} onClick={() => onOpen(cell.card)} />
+            </Scaled>
+          );
         if (cell.kind === 'honour')
           return (
             <Scaled key={cell.card.id} scale={layout.scale} label={undefined}>
@@ -628,8 +665,8 @@ function ClubFoil({ club }: { club: Club }) {
 function Sticker({ card, drafted, totw, onClick }: { card: PlayerCard; drafted?: number; totw?: number; onClick?: () => void }) {
   const club = getClub(card.club);
   const era = eraColour(card.era);
-  const finish = totw ? 'foil-holo' : card.tier === 'PRIME_ICON' ? 'foil-holo' : card.tier === 'RISING_WORLD' ? 'foil-gold' : '';
-  const frame = totw || card.tier === 'PRIME_ICON' || card.tier === 'RISING_WORLD' ? undefined : card.tier === 'ELITE' ? era.mid : '#ffffff';
+  const finish = card.tier === 'SECRET_DEV' ? 'foil-holo' : totw ? 'foil-holo' : card.tier === 'PRIME_ICON' ? 'foil-holo' : card.tier === 'RISING_WORLD' ? 'foil-gold' : '';
+  const frame = totw || card.tier === 'PRIME_ICON' || card.tier === 'RISING_WORLD' || card.tier === 'SECRET_DEV' ? undefined : card.tier === 'ELITE' ? era.mid : '#ffffff';
   const Tag = onClick ? 'button' : 'div';
   return (
     <Tag
@@ -738,7 +775,7 @@ function StickerProfile({ card, book, number, onClose }: { card: PlayerCard; boo
           )}
         </div>
         <div className="min-w-0 flex-1 self-stretch">
-          <div className="text-[11px] font-black uppercase tracking-widest text-[#8a7a60]">Sticker {number}</div>
+          <div className="text-[11px] font-black uppercase tracking-widest text-[#8a7a60]">{number ? `Sticker ${number}` : 'Secret file'}</div>
           <div className="font-display text-4xl leading-none">{card.name.toUpperCase()}</div>
           <dl className="mt-3 grid grid-cols-[auto_1fr] gap-x-3 gap-y-1.5 text-sm">
             {rows.map(([k, v]) => (

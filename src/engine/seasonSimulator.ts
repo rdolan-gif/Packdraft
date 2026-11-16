@@ -174,7 +174,7 @@ function rivalPlayers(code: string, roster: RivalPlayer[], reserves: RivalPlayer
   const taken = new Set(out.map((p) => p.id));
   const names = new Set(out.map((p) => p.name));
   const FILL_WEIGHTS: Record<string, [number, number]> = { GK: [0, 0], DEF: [0.08, 0.2], MID: [0.2, 0.5], FWD: [0.35, 0.4] };
-  PLAYERS.filter((c) => c.club === code)
+  PLAYERS.filter((c) => c.club === code && c.tier !== 'SECRET_DEV')
     .sort((a, b) => b.ovr - a.ovr)
     .forEach((c) => {
       const g = positionGroup(c.positions[0]);

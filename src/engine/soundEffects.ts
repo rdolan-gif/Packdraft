@@ -216,6 +216,13 @@ export const sfx = {
         chord([196, 247, 294, 392, 494, 587], { type: 'sawtooth', start: 0.05, dur: 2.4, vol: 0.06, attack: 0.15, filter: 3200 });
         [784, 988, 1175, 1568].forEach((f, i) => tone({ freq: f, type: 'triangle', start: 0.3 + i * 0.09, dur: 0.9, vol: 0.08 }));
         break;
+      case 'SECRET_DEV':
+        // deep boom, a dreamy swell, then a shimmering rising arpeggio
+        tone({ freq: 55, type: 'sine', dur: 1.8, vol: 0.9, slideTo: 28 });
+        noise({ dur: 1.6, vol: 0.3, freq: 300, freqTo: 9000, q: 0.4, type: 'lowpass', color: 'pink', attack: 0.3 });
+        chord([262, 330, 392, 494, 587], { type: 'sine', start: 0.1, dur: 3, vol: 0.07, attack: 0.6 });
+        [1047, 1319, 1568, 1976, 2349, 2637, 3136].forEach((f, i) => tone({ freq: f, type: 'triangle', start: 0.5 + i * 0.11, dur: 1.1, vol: 0.06 }));
+        break;
     }
   },
   /** Crowd roar for the prime walkout reveal. */

@@ -3,8 +3,11 @@
 export type Position = 'GK' | 'RB' | 'CB' | 'LB' | 'CDM' | 'CM' | 'CAM' | 'RM' | 'LM' | 'RW' | 'LW' | 'ST';
 export type PositionGroup = 'GK' | 'DEF' | 'MID' | 'FWD';
 
-/** Rarity by OVR: 74–80 Standard · 81–85 Elite (coloured by era label) · 86–90 gold · 91–96 Prime Icon. */
-export type Tier = 'STANDARD' | 'ELITE' | 'RISING_WORLD' | 'PRIME_ICON';
+/**
+ * Rarity by OVR: 74–80 Standard · 81–85 Elite (coloured by era label) · 86–90 gold · 91–96 Prime Icon.
+ * SECRET_DEV is the hidden easter-egg tier: any card with the DEV era label, whatever its OVR.
+ */
+export type Tier = 'STANDARD' | 'ELITE' | 'RISING_WORLD' | 'PRIME_ICON' | 'SECRET_DEV';
 
 export type EraLabel =
   | 'SQUAD'
@@ -13,7 +16,8 @@ export type EraLabel =
   | 'RISING STAR'
   | 'WORLD CLASS'
   | 'PRIME'
-  | 'LEGEND';
+  | 'LEGEND'
+  | 'DEV';
 
 export type Decade = '1990s' | '2000s' | '2010s' | '2020s';
 

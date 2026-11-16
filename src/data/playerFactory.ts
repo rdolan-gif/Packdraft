@@ -58,7 +58,7 @@ export function player(
     era,
     decade: decadeFromSeason(season),
     ovr,
-    tier: tierFromOvr(ovr),
+    tier: era === 'DEV' ? 'SECRET_DEV' : tierFromOvr(ovr), // DEV = the hidden secret tier
     positions: pos.split('/') as Position[],
     club,
     nation,

@@ -28,6 +28,8 @@ const list: Club[] = [
   { code: 'WIG', name: 'Wigan Athletic', short: 'WIG', primary: '#1d59af', secondary: '#ffffff', accent: '#ffffff', sleeve: '#ffffff', collar: '#ffffff' },
   { code: 'WBA', name: 'West Bromwich Albion', short: 'WBA', primary: '#122f67', secondary: '#ffffff', accent: '#ffffff', sleeve: '#ffffff', collar: '#ffffff' },
   { code: 'BRI', name: 'Brighton & Hove Albion', short: 'BHA', primary: '#0057b8', secondary: '#ffffff', accent: '#ffcd00', sleeve: '#ffffff', collar: '#ffffff' },
+  // Hidden club for the secret dev cards (never in the league).
+  { code: 'DEV', name: 'PackDraft Dev Team', short: 'DEV', primary: '#0b0b0f', secondary: '#f5f5f5', accent: '#a855f7', sleeve: '#0b0b0f', collar: '#f472b6' },
   { code: 'WOL', name: 'Wolverhampton Wanderers', short: 'WOL', primary: '#fdb913', secondary: '#231f20', accent: '#231f20', sleeve: '#231f20', collar: '#231f20' },
   { code: 'NFO', name: 'Nottingham Forest', short: 'NFO', primary: '#dd0000', secondary: '#ffffff', accent: '#ffffff', sleeve: '#ffffff', collar: '#ffffff' },
   { code: 'BRE', name: 'Brentford', short: 'BRE', primary: '#e30613', secondary: '#ffffff', accent: '#140e0c', sleeve: '#ffffff', collar: '#ffffff' },

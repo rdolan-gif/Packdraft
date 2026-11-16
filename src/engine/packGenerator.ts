@@ -1,8 +1,11 @@
 import { FORMATIONS, positionGroup, slotAccepts } from '../data/formations';
 import type { FormationId, Lineup, PlayerCard, PositionGroup, Position, Tier } from '../types/game';
 
-export const TIER_ORDER: Tier[] = ['STANDARD', 'ELITE', 'RISING_WORLD', 'PRIME_ICON'];
-export const TIER_RANK: Record<Tier, number> = { STANDARD: 0, ELITE: 1, RISING_WORLD: 2, PRIME_ICON: 3 };
+export const TIER_ORDER: Tier[] = ['STANDARD', 'ELITE', 'RISING_WORLD', 'PRIME_ICON', 'SECRET_DEV'];
+export const TIER_RANK: Record<Tier, number> = { STANDARD: 0, ELITE: 1, RISING_WORLD: 2, PRIME_ICON: 3, SECRET_DEV: 4 };
+/** Hidden: the chance that a pack has one of its cards swapped for a secret dev card. Never shown to players. */
+export const SECRET_DEV_CHANCE = 0.005;
+export const isSecret = (c: PlayerCard) => c.tier === 'SECRET_DEV';
 const MAX_RANK = TIER_ORDER.length - 1;
 
 export const TOTAL_PACKS = 11;
@@ -10,8 +13,8 @@ export const PACK_SIZE = 5;
 
 export function tierRates(packNumber: number): Record<Tier, number> {
   // 81–85 is one rarity band (26%); its card colour comes from the era label.
-  if (packNumber >= TOTAL_PACKS) return { STANDARD: 61.5, ELITE: 26, RISING_WORLD: 8.5, PRIME_ICON: 4 };
-  return { STANDARD: 63.5, ELITE: 26, RISING_WORLD: 8.5, PRIME_ICON: 2 };
+  if (packNumber >= TOTAL_PACKS) return { STANDARD: 61.5, ELITE: 26, RISING_WORLD: 8.5, PRIME_ICON: 4, SECRET_DEV: 0 };
+  return { STANDARD: 63.5, ELITE: 26, RISING_WORLD: 8.5, PRIME_ICON: 2, SECRET_DEV: 0 };
 }
 
 const BASE_GROUP_WEIGHTS: Record<PositionGroup, number> = { GK: 10, DEF: 35, MID: 35, FWD: 20 };
@@ -80,7 +83,8 @@ function drawCard(
   usedBase: Set<string>,
   rng: () => number,
 ): PlayerCard | undefined {
-  const available = ctx.pool.filter((c) => !ctx.draftedBaseIds.has(c.basePlayerId) && !usedBase.has(c.basePlayerId) && filter(c));
+  // Secret dev cards never come out of a normal draw; they only appear through the hidden swap below.
+  const available = ctx.pool.filter((c) => !isSecret(c) && !ctx.draftedBaseIds.has(c.basePlayerId) && !usedBase.has(c.basePlayerId) && filter(c));
   const rank = TIER_RANK[tier];
   const order = [0, -1, 1, -2, 2, -3, 3, -4, 4].map((d) => rank + d).filter((r) => r >= 0 && r <= MAX_RANK);
   for (const r of order) {
@@ -142,6 +146,19 @@ export function generatePack(ctx: PackContext): PlayerCard[] {
       });
       if (idx >= 0) cards[idx] = star;
       else cards.push(star);
+    }
+  }
+
+  // The easter egg: rarely, one card is swapped for a secret dev card (never one of the guaranteed slot matches).
+  if (rng() < SECRET_DEV_CHANCE) {
+    const secrets = ctx.pool.filter((c) => isSecret(c) && !ctx.draftedBaseIds.has(c.basePlayerId) && !usedBase.has(c.basePlayerId));
+    const dev = pickRandom(secrets, rng);
+    const free = cards.map((_, i) => i).filter((i) => i >= mustMatch);
+    if (dev && free.length) {
+      const i = free[Math.floor(rng() * free.length)];
+      usedBase.delete(cards[i].basePlayerId);
+      cards[i] = dev;
+      usedBase.add(dev.basePlayerId);
     }
   }
 

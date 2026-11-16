@@ -66,6 +66,7 @@ for code, name, lo, hi in TIERS:
     guide.append((f"{name} ({code}): OVR {lo}–{hi}", ""))
 guide += [
     ("To move a card to a different tier, change its OVR. The Tier column updates automatically.", ""),
+    ("Secret dev cards (easter egg, never shown to players): set the Era Label to DEV and the Club to DEV (PackDraft Dev Team tab). Any OVR works. Each pack has a hidden 0.5% chance to swap a card for one of them.", ""),
     ("Drop rates: Squad 63.5% · Elite 26% · Gold 8.5% · Prime 2% (4% in pack 11).", ""),
     ("Card colour: 81–85 cards take their Era Label's colour; 86–90 cards are gold with a trim in that colour. See the Card Colour column and the Lists tab.", ""),
     ("", ""),
@@ -153,8 +154,9 @@ def player_sheet(title, plist):
         ws.cell(row=r, column=COL["Card ID"], value=f'=IF({B}="","",{B}&"_"&SUBSTITUTE({F},"-",""))')
         T = f"{L(COL['Tier (auto)'])}{r}"; G = f"{L(COL['Era Label'])}{r}"
         colour = f"INDEX({list_range['Era Colour']},MATCH({G},{list_range['Era Label']},0))"
-        ws.cell(row=r, column=COL["Card Colour (auto)"], value=f'=IF({T}="","",IFERROR(IF({T}="ELITE",{colour},IF({T}="RISING_WORLD","Gold, "&LOWER({colour})&" trim",IF({T}="PRIME_ICON","Pearl white","Grey"))),""))')
-        ws.cell(row=r, column=COL["Tier (auto)"], value=f'=IF({H}="","",IFERROR(INDEX({tier_list},MATCH({H},{tier_min},1)),"OVR too low"))')
+        ws.cell(row=r, column=COL["Card Colour (auto)"], value=f'=IF({T}="","",IFERROR(IF({T}="ELITE",{colour},IF({T}="RISING_WORLD","Gold, "&LOWER({colour})&" trim",IF({T}="PRIME_ICON","Pearl white",IF({T}="SECRET_DEV","Black, rainbow sheen","Grey")))),""))')
+        # DEV era label = the hidden secret tier, whatever the OVR
+        ws.cell(row=r, column=COL["Tier (auto)"], value=f'=IF({H}="","",IF({G}="DEV","SECRET_DEV",IFERROR(INDEX({tier_list},MATCH({H},{tier_min},1)),"OVR too low")))')
         # Age on 1 September of the season's first year (90-99 = 1990s, 00-89 = 2000s)
         D = f"{L(COL['Born'])}{r}"
         yy = f"VALUE(LEFT({F},2))"
@@ -268,6 +270,7 @@ by_club = {}
 for p in players:
     by_club.setdefault(p["club"], []).append(p)
 club_tabs = []  # (code, name, sheet title, last row, cards, players)
+by_club.setdefault("DEV", [])  # the secret dev team always has a tab, ready for its cards
 for code in sorted(by_club, key=lambda c: club_name.get(c, c)):
     plist = sorted(by_club[code], key=lambda p: (POSITION_ORDER.index(p["positions"][0]), -TIER_RANK[p["tier"]], -p["ovr"], p["season"]))
     title = club_name.get(code, code)[:31]
@@ -345,7 +348,13 @@ for ri, (code, name, _, _) in enumerate(TIERS, start=5):
     for gi, grp in enumerate(groups, start=3):
         sm.cell(row=ri, column=gi, value="=" + "+".join(f"COUNTIFS('{t}'!${tierC}$2:${tierC}${last},$A{ri},'{t}'!${grpC}$2:${grpC}${last},{L(gi)}$4)" for _, _, t, last, _, _ in club_tabs)).font = f_body
     sm.cell(row=ri, column=7, value=f"=SUM(C{ri}:F{ri})").font = Font(name=FONT, size=10, bold=True)
-tr = 5 + len(TIERS)
+sr = 5 + len(TIERS)  # the hidden secret tier, counted on its own row
+sm.cell(row=sr, column=1, value="SECRET_DEV").font = f_body
+sm.cell(row=sr, column=2, value="Secret dev (era label DEV, hidden)").font = f_body
+for gi, grp in enumerate(groups, start=3):
+    sm.cell(row=sr, column=gi, value="=" + "+".join(f"COUNTIFS('{t}'!${tierC}$2:${tierC}${last},$A{sr},'{t}'!${grpC}$2:${grpC}${last},{L(gi)}$4)" for _, _, t, last, _, _ in club_tabs)).font = f_body
+sm.cell(row=sr, column=7, value=f"=SUM(C{sr}:F{sr})").font = Font(name=FONT, size=10, bold=True)
+tr = sr + 1
 sm.cell(row=tr, column=1, value="Total").font = Font(name=FONT, size=10, bold=True)
 for ci in range(3, 8):
     sm.cell(row=tr, column=ci, value=f"=SUM({L(ci)}5:{L(ci)}{tr - 1})").font = Font(name=FONT, size=10, bold=True)

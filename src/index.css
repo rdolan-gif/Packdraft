@@ -93,6 +93,20 @@ body {
     border: 2px solid #ffffff;
     color: #0f172a;
   }
+  /* Secret dev cards: black, with a soft rainbow drifting across and a slowly colour-cycling rim. */
+  .tier-SECRET_DEV {
+    background:
+      radial-gradient(ellipse at 50% 0%, rgba(255, 255, 255, 0.14) 0%, rgba(255, 255, 255, 0) 60%),
+      linear-gradient(160deg, #1c1c22 0%, #0b0b0f 55%, #000000 100%);
+    border: 2px solid rgba(255, 255, 255, 0.22);
+    color: #ffffff;
+    animation: secretrim 6s linear infinite;
+  }
+  .tier-SECRET_DEV > .holo {
+    mix-blend-mode: screen;
+    opacity: 0.42;
+    filter: blur(6px);
+  }
   /* On white, colour-dodge shows nothing; multiply leaves a pastel, pearly rainbow. */
   .tier-PRIME_ICON > .holo {
     mix-blend-mode: multiply;
@@ -401,3 +415,11 @@ html.lite .foil-holo, html.lite .foil-gold { animation: none; }
 
 .no-scrollbar { scrollbar-width: none; }
 .no-scrollbar::-webkit-scrollbar { display: none; }
+
+@keyframes secretrim {
+  0%, 100% { box-shadow: 0 0 16px 3px rgba(244, 114, 182, 0.6), 0 0 34px 8px rgba(244, 114, 182, 0.18); }
+  25% { box-shadow: 0 0 16px 3px rgba(251, 191, 36, 0.6), 0 0 34px 8px rgba(251, 191, 36, 0.18); }
+  50% { box-shadow: 0 0 16px 3px rgba(34, 211, 238, 0.6), 0 0 34px 8px rgba(34, 211, 238, 0.18); }
+  75% { box-shadow: 0 0 16px 3px rgba(167, 139, 250, 0.6), 0 0 34px 8px rgba(167, 139, 250, 0.18); }
+}
+html.lite .tier-SECRET_DEV { animation: none; box-shadow: 0 0 14px 3px rgba(192, 132, 252, 0.55); }

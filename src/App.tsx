@@ -20,7 +20,7 @@ import { generatePack, TOTAL_PACKS } from './engine/packGenerator';
 import { buildLeague, buildSummary, pickEra, SeasonSim } from './engine/seasonSimulator';
 import { loadCareer, loadVault, qualifiesForVault, recordRun, saveToVault, deleteFromVault } from './engine/vault';
 import { sfx } from './engine/soundEffects';
-import { goldConfetti } from './engine/fx';
+import { goldConfetti, rainbowConfetti } from './engine/fx';
 import type { FormationId, Lineup, ManagerCard, ManagerId, PlayerCard, SeasonSummary, VaultEntry } from './types/game';
 
 type Phase = 'title' | 'manager' | 'formation' | 'draft' | 'season' | 'review';
@@ -159,7 +159,8 @@ export default function App() {
     setDrafted(nextDrafted);
     setSelected(null);
     sfx.select();
-    if (card.tier === 'PRIME_ICON') goldConfetti(0.5);
+    if (card.tier === 'SECRET_DEV') rainbowConfetti();
+    else if (card.tier === 'PRIME_ICON') goldConfetti(0.5);
     const picks = Object.values(nextLineup).filter(Boolean).length;
     if (picks >= 3 && !formationLocked) {
       setFormationLocked(true);
@@ -242,7 +243,8 @@ export default function App() {
     recordDrafted(card.id);
     setLineup(next);
     setDrafted((d) => new Set(d).add(card.basePlayerId));
-    if (card.tier === 'PRIME_ICON') goldConfetti(0.8);
+    if (card.tier === 'SECRET_DEV') rainbowConfetti();
+    else if (card.tier === 'PRIME_ICON') goldConfetti(0.8);
     flash(`Signed: ${card.name} replaces ${out.name}`);
   };
 
@@ -519,7 +521,7 @@ function TitleScreen({ onStart, career, vaultCount, onVault }: { onStart: () => 
   return (
     <div className="mx-auto flex max-w-6xl flex-col items-center px-4 pb-10 pt-10 text-center sm:pt-14">
       <div className="flex items-center gap-2 rounded-full border border-yellow-300/40 bg-yellow-300/10 px-3 py-1 text-[11px] font-black uppercase tracking-[0.3em] text-yellow-200">
-        <Sparkles className="h-3.5 w-3.5" /> 11 packs · {PLAYERS.length} cards · 38 matchweeks
+        <Sparkles className="h-3.5 w-3.5" /> 11 packs · {PLAYERS.filter((p) => p.tier !== 'SECRET_DEV').length} cards · 38 matchweeks
       </div>
       <h1 className="mt-4 font-display text-7xl leading-[0.85] text-white drop-shadow-[0_6px_0_rgba(0,0,0,.5)] sm:text-9xl">
         PACK<span className="text-emerald-400">DRAFT</span>
