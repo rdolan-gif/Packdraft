@@ -30,6 +30,8 @@ const TIER_ODDS: Record<Tier, string> = { PRIME_ICON: '2% of pack cards', RISING
 // Secret dev cards are an easter egg: they're kept out of every count and page until you've pulled one.
 const ALBUM = PLAYERS.filter((p) => p.tier !== 'SECRET_DEV');
 const SECRETS = PLAYERS.filter((p) => p.tier === 'SECRET_DEV');
+// Showcase switch: while true, every dev card shows in the Secret Files as if pulled. Set to false to hide them again.
+const SHOW_ALL_SECRETS = true;
 
 const PAPER = '#f3ead3';
 const INK = '#2b2118';
@@ -187,7 +189,7 @@ export function StickerBookModal({ onClose }: { onClose: () => void }) {
     );
     hparts.forEach((cells, part) => pages.push({ kind: 'honours', part, parts: hparts.length, cells }));
     // The secret files: only exist once you've found at least one dev card.
-    const found = SECRETS.filter((c) => book.pulled[c.id]);
+    const found = SECRETS.filter((c) => SHOW_ALL_SECRETS || book.pulled[c.id]);
     if (found.length) {
       startLeft('');
       firstPageOf['__secret'] = pages.length;
@@ -739,7 +741,7 @@ function EmptySlot({ card, number, onClick }: { card: PlayerCard; number: number
 
 /** Tap a sticker: the full card with stats (or, for a missing sticker, just what's printed in the slot). */
 function StickerProfile({ card, book, number, onClose }: { card: PlayerCard; book: ReturnType<typeof loadBook>; number: number; onClose: () => void }) {
-  const owned = !!book.pulled[card.id];
+  const owned = !!book.pulled[card.id] || (SHOW_ALL_SECRETS && card.tier === 'SECRET_DEV');
   const club = getClub(card.club);
   const age = ageInSeason(BORN[card.basePlayerId], card.season);
   const era = eraColour(card.era);
