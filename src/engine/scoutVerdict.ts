@@ -590,7 +590,7 @@ export function scoutVerdict(inp: VerdictInput): { verdict: string; scout: Scout
     remarks.push({ id: 'misfit', score: 2.2 });
   }
   if (rating.balanceNote && rating.balancePenalty > 0) remarks.push({ id: 'noShield', score: 1.8 });
-  if (rating.chemistry >= 75) {
+  if (rating.chemistry >= 85) {
     f.chem = rating.chemistry;
     remarks.push({ id: 'chemistry', score: 1.2 });
   }

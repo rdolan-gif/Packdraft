@@ -29,9 +29,9 @@ function Sheet({ onClose, children, label }: { onClose: () => void; children: Re
 }
 
 const FIT_LABEL = {
-  natural: { text: 'Natural position', pts: 4, cls: 'text-emerald-300 bg-emerald-400/15 border-emerald-400/40' },
-  secondary: { text: 'Secondary position', pts: 3, cls: 'text-lime-200 bg-lime-300/10 border-lime-300/40' },
-  adjacent: { text: 'Adjacent position', pts: 1, cls: 'text-amber-200 bg-amber-400/10 border-amber-400/40' },
+  natural: { text: 'Natural position', pts: 5, cls: 'text-emerald-300 bg-emerald-400/15 border-emerald-400/40' },
+  secondary: { text: 'Secondary position', pts: 4, cls: 'text-lime-200 bg-lime-300/10 border-lime-300/40' },
+  adjacent: { text: 'Adjacent position', pts: 2, cls: 'text-amber-200 bg-amber-400/10 border-amber-400/40' },
   oop: { text: 'Out of position', pts: 0, cls: 'text-rose-200 bg-rose-500/15 border-rose-500/40' },
 } as const;
 

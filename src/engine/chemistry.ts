@@ -32,18 +32,27 @@ export function fitFor(card: PlayerCard, slot: Position): Omit<SlotFit, 'slotId'
 
 const neighbourCache = new Map<FormationId, [string, string][]>();
 
+export const MIN_LINKS = 3;
+
+/** Slots link to the team-mates around them. Every position gets at least MIN_LINKS links (its nearest
+ *  team-mates), so strikers and wide players aren't stuck with one or two. */
 export function neighbours(formation: Formation): [string, string][] {
   const cached = neighbourCache.get(formation.id);
   if (cached) return cached;
-  const pairs: [string, string][] = [];
   const s = formation.slots;
+  const dist = (i: number, j: number) => Math.hypot(s[i].x - s[j].x, (s[i].y - s[j].y) * 1.1);
+  const key = (i: number, j: number) => (i < j ? `${i}|${j}` : `${j}|${i}`);
+  const set = new Set<string>();
+  for (let i = 0; i < s.length; i++) for (let j = i + 1; j < s.length; j++) if (dist(i, j) < 36) set.add(key(i, j));
+  const degree = (i: number) => [...set].filter((k) => k.split('|').map(Number).includes(i)).length;
   for (let i = 0; i < s.length; i++) {
-    for (let j = i + 1; j < s.length; j++) {
-      const dx = s[i].x - s[j].x;
-      const dy = (s[i].y - s[j].y) * 1.1;
-      if (Math.hypot(dx, dy) < 36) pairs.push([s[i].id, s[j].id]);
+    const nearest = s.map((_, j) => j).filter((j) => j !== i).sort((a, b) => dist(i, a) - dist(i, b));
+    for (const j of nearest) {
+      if (degree(i) >= MIN_LINKS) break;
+      set.add(key(i, j));
     }
   }
+  const pairs = [...set].map((k) => k.split('|').map(Number)).sort((a, b) => a[0] - b[0] || a[1] - b[1]).map(([i, j]) => [s[i].id, s[j].id] as [string, string]);
   neighbourCache.set(formation.id, pairs);
   return pairs;
 }
@@ -314,7 +323,7 @@ export function computeTeamRating(
     const eff = card.ovr - f.penalty;
     fits.push({ slotId: slot.id, ...f, effectiveOvr: eff });
     groupOvr[positionGroup(slot.label)].push(eff);
-    chemPoints[slot.id] = f.fit === 'natural' ? 4 : f.fit === 'secondary' ? 3 : f.fit === 'adjacent' ? 1 : 0;
+    chemPoints[slot.id] = f.fit === 'natural' ? 5 : f.fit === 'secondary' ? 4 : f.fit === 'adjacent' ? 2 : 0;
   }
 
   const links: ChemLink[] = [];
@@ -335,7 +344,8 @@ export function computeTeamRating(
   const baseAvg = filled ? fits.reduce((s, f) => s + f.effectiveOvr, 0) / filled : 0;
   const rawAvg = filled ? fits.reduce((s, f) => s + lineup[f.slotId]!.ovr, 0) / filled : 0;
   const oopPenalty = rawAvg - baseAvg;
-  const chemBonus = filled ? Math.round(((chemistry - 45) / 55) * 1.6 * 10) / 10 : 0;
+  // 60% is par (no bonus). Up to +1.6 at 100%, down to -1.2 at 0%.
+  const chemBonus = filled ? Math.round((chemistry >= 60 ? ((chemistry - 60) / 40) * 1.6 : ((chemistry - 60) / 60) * 1.2) * 10) / 10 : 0;
 
   const mgr = evalManager(managerId, formation, lineup);
 

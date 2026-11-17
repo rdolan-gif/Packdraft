@@ -883,7 +883,7 @@ export function buildSummary(sim: SeasonSim, formationId: FormationId, lineup: L
   const shoutScore = sim.shouts.reduce((s, x) => s + (x.result === 'W' ? 1 : x.result === 'D' ? 0.3 : -0.8), 0);
   const tacticalRating = Math.max(
     1,
-    Math.min(10, Math.round((4 + rating.chemistry / 25 + (rating.managerActive ? 1.2 : 0) - rating.oopPenalty * 0.6 - rating.balancePenalty + shoutScore) * 10) / 10),
+    Math.min(10, Math.round((4 + (rating.chemistry - 15) / 25 + (rating.managerActive ? 1.2 : 0) - rating.oopPenalty * 0.6 - rating.balancePenalty + shoutScore) * 10) / 10),
   );
 
   // Scout's verdict: one of four scouts, leading with the season's most remarkable story.
