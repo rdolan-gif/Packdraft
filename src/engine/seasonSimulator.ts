@@ -20,6 +20,7 @@ import type {
 } from '../types/game';
 import { getClub } from '../data/clubs';
 import { PLAYERS } from '../data/players';
+import { scoutVerdict } from './scoutVerdict';
 
 export const USER_TEAM_ID = 'USER';
 export const TOTAL_MATCHWEEKS = 38;
@@ -799,12 +800,7 @@ export const GRADE_INFO: Record<Grade, { title: string; subtitle: string }> = {
   F: { title: 'RELEGATED', subtitle: 'Sacked in the Morning' },
 };
 
-function pick<T>(arr: T[], rng: () => number): T {
-  return arr[Math.floor(rng() * arr.length)];
-}
-
 export function buildSummary(sim: SeasonSim, formationId: FormationId, lineup: Lineup, rating: TeamRating): SeasonSummary {
-  const rng = sim.rng;
   const table = sim.sortedTable();
   const position = sim.userPosition();
   const record = table[position - 1];
@@ -890,49 +886,8 @@ export function buildSummary(sim: SeasonSim, formationId: FormationId, lineup: L
     Math.min(10, Math.round((4 + rating.chemistry / 25 + (rating.managerActive ? 1.2 : 0) - rating.oopPenalty * 0.6 - rating.balancePenalty + shoutScore) * 10) / 10),
   );
 
-  // Scout's verdict
-  const placed = formation.slots.map((s) => ({ slot: s, card: lineup[s.id] })).filter((x) => x.card) as { slot: (typeof formation.slots)[number]; card: PlayerCard }[];
-  const stars = [...placed].sort((a, b) => {
-    const sa = sim.stats[a.card.id];
-    const sb = sim.stats[b.card.id];
-    return sb.goals + sb.assists * 0.7 - (sa.goals + sa.assists * 0.7);
-  });
-  const label = (c: PlayerCard) => `${c.season} ${c.era === 'PRIME' ? 'Prime ' : c.era === 'LEGEND' ? 'Legend ' : ''}${c.shortName}`;
-  const s1 = stars[0]?.card;
-  const s2 = stars[1]?.card;
-  const worstFit = rating.fits.filter((f) => f.fit === 'oop' || f.fit === 'adjacent').sort((a, b) => b.penalty - a.penalty)[0];
-  const misfit = worstFit ? placed.find((p) => p.slot.id === worstFit.slotId) : undefined;
-  const roleName = (pos: string) =>
-    ({ GK: 'goalkeeper', CB: 'centre-back', RB: 'right-back', LB: 'left-back', CDM: 'holding midfielder', CM: 'central midfielder', CAM: 'No.10', RM: 'right midfielder', LM: 'left midfielder', RW: 'right winger', LW: 'left winger', ST: 'striker' })[pos] ?? pos;
-
-  const opening =
-    grade === 'S+' || grade === 'S'
-      ? `Pairing ${s1 ? label(s1) : 'your stars'} with ${s2 ? label(s2) : 'that supporting cast'} tore the league apart`
-      : grade === 'A' && position === 1
-        ? `${s1 ? label(s1) : 'Your talisman'} and ${s2 ? label(s2) : 'friends'} dragged this side over the line`
-        : grade === 'A' || grade === 'B'
-          ? `${s1 ? label(s1) : 'Your talisman'} and ${s2 ? label(s2) : 'friends'} kept you in the hunt all season`
-        : grade === 'C' || grade === 'D'
-          ? `${s1 ? label(s1) : 'Your best player'} carried the load, but too often looked lonely`
-          : `Not even ${s1 ? label(s1) : 'your marquee signing'} could save this sinking ship`;
-  const twist = misfit
-    ? `, though playing a ${roleName(misfit.card.positions[0])} at ${roleName(misfit.slot.label)} gave ${misfit.slot.label === 'GK' ? 'everyone' : positionGroup(misfit.slot.label) === 'DEF' ? 'your defence' : 'the coaching staff'} heart palpitations.`
-    : rating.balanceNote && rating.balancePenalty > 0
-      ? ', though a midfield with no shield left the back four horribly exposed.'
-      : rating.chemistry >= 70
-        ? `, and ${rating.chemistry}% chemistry made it look rehearsed.`
-        : '.';
-  const closers: Record<Grade, string[]> = {
-    'S+': ['History will remember this XI alongside the 03-04 Arsenal side. Frame the shirt.', 'Unbeaten. Unmatched. Pundits have run out of superlatives.'],
-    S: ['A title won at a canter. The parade bus has been booked.', 'Champions with room to spare. The rest of the league is writing apology letters.'],
-    A: ['So close to glory that the board are already sanctioning a summer splurge.', 'Champions League nights are coming. Now go and win the thing.'],
-    B: ['Europe beckons, but the title chasers barely looked over their shoulders.', 'A strong campaign, if one big summer signing short of contention.'],
-    C: ['Comfortable, forgettable, and safely in the middle of the pack.', 'The kind of season that sells very few calendars.'],
-    D: ['The fans have started singing about the board. Not kindly.', 'A big-name XI that played like a pub team on a Sunday morning.'],
-    F: ['Sacked in the morning. The fans have already chartered a plane with a banner.', 'Relegated with this squad? Pundits will be dissecting this one for years.'],
-  };
-  const champClosers = ['Champions, if not by the landslide the squad promised. The trophy looks the same either way.', 'A title is a title. The parade bus does not check the points total.'];
-  const verdict = `${opening}${twist} ${pick(grade === 'A' && position === 1 ? champClosers : closers[grade], rng)}`;
+  // Scout's verdict: one of four scouts, leading with the season's most remarkable story.
+  const { verdict, scout } = scoutVerdict({ sim, userTeamId: USER_TEAM_ID, formationId, lineup, rating, grade, position, record, table, userStats, bestStreak });
 
   return {
     grade,
@@ -948,6 +903,7 @@ export function buildSummary(sim: SeasonSim, formationId: FormationId, lineup: L
     userWonPlaymaker: !!playmaker?.isUser,
     highlights: highlights.slice(0, 8),
     verdict,
+    scout: { name: scout.name, emoji: scout.emoji },
     tacticalRating,
     biggestWin,
     worstLoss,

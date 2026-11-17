@@ -159,7 +159,9 @@ export function SeasonReviewCard({ summary, teamName, formationId, lineup, manag
             </div>
 
             <div className="mt-4 rounded-2xl border border-white/10 bg-black/40 p-4">
-              <div className="text-[10px] font-black uppercase tracking-widest text-yellow-300">Scout's Verdict</div>
+              <div className="text-[10px] font-black uppercase tracking-widest text-yellow-300">
+                Scout's Verdict{summary.scout && <span className="text-white/60"> · {summary.scout.emoji} {summary.scout.name}</span>}
+              </div>
               <p className="mt-1 text-[15px] italic leading-relaxed text-white/90">“{summary.verdict}”</p>
             </div>
 

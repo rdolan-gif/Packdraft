@@ -332,6 +332,8 @@ export interface SeasonSummary {
   userWonPlaymaker: boolean;
   highlights: string[];
   verdict: string;
+  /** Who wrote the verdict (older saved summaries don't have one). */
+  scout?: { name: string; emoji: string };
   tacticalRating: number;
   biggestWin: MatchResult | null;
   worstLoss: MatchResult | null;
