@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { BookOpen, Gauge, RotateCcw, Sparkles, Trophy, Volume2, VolumeX } from 'lucide-react';
+import { Award, BookOpen, Gauge, RotateCcw, Sparkles, Trophy, Volume2, VolumeX } from 'lucide-react';
 import { isMuted, onMuteChange, setMuted, sfx } from '../engine/soundEffects';
 import { isLite, onLiteChange, setLite } from '../engine/perf';
 import { TOTAL_PACKS } from '../engine/packGenerator';
@@ -11,10 +11,14 @@ interface Props {
   vaultCount: number;
   onOpenVault: () => void;
   onOpenBook: () => void;
+  onOpenCabinet: () => void;
+  trophyCount: number;
+  /** Set during a Daily Draft. */
+  dailyNumber: number | null;
   onNewRun: () => void;
 }
 
-export function Header({ phase, packNumber, picksMade, vaultCount, onOpenVault, onOpenBook, onNewRun }: Props) {
+export function Header({ phase, packNumber, picksMade, vaultCount, onOpenVault, onOpenBook, onOpenCabinet, trophyCount, dailyNumber, onNewRun }: Props) {
   const [muted, setM] = useState(isMuted());
   const [armed, setArmed] = useState(false);
   const [lite, setL] = useState(isLite());
@@ -51,6 +55,9 @@ export function Header({ phase, packNumber, picksMade, vaultCount, onOpenVault, 
             PACK<span className="text-emerald-400">DRAFT</span> 38
           </span>
         </button>
+        {dailyNumber !== null && phase !== 'title' && (
+          <span className="rounded-full bg-sky-400 px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-black">Daily #{dailyNumber}</span>
+        )}
 
         {phase === 'draft' && (
           <div className="ml-2 flex flex-1 items-center gap-2">
@@ -80,6 +87,18 @@ export function Header({ phase, packNumber, picksMade, vaultCount, onOpenVault, 
         >
           <BookOpen className="h-4 w-4" />
           <span className="hidden sm:inline">Stickers</span>
+        </button>
+        <button
+          onClick={() => {
+            sfx.click();
+            onOpenCabinet();
+          }}
+          className="flex items-center gap-1.5 rounded-lg border border-amber-500/40 bg-amber-600/15 px-3 py-1.5 text-xs font-black uppercase tracking-wider text-amber-100 transition hover:bg-amber-600/25"
+          aria-label="Trophy cabinet"
+        >
+          <Award className="h-4 w-4" />
+          <span className="hidden lg:inline">Trophies</span>
+          <span className="rounded-full bg-amber-400 px-1.5 text-[10px] text-black">{trophyCount}</span>
         </button>
         <button
           onClick={() => {

@@ -88,6 +88,7 @@ export function PlayerInspectPanel({
     .map((l) => {
       const other = lineup[l.a === slotId ? l.b : l.a]!;
       const kinds: string[] = [];
+      if (l.kind === 'duo') return { other, kinds: [`★ Famous duo: ${l.duo?.name ?? ''}`], strength: l.strength };
       if (other.club === card.club) kinds.push(other.decade === card.decade ? 'Club + era' : 'Club');
       if (other.nation === card.nation) kinds.push('Nation');
       if (other.decade === card.decade) kinds.push('Decade');
@@ -152,7 +153,7 @@ export function PlayerInspectPanel({
           </div>
           {links.length === 0 && <div className="rounded-lg bg-white/5 px-2.5 py-1.5 text-white/60">No links with neighbouring players yet.</div>}
           {links.map((l) => (
-            <div key={l.other.id} className="flex items-center justify-between gap-2 rounded-lg bg-white/5 px-2.5 py-1.5 text-white/85">
+            <div key={`${l.other.id}-${l.kinds[0]}`} className="flex items-center justify-between gap-2 rounded-lg bg-white/5 px-2.5 py-1.5 text-white/85">
               <span className="flex min-w-0 items-center gap-1.5">
                 <Link2 className="h-3.5 w-3.5 shrink-0 text-yellow-300" />
                 <span className="truncate">

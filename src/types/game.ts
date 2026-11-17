@@ -188,13 +188,15 @@ export type Lineup = Record<string, PlayerCard | null>; // slotId → card
 
 // ───────────────────────────── Chemistry ─────────────────────────────
 
-export type LinkKind = 'club' | 'nation' | 'decade';
+export type LinkKind = 'club' | 'nation' | 'decade' | 'duo';
 
 export interface ChemLink {
   a: string; // slot id
   b: string;
   kind: LinkKind;
   strength: number;
+  /** Famous duo id and name (kind 'duo'). */
+  duo?: { id: string; name: string };
 }
 
 export interface SlotFit {

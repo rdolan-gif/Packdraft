@@ -7,6 +7,9 @@ import { gradeLabel, ordinal } from '../engine/seasonSimulator';
 import { sfx } from '../engine/soundEffects';
 import { goldConfetti, rainbowConfetti, shakeScreen } from '../engine/fx';
 import { PlayerCardUI, cardEmoji } from './PlayerCardUI';
+import { NewTrophies } from './TrophyCabinetModal';
+import type { Trophy as TrophyDef } from '../engine/achievements';
+import { shareText } from '../engine/share';
 
 export const GRADE_STYLE: Record<Grade, { stamp: string; text: string; glow: string }> = {
   'S+': { stamp: 'bg-[conic-gradient(from_0deg,#facc15,#f472b6,#22d3ee,#a3e635,#facc15)] text-black border-yellow-100', text: 'text-yellow-200', glow: 'shadow-[0_0_60px_rgba(250,204,21,.8)]' },
@@ -28,6 +31,11 @@ interface Props {
   savedToVault: boolean;
   onNewRun: () => void;
   onOpenVault: () => void;
+  /** Trophies unlocked by this season. */
+  newTrophies?: TrophyDef[];
+  onOpenCabinet?: () => void;
+  /** Set when this was today's Daily Draft. */
+  daily?: { number: number; streak: number; text: string };
 }
 
 export function buildShareText(opts: { summary: SeasonSummary; teamName: string; formationId: FormationId; lineup: Lineup; managerId: ManagerId }) {
@@ -56,9 +64,17 @@ export function buildShareText(opts: { summary: SeasonSummary; teamName: string;
   ].join('\n');
 }
 
-export function SeasonReviewCard({ summary, teamName, formationId, lineup, managerId, rating, savedToVault, onNewRun, onOpenVault }: Props) {
+export function SeasonReviewCard({ summary, teamName, formationId, lineup, managerId, rating, savedToVault, onNewRun, onOpenVault, newTrophies = [], onOpenCabinet, daily }: Props) {
   const [stamped, setStamped] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [dailyShared, setDailyShared] = useState<string | null>(null);
+  const shareDaily = async () => {
+    if (!daily) return;
+    const r = await shareText(daily.text);
+    sfx.select();
+    setDailyShared(r === 'copied' ? 'COPIED!' : r === 'shared' ? 'SHARED!' : 'COPY FAILED');
+    window.setTimeout(() => setDailyShared(null), 2000);
+  };
   const g = summary.grade;
   const info = gradeLabel(g, summary.position);
   const style = GRADE_STYLE[g];
@@ -190,6 +206,27 @@ export function SeasonReviewCard({ summary, teamName, formationId, lineup, manag
                 <div className="absolute right-2 top-2 rounded-full bg-yellow-300 px-2 py-0.5 text-[10px] font-black uppercase text-black">MVP: {summary.mvpCard.shortName}</div>
               )}
             </div>
+
+            {daily && (
+              <div className="rounded-2xl border border-sky-300/50 bg-gradient-to-r from-sky-500/20 to-indigo-500/20 p-3">
+                <div className="flex items-center justify-between gap-2">
+                  <div>
+                    <div className="text-[10px] font-black uppercase tracking-widest text-sky-200">Daily Draft #{daily.number}</div>
+                    <div className="font-display text-xl leading-none text-white">{daily.streak > 1 ? `🔥 ${daily.streak}-day streak` : 'Same packs for everyone today'}</div>
+                  </div>
+                  <button onClick={shareDaily} className="flex shrink-0 items-center gap-1.5 rounded-xl bg-sky-400 px-3 py-2 font-display text-lg tracking-wider text-black hover:bg-sky-300">
+                    {dailyShared ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />} {dailyShared ?? 'SHARE RESULT'}
+                  </button>
+                </div>
+                <pre className="mt-2 whitespace-pre-wrap rounded-lg bg-black/40 p-2 font-sans text-xs leading-snug text-white/80">{daily.text}</pre>
+              </div>
+            )}
+
+            {newTrophies.length > 0 && (
+              <button onClick={onOpenCabinet} className="text-left" aria-label="Open the trophy cabinet">
+                <NewTrophies list={newTrophies} />
+              </button>
+            )}
 
             <div className="rounded-2xl border border-white/10 bg-black/40 p-4">
               <div className="text-[10px] font-black uppercase tracking-widest text-emerald-300">Season Highlights</div>

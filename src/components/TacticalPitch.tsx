@@ -22,7 +22,7 @@ interface Props {
   compact?: boolean;
 }
 
-const LINK_COLOR = { club: '#facc15', nation: '#22d3ee', decade: '#a78bfa' } as const;
+const LINK_COLOR = { club: '#facc15', nation: '#22d3ee', decade: '#a78bfa', duo: '#f472b6' } as const;
 const FIT_STYLE = {
   natural: 'border-emerald-400 bg-emerald-400/20 text-emerald-200',
   secondary: 'border-lime-300 bg-lime-300/15 text-lime-200',
@@ -100,7 +100,7 @@ export function TacticalPitch({ formationId, lineup, rating, managerId, pendingC
             if (!a || !b) return null;
             return (
               <line
-                key={`${l.a}-${l.b}`}
+                key={`${l.a}-${l.b}-${l.kind}`}
                 x1={a.x}
                 y1={pitchY(a.y)}
                 x2={b.x}
@@ -109,6 +109,7 @@ export function TacticalPitch({ formationId, lineup, rating, managerId, pendingC
                 strokeWidth={0.35 + l.strength * 0.18}
                 strokeLinecap="round"
                 opacity="0.85"
+                strokeDasharray={l.kind === 'duo' ? '5 4' : undefined}
                 style={{ filter: `drop-shadow(0 0 1.2px ${LINK_COLOR[l.kind]})` }}
                 vectorEffect="non-scaling-stroke"
               />
@@ -168,6 +169,9 @@ export function TacticalPitch({ formationId, lineup, rating, managerId, pendingC
             <span className="flex items-center gap-1"><Link2 className="h-3 w-3" style={{ color: LINK_COLOR.club }} /> Club</span>
             <span className="flex items-center gap-1"><Link2 className="h-3 w-3" style={{ color: LINK_COLOR.nation }} /> Nation</span>
             <span className="flex items-center gap-1"><Link2 className="h-3 w-3" style={{ color: LINK_COLOR.decade }} /> Decade</span>
+            {rating.links.some((l) => l.kind === 'duo') && (
+              <span className="flex items-center gap-1 font-bold text-pink-300"><Link2 className="h-3 w-3" style={{ color: LINK_COLOR.duo }} /> Famous duo</span>
+            )}
             {fine ? (
               <span className="flex items-center gap-1"><MousePointerClick className="h-3 w-3" /> Click a player for stats &amp; Move</span>
             ) : (

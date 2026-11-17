@@ -1,4 +1,5 @@
 import { ADJACENT, FORMATIONS, positionGroup, slotAccepts } from '../data/formations';
+import { DUOS, DUO_BONUS } from '../data/duos';
 import type {
   ChemLink,
   ManagerCheck,
@@ -336,6 +337,21 @@ export function computeTeamRating(
     links.push({ a, b, ...l });
     chemPoints[a] += l.strength;
     chemPoints[b] += l.strength;
+  }
+
+  // Hidden famous duos: both in the XI (anywhere) = a special link worth DUO_BONUS each.
+  const slotOfBase: Record<string, string> = {};
+  for (const slot of formation.slots) {
+    const c = lineup[slot.id];
+    if (c) slotOfBase[c.basePlayerId] = slot.id;
+  }
+  for (const d of DUOS) {
+    const sa = slotOfBase[d.a];
+    const sb = slotOfBase[d.b];
+    if (!sa || !sb) continue;
+    links.push({ a: sa, b: sb, kind: 'duo', strength: DUO_BONUS, duo: { id: d.id, name: d.name } });
+    chemPoints[sa] += DUO_BONUS;
+    chemPoints[sb] += DUO_BONUS;
   }
 
   const filled = fits.length;

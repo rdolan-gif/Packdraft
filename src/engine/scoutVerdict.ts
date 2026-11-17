@@ -356,7 +356,7 @@ const cardLabel = (c: PlayerCard) => `${c.season} ${c.era === 'PRIME' ? 'Prime '
 const gapText = (pts: number, gd: number) => (pts === 0 ? (gd === 0 ? 'goals scored' : 'goal difference') : pts === 1 ? 'a single point' : `${pts} points`);
 
 /** Each club's league position after every matchweek (index 0 = after MW1), using the table's tie-breaks. */
-function positionHistory(sim: SeasonSim, teamId: string): number[] {
+export function positionHistory(sim: SeasonSim, teamId: string): number[] {
   const rows: Record<string, { pts: number; gd: number; gf: number; name: string }> = {};
   sim.teams.forEach((t) => (rows[t.id] = { pts: 0, gd: 0, gf: 0, name: t.name }));
   const out: number[] = [];

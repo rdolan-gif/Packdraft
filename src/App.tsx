@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Wand2, Lock, Play, Sparkles } from 'lucide-react';
+import { Wand2, Lock, Play, Sparkles, CalendarDays, Award, Check, Copy } from 'lucide-react';
 import { Header } from './components/Header';
 import { ManagerDraftModal } from './components/ManagerDraftModal';
 import { FormationPicker } from './components/FormationPicker';
@@ -11,13 +11,19 @@ import { TrophyVaultModal } from './components/TrophyVaultModal';
 import { PlayerCardUI } from './components/PlayerCardUI';
 import { ManagerObjectivePanel, PlayerInspectPanel } from './components/InspectPanels';
 import { StickerBookModal } from './components/StickerBookModal';
+import { TrophyCabinetModal } from './components/TrophyCabinetModal';
+import { checkTrophies, TROPHIES, unlockedTrophies, type Trophy } from './engine/achievements';
+import { dailyRng, dailyShareText, dailyStreak, dayNumber, formFromResults, loadDaily, markDailyStarted, saveDailyResult, todayKey, untilTomorrow, type DailyResult } from './engine/daily';
+import { discoverDuos, DUOS } from './data/duos';
+import { positionHistory } from './engine/scoutVerdict';
+import { shareText } from './engine/share';
 import { isPulled, recordDrafted, recordPulled } from './engine/stickerBook';
 import { MANAGERS, MANAGERS_BY_ID } from './data/managers';
 import { FORMATIONS } from './data/formations';
 import { PLAYERS } from './data/players';
 import { bestSlotFor, computeTeamRating, fitFor } from './engine/chemistry';
 import { generatePack, TOTAL_PACKS } from './engine/packGenerator';
-import { buildLeague, buildSummary, pickEra, SeasonSim } from './engine/seasonSimulator';
+import { buildLeague, buildSummary, ordinal, pickEra, SeasonSim, USER_TEAM_ID } from './engine/seasonSimulator';
 import { loadCareer, loadVault, qualifiesForVault, recordRun, saveToVault, deleteFromVault } from './engine/vault';
 import { sfx } from './engine/soundEffects';
 import { goldConfetti, rainbowConfetti } from './engine/fx';
@@ -46,12 +52,12 @@ function remapLineup(old: Lineup, to: FormationId): Lineup {
 }
 
 /** Deal 3 different managers; dealWeight makes some (the Galáctico Collector) rarer. */
-function dealManagers(): ManagerCard[] {
+function dealManagers(rng: () => number = Math.random): ManagerCard[] {
   const pool = [...MANAGERS];
   const hand: ManagerCard[] = [];
   while (hand.length < 3 && pool.length) {
     const total = pool.reduce((s, m) => s + (m.dealWeight ?? 1), 0);
-    let r = Math.random() * total;
+    let r = rng() * total;
     const i = pool.findIndex((m) => (r -= m.dealWeight ?? 1) <= 0);
     hand.push(pool.splice(i < 0 ? pool.length - 1 : i, 1)[0]);
   }
@@ -84,6 +90,14 @@ export default function App() {
   const [managerInfoOpen, setManagerInfoOpen] = useState(false);
   const [bookOpen, setBookOpen] = useState(false);
   const [newIds, setNewIds] = useState<Set<string>>(new Set());
+  // Daily Draft: the date this run is seeded from (null = a normal random run).
+  const [dailyDay, setDailyDay] = useState<string | null>(null);
+  const [dailyInfo, setDailyInfo] = useState<{ number: number; streak: number; text: string } | null>(null);
+  const [cabinetOpen, setCabinetOpen] = useState(false);
+  const [newTrophies, setNewTrophies] = useState<Trophy[]>([]);
+  const [trophyCount, setTrophyCount] = useState(() => Object.keys(unlockedTrophies()).length);
+  /** Random numbers for one part of the run: seeded on a Daily Draft, truly random otherwise. */
+  const rngFor = (part: string) => (dailyDay ? dailyRng(dailyDay, part) : Math.random);
   // Between placing a card and the next pack arriving, the old pack is locked:
   // before, clicking during that gap could draft twice from one pack (even the same player).
   const [dealing, setDealing] = useState(false);
@@ -106,8 +120,8 @@ export default function App() {
   };
 
   const dealPack = useCallback(
-    (num: number, lu: Lineup, draftedIds: Set<string>, f: FormationId) => {
-      const cards = generatePack({ packNumber: num, pool: PLAYERS, draftedBaseIds: draftedIds, formationId: f, lineup: lu });
+    (num: number, lu: Lineup, draftedIds: Set<string>, f: FormationId, rng: () => number = Math.random) => {
+      const cards = generatePack({ packNumber: num, pool: PLAYERS, draftedBaseIds: draftedIds, formationId: f, lineup: lu, rng });
       setNewIds(new Set(cards.filter((c) => !isPulled(c.id)).map((c) => c.id)));
       setPackCards(cards);
       setPackKey((k) => k + 1);
@@ -119,6 +133,9 @@ export default function App() {
   const newRun = () => {
     cancelDeal();
     setPhase('title');
+    setDailyDay(null);
+    setDailyInfo(null);
+    setNewTrophies([]);
     setManagerOffers(dealManagers());
     setManagerId(null);
     setFormationId('4-3-3');
@@ -143,10 +160,43 @@ export default function App() {
     setSwapSource(null);
   };
 
+  /** Today's Daily Draft: same managers, packs, era and season luck for everyone. */
+  const startDaily = () => {
+    const day = todayKey();
+    if (loadDaily()[day]) return;
+    sfx.unlock();
+    sfx.select();
+    setDailyDay(day);
+    setManagerOffers(dealManagers(dailyRng(day, 'managers')));
+    markDailyStarted(day);
+    setPhase('manager');
+    window.scrollTo({ top: 0 });
+  };
+
+  const showTrophies = (list: Trophy[]) => {
+    if (!list.length) return;
+    setTrophyCount(Object.keys(unlockedTrophies()).length);
+    sfx.trophy();
+    flash(`🏆 Trophy unlocked: ${list.map((t) => t.title).join(', ')}`);
+  };
+
+  // Hidden famous duos: the first time a pair lines up in your XI, it's discovered.
+  useEffect(() => {
+    const ids = rating.links.filter((l) => l.kind === 'duo' && l.duo).map((l) => l.duo!.id);
+    const fresh = discoverDuos(ids);
+    if (!fresh.length) return;
+    const names = fresh.map((id) => DUOS.find((d) => d.id === id)?.name).join(', ');
+    sfx.stinger('RISING_WORLD');
+    const unlocked = checkTrophies();
+    if (unlocked.length) setTrophyCount(Object.keys(unlockedTrophies()).length);
+    flash(`🤝 Famous duo discovered: ${names}! +3 chemistry each${unlocked.length ? ` · 🏆 ${unlocked.map((t) => t.title).join(', ')}` : ''}`);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [rating.links]);
+
   const startDraft = () => {
     sfx.select();
     setPhase('draft');
-    dealPack(1, lineup, drafted, formationId);
+    dealPack(1, lineup, drafted, formationId, rngFor('pack1'));
     window.scrollTo({ top: 0 });
   };
 
@@ -173,7 +223,7 @@ export default function App() {
       dealTimer.current = window.setTimeout(() => {
         dealTimer.current = null;
         setDealing(false);
-        dealPack(n, nextLineup, nextDrafted, formationId);
+        dealPack(n, nextLineup, nextDrafted, formationId, rngFor(`pack${n}`));
       }, 450);
     } else {
       setPackCards([]);
@@ -216,7 +266,7 @@ export default function App() {
   const reroll = () => {
     if (rerollUsed || dealing) return;
     setRerollUsed(true);
-    dealPack(packNumber, lineup, drafted, formationId);
+    dealPack(packNumber, lineup, drafted, formationId, rngFor(`pack${packNumber}-reroll`));
     flash('Scout reroll used: fresh pack incoming!');
   };
 
@@ -224,9 +274,9 @@ export default function App() {
     if (!managerId) return;
     sfx.whistle();
     // Each draft is played in a random era of the league (scoring, home advantage, gap to the elite).
-    const era = pickEra();
-    const teams = buildLeague({ teamName: teamName.trim() || 'PackDraft XI', formationId, lineup, rating, managerId, era });
-    setSim(new SeasonSim(teams, managerId, rating, Math.random, era));
+    const era = pickEra(rngFor('era'));
+    const teams = buildLeague({ teamName: teamName.trim() || 'PackDraft XI', formationId, lineup, rating, managerId, era, rng: rngFor('league') });
+    setSim(new SeasonSim(teams, managerId, rating, rngFor('season'), era));
     setPhase('season');
     window.scrollTo({ top: 0 });
   };
@@ -254,6 +304,45 @@ export default function App() {
     setSummary(s);
     const r = s.record;
     setCareer(recordRun({ grade: s.grade, position: s.position, lost: r.lost, won: r.won, points: r.points, gf: r.gf }));
+    const results = sim.results.map((_, i) => sim.userResult(i)!).filter(Boolean);
+    if (dailyDay) {
+      const result: DailyResult = {
+        day: dailyDay,
+        number: dayNumber(dailyDay),
+        status: 'done',
+        grade: s.grade,
+        position: s.position,
+        points: r.points,
+        record: { w: r.won, d: r.drawn, l: r.lost, gf: r.gf, ga: r.ga },
+        form: formFromResults(results, USER_TEAM_ID),
+        rating: rating.overall,
+        chemistry: rating.chemistry,
+        teamName: teamName.trim() || 'PackDraft XI',
+        managerName: MANAGERS_BY_ID[managerId].name,
+        eraName: sim.era.name,
+      };
+      saveDailyResult(result);
+      const streak = dailyStreak();
+      setDailyInfo({ number: result.number, streak, text: dailyShareText(result, streak) });
+    }
+    const unlocked = checkTrophies({
+      position: s.position,
+      record: r,
+      grade: s.grade,
+      wonBoot: s.userWonBoot,
+      wonGlove: s.userWonGlove,
+      wonPlaymaker: s.userWonPlaymaker,
+      cards: Object.values(lineup).filter(Boolean) as PlayerCard[],
+      formationId,
+      managerId,
+      teamRating: rating.overall,
+      chemistry: rating.chemistry,
+      eraId: sim.era.id,
+      daily: !!dailyDay,
+      midPosition: positionHistory(sim, USER_TEAM_ID)[18] ?? s.position,
+    });
+    setNewTrophies(unlocked);
+    setTrophyCount(Object.keys(unlockedTrophies()).length);
     if (qualifiesForVault(s.grade, r.lost, s.position)) {
       const top = sim.leaders('goals', 50).find((p) => p.isUser);
       const entry: VaultEntry = {
@@ -285,6 +374,7 @@ export default function App() {
         setSwapSource(null);
         setSelected(null);
         setVaultOpen(false);
+        setCabinetOpen(false);
       }
     };
     window.addEventListener('keydown', onKey);
@@ -293,9 +383,19 @@ export default function App() {
 
   return (
     <div className="stadium-bg min-h-screen">
-      <Header phase={phase} packNumber={packNumber} picksMade={picksMade} vaultCount={vault.length} onOpenVault={() => setVaultOpen(true)} onOpenBook={() => setBookOpen(true)} onNewRun={newRun} />
+      <Header phase={phase} packNumber={packNumber} picksMade={picksMade} vaultCount={vault.length} onOpenVault={() => setVaultOpen(true)} onOpenBook={() => setBookOpen(true)} onOpenCabinet={() => setCabinetOpen(true)} trophyCount={trophyCount} dailyNumber={dailyDay ? dayNumber(dailyDay) : null} onNewRun={newRun} />
       <main id="app-shell" className="pb-16">
-        {phase === 'title' && <TitleScreen onStart={() => (sfx.unlock(), sfx.select(), setPhase('manager'))} career={career} vaultCount={vault.length} onVault={() => setVaultOpen(true)} />}
+        {phase === 'title' && (
+          <TitleScreen
+            onStart={() => (sfx.unlock(), sfx.select(), setPhase('manager'))}
+            onDaily={startDaily}
+            onCabinet={() => setCabinetOpen(true)}
+            trophyCount={trophyCount}
+            career={career}
+            vaultCount={vault.length}
+            onVault={() => setVaultOpen(true)}
+          />
+        )}
 
         {phase === 'manager' && (
           <ManagerDraftModal
@@ -354,7 +454,10 @@ export default function App() {
                       setSwapSource(null);
                     }}
                     rerollAvailable={!rerollUsed && !dealing}
-                    onRip={() => recordPulled(packCards.map((c) => c.id))}
+                    onRip={() => {
+                      recordPulled(packCards.map((c) => c.id));
+                      showTrophies(checkTrophies());
+                    }}
                     newIds={newIds}
                     onReroll={reroll}
                   />
@@ -424,6 +527,9 @@ export default function App() {
             savedToVault={savedToVault}
             onNewRun={newRun}
             onOpenVault={() => setVaultOpen(true)}
+            newTrophies={newTrophies}
+            onOpenCabinet={() => setCabinetOpen(true)}
+            daily={dailyInfo ?? undefined}
           />
         )}
       </main>
@@ -452,6 +558,7 @@ export default function App() {
       {managerInfoOpen && managerId && <ManagerObjectivePanel managerId={managerId} rating={rating} onClose={() => setManagerInfoOpen(false)} />}
 
       {bookOpen && <StickerBookModal onClose={() => setBookOpen(false)} />}
+      {cabinetOpen && <TrophyCabinetModal onClose={() => setCabinetOpen(false)} />}
 
       {vaultOpen && (
         <TrophyVaultModal
@@ -510,7 +617,23 @@ function KickoffPanel({ teamName, setTeamName, lineup, rating, onKickOff }: { te
   );
 }
 
-function TitleScreen({ onStart, career, vaultCount, onVault }: { onStart: () => void; career: ReturnType<typeof loadCareer>; vaultCount: number; onVault: () => void }) {
+function TitleScreen({
+  onStart,
+  onDaily,
+  onCabinet,
+  trophyCount,
+  career,
+  vaultCount,
+  onVault,
+}: {
+  onStart: () => void;
+  onDaily: () => void;
+  onCabinet: () => void;
+  trophyCount: number;
+  career: ReturnType<typeof loadCareer>;
+  vaultCount: number;
+  onVault: () => void;
+}) {
   const showcase = useMemo(() => {
     // One of each card style, fanned out with a Prime in the middle:
     // Squad (grey) · Elite (Cult Hero red) · Prime · Gold (Rising Star glow) · Elite (Legend bronze)
@@ -555,6 +678,24 @@ function TitleScreen({ onStart, career, vaultCount, onVault }: { onStart: () => 
         <span className="absolute inset-0 -translate-x-full bg-white/50 transition duration-700 group-hover:translate-x-full" />
       </button>
 
+      <div className="mt-6 grid w-full max-w-2xl grid-cols-1 gap-3 sm:grid-cols-[1.6fr_1fr]">
+        <DailyCard onPlay={onDaily} />
+        <button
+          onClick={onCabinet}
+          className="flex items-center gap-3 rounded-2xl border border-amber-500/40 bg-gradient-to-br from-amber-900/50 to-black/40 p-3 text-left transition hover:border-amber-300/70"
+        >
+          <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-gradient-to-b from-yellow-200 to-amber-500 text-black">
+            <Award className="h-6 w-6" />
+          </span>
+          <span>
+            <span className="block font-display text-2xl leading-none text-white">TROPHY CABINET</span>
+            <span className="block text-xs font-bold text-amber-100/70">
+              {trophyCount} / {TROPHIES.length} unlocked
+            </span>
+          </span>
+        </button>
+      </div>
+
       <div className="mt-10 grid w-full max-w-4xl grid-cols-2 gap-3 text-left sm:grid-cols-4">
         {[
           ['🎩', 'Mystery Manager', 'Pick 1 of 3 tactical philosophies with passive buffs.'],
@@ -573,6 +714,60 @@ function TitleScreen({ onStart, career, vaultCount, onVault }: { onStart: () => 
         <button onClick={onVault} className="mt-6 text-sm text-white/60 hover:text-white">
           {career.runs} runs · {career.titles} titles · {career.invincibles} Invincibles · {vaultCount} in the vault →
         </button>
+      )}
+    </div>
+  );
+}
+
+/** Home screen panel for today's Daily Draft: play it, or see (and share) how it went. */
+function DailyCard({ onPlay }: { onPlay: () => void }) {
+  const day = todayKey();
+  const all = loadDaily();
+  const today = all[day];
+  const streak = dailyStreak(all, day);
+  const [shared, setShared] = useState<string | null>(null);
+  const [, tick] = useState(0);
+  useEffect(() => {
+    const t = window.setInterval(() => tick((n) => n + 1), 60000);
+    return () => clearInterval(t);
+  }, []);
+  const share = async () => {
+    if (!today) return;
+    const r = await shareText(dailyShareText(today, streak));
+    sfx.select();
+    setShared(r === 'copied' ? 'Copied!' : r === 'shared' ? 'Shared!' : 'Copy failed');
+    window.setTimeout(() => setShared(null), 2000);
+  };
+  return (
+    <div className="flex flex-col gap-2 rounded-2xl border border-sky-300/40 bg-gradient-to-br from-sky-900/50 via-indigo-900/40 to-black/40 p-3 text-left">
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2">
+          <CalendarDays className="h-5 w-5 text-sky-300" />
+          <span className="font-display text-2xl leading-none text-white">DAILY DRAFT #{dayNumber(day)}</span>
+        </div>
+        {streak > 0 && <span className="rounded-full bg-orange-500/20 px-2 py-0.5 text-xs font-black text-orange-200">🔥 {streak}</span>}
+      </div>
+      {!today ? (
+        <>
+          <div className="text-xs text-white/65">Same managers, packs and league for everyone today. One attempt: leaving mid-run uses it.</div>
+          <button onClick={onPlay} className="rounded-xl bg-sky-400 px-4 py-2 font-display text-xl tracking-wider text-black transition hover:bg-sky-300">
+            PLAY TODAY'S DRAFT
+          </button>
+        </>
+      ) : today.status === 'done' ? (
+        <>
+          <div className="text-sm font-bold text-white">
+            {today.position === 1 ? '🏆' : '⚽'} {ordinal(today.position ?? 0)} · {today.points} pts · Grade {today.grade}
+          </div>
+          <div className="flex items-center gap-2">
+            <button onClick={share} className="flex items-center gap-1.5 rounded-xl bg-sky-400 px-3 py-1.5 font-display text-lg tracking-wider text-black hover:bg-sky-300">
+              {shared ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />} {shared ?? 'SHARE'}
+            </button>
+            <span className="text-xs text-white/55">Next draft in {untilTomorrow()}</span>
+          </div>
+        </>
+      ) : (
+        <div className="text-xs text-white/65">Today's attempt has been used. Next draft in {untilTomorrow()}.</div>
       )}
     </div>
   );
