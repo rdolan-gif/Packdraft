@@ -334,6 +334,13 @@ export interface SeasonSummary {
   userWonPlaymaker: boolean;
   highlights: string[];
   verdict: string;
+  /** W/D/L for each of the 38 games, in order. */
+  form?: string;
+  eraName?: string;
+  /** Your side's leading scorer, creator and keeper. */
+  userTopScorer?: { name: string; goals: number } | null;
+  userTopCreator?: { name: string; assists: number } | null;
+  userKeeper?: { name: string; cleanSheets: number } | null;
   /** Who wrote the verdict (older saved summaries don't have one). */
   scout?: { name: string; emoji: string };
   tacticalRating: number;

@@ -904,6 +904,18 @@ export function buildSummary(sim: SeasonSim, formationId: FormationId, lineup: L
     highlights: highlights.slice(0, 8),
     verdict,
     scout: { name: scout.name, emoji: scout.emoji },
+    form: sim.results
+      .map((_, i) => sim.userResult(i))
+      .filter(Boolean)
+      .map((m) => {
+        const diff = m!.homeId === USER_TEAM_ID ? m!.homeGoals - m!.awayGoals : m!.awayGoals - m!.homeGoals;
+        return diff > 0 ? 'W' : diff < 0 ? 'L' : 'D';
+      })
+      .join(''),
+    eraName: sim.era.name,
+    userTopScorer: topUser && topUser.goals > 0 ? { name: topUser.name, goals: topUser.goals } : null,
+    userTopCreator: topCreator && topCreator.assists > 0 ? { name: topCreator.name, assists: topCreator.assists } : null,
+    userKeeper: userGk ? { name: userGk.name, cleanSheets: userGk.cleanSheets } : null,
     tacticalRating,
     biggestWin,
     worstLoss,

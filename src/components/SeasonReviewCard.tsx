@@ -10,6 +10,7 @@ import { PlayerCardUI, cardEmoji } from './PlayerCardUI';
 import { NewTrophies } from './TrophyCabinetModal';
 import type { Trophy as TrophyDef } from '../engine/achievements';
 import { shareText } from '../engine/share';
+import { SeasonCardDownload } from './SeasonCardDownload';
 
 export const GRADE_STYLE: Record<Grade, { stamp: string; text: string; glow: string }> = {
   'S+': { stamp: 'bg-[conic-gradient(from_0deg,#facc15,#f472b6,#22d3ee,#a3e635,#facc15)] text-black border-yellow-100', text: 'text-yellow-200', glow: 'shadow-[0_0_60px_rgba(250,204,21,.8)]' },
@@ -247,6 +248,7 @@ export function SeasonReviewCard({ summary, teamName, formationId, lineup, manag
                 <RotateCcw className="h-5 w-5" /> DRAFT AGAIN
               </button>
             </div>
+            <SeasonCardDownload summary={summary} teamName={teamName} formationId={formationId} lineup={lineup} managerId={managerId} rating={rating} dailyNumber={daily?.number} />
             {savedToVault ? (
               <button onClick={onOpenVault} className="flex items-center justify-center gap-2 rounded-xl border border-yellow-300/60 bg-yellow-300/10 px-4 py-2 text-sm font-black uppercase tracking-wider text-yellow-200 hover:bg-yellow-300/20">
                 <Trophy className="h-4 w-4" /> Immortalised in the 38-0 Trophy Vault. View it.
