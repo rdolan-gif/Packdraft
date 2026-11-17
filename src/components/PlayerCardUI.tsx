@@ -168,20 +168,18 @@ export function PlayerCardUI({ card, size = 'md', onClick, selected, dimmed, sho
       </div>
 
       {/* name panel */}
-      <div className="absolute inset-x-0 bottom-0 z-10 bg-ink/90 px-1.5 pb-2 pt-1.5 text-center text-white">
+      <div className="absolute inset-x-0 bottom-0 z-10 bg-gradient-to-t from-ink via-ink/85 to-ink/0 px-1.5 pb-[7px] pt-3 text-center text-white">
         <div className={`font-display italic ${d.name} leading-none truncate ${world ? 'text-[#f8de8c]' : ''}`} style={{ fontWeight: 900 }}>
           {card.shortName.toUpperCase()}
         </div>
         {!tiny && (
           <>
-            <div className="mt-0.5 truncate text-[9px] font-semibold opacity-80">
-              {theme ? `Dev Team · ${theme.fanLabel}` : `${club.name} · ${card.nation}`}
-            </div>
-            <div className="mt-1 inline-block rounded-full border border-white/30 bg-white/10 px-2 py-[1px] text-[9px] font-bold uppercase tracking-wide">
-              {card.archetype}
+            {/* one short line: playing style and nation (the club is the badge in the corner) */}
+            <div className="mt-0.5 truncate text-[9px] font-semibold opacity-80" title={`${club.name} · ${card.archetype} · ${card.nation}`}>
+              {theme ? `Dev Team · ${theme.fanLabel}` : `${card.archetype} · ${card.nation}`}
             </div>
             {showStats && (
-              <div className={`mt-1 grid ${isGK ? 'grid-cols-5' : 'grid-cols-6'} gap-0.5 text-[8px] leading-tight`}>
+              <div className={`mt-0.5 grid ${isGK ? 'grid-cols-5' : 'grid-cols-6'} gap-0.5 text-[8px] leading-tight`}>
                 {(isGK ? GK_STAT_KEYS : STAT_KEYS).map(([k, label]) => (
                   <div key={k} className="flex flex-col">
                     <span className="font-black">{card.stats[k]}</span>

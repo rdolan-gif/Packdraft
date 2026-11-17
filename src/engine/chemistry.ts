@@ -33,27 +33,100 @@ export function fitFor(card: PlayerCard, slot: Position): Omit<SlotFit, 'slotId'
 
 const neighbourCache = new Map<FormationId, [string, string][]>();
 
-export const MIN_LINKS = 3;
+/**
+ * Who links to whom, formation by formation, matching the classic FUT link lines: a full-back links to
+ * the centre-back, midfielder and winger on his side; centre-backs link to each other, the keeper and
+ * the holding midfielder; strikers link to the wingers and midfielders feeding them.
+ */
+const LINK_MAP: Partial<Record<FormationId, Record<string, string[]>>> = {
+  '4-3-3': {
+    gk: ['lcb', 'rcb'],
+    lb: ['lcb', 'lcm', 'lw'],
+    lcb: ['gk', 'lb', 'rcb', 'cdm'],
+    rcb: ['gk', 'rb', 'lcb', 'cdm'],
+    rb: ['rcb', 'rcm', 'rw'],
+    cdm: ['lcb', 'rcb', 'lcm', 'rcm'],
+    lcm: ['lb', 'cdm', 'lw', 'st'],
+    rcm: ['rb', 'cdm', 'rw', 'st'],
+    lw: ['lb', 'lcm', 'st'],
+    rw: ['rb', 'rcm', 'st'],
+    st: ['lw', 'rw', 'lcm', 'rcm'],
+  },
+  '4-4-2': {
+    gk: ['lcb', 'rcb'],
+    lb: ['lcb', 'lm'],
+    lcb: ['gk', 'lb', 'rcb', 'lcm'],
+    rcb: ['gk', 'rb', 'lcb', 'rcm'],
+    rb: ['rcb', 'rm'],
+    lm: ['lb', 'lcm', 'lst'],
+    lcm: ['lcb', 'lm', 'rcm', 'lst'],
+    rcm: ['rcb', 'rm', 'lcm', 'rst'],
+    rm: ['rb', 'rcm', 'rst'],
+    lst: ['lm', 'lcm', 'rst'],
+    rst: ['rm', 'rcm', 'lst'],
+  },
+  '4-2-3-1': {
+    gk: ['lcb', 'rcb'],
+    lb: ['lcb', 'lcdm', 'lw'],
+    lcb: ['gk', 'lb', 'rcb', 'lcdm'],
+    rcb: ['gk', 'rb', 'lcb', 'rcdm'],
+    rb: ['rcb', 'rcdm', 'rw'],
+    lcdm: ['lb', 'lcb', 'rcdm', 'cam'],
+    rcdm: ['rb', 'rcb', 'lcdm', 'cam'],
+    lw: ['lb', 'cam', 'st'],
+    rw: ['rb', 'cam', 'st'],
+    cam: ['lcdm', 'rcdm', 'lw', 'rw', 'st'],
+    st: ['lw', 'rw', 'cam'],
+  },
+  '3-5-2': {
+    gk: ['lcb', 'ccb', 'rcb'],
+    lcb: ['gk', 'ccb', 'lm', 'cdm'],
+    ccb: ['gk', 'lcb', 'rcb', 'cdm'],
+    rcb: ['gk', 'ccb', 'rm', 'cdm'],
+    lm: ['lcb', 'lcm', 'lst'],
+    rm: ['rcb', 'rcm', 'rst'],
+    cdm: ['lcb', 'ccb', 'rcb', 'lcm', 'rcm'],
+    lcm: ['lm', 'cdm', 'lst'],
+    rcm: ['rm', 'cdm', 'rst'],
+    lst: ['lm', 'lcm', 'rst'],
+    rst: ['rm', 'rcm', 'lst'],
+  },
+  '4-1-2-1-2': {
+    gk: ['lcb', 'rcb'],
+    lb: ['lcb', 'lcm'],
+    lcb: ['gk', 'lb', 'rcb', 'cdm'],
+    rcb: ['gk', 'rb', 'lcb', 'cdm'],
+    rb: ['rcb', 'rcm'],
+    cdm: ['lcb', 'rcb', 'lcm', 'rcm'],
+    lcm: ['lb', 'cdm', 'cam', 'lst'],
+    rcm: ['rb', 'cdm', 'cam', 'rst'],
+    cam: ['lcm', 'rcm', 'lst', 'rst'],
+    lst: ['lcm', 'cam', 'rst'],
+    rst: ['rcm', 'cam', 'lst'],
+  },
+};
 
-/** Slots link to the team-mates around them. Every position gets at least MIN_LINKS links (its nearest
- *  team-mates), so strikers and wide players aren't stuck with one or two. */
+/** The formation's link lines, as unique slot pairs. */
 export function neighbours(formation: Formation): [string, string][] {
   const cached = neighbourCache.get(formation.id);
   if (cached) return cached;
-  const s = formation.slots;
-  const dist = (i: number, j: number) => Math.hypot(s[i].x - s[j].x, (s[i].y - s[j].y) * 1.1);
-  const key = (i: number, j: number) => (i < j ? `${i}|${j}` : `${j}|${i}`);
+  const map = LINK_MAP[formation.id];
   const set = new Set<string>();
-  for (let i = 0; i < s.length; i++) for (let j = i + 1; j < s.length; j++) if (dist(i, j) < 36) set.add(key(i, j));
-  const degree = (i: number) => [...set].filter((k) => k.split('|').map(Number).includes(i)).length;
-  for (let i = 0; i < s.length; i++) {
-    const nearest = s.map((_, j) => j).filter((j) => j !== i).sort((a, b) => dist(i, a) - dist(i, b));
-    for (const j of nearest) {
-      if (degree(i) >= MIN_LINKS) break;
-      set.add(key(i, j));
-    }
+  const pairs: [string, string][] = [];
+  const add = (a: string, b: string) => {
+    const k = a < b ? `${a}|${b}` : `${b}|${a}`;
+    if (set.has(k)) return;
+    set.add(k);
+    pairs.push([a, b]);
+  };
+  if (map) {
+    Object.entries(map).forEach(([a, list]) => list.forEach((b) => add(a, b)));
+  } else {
+    // A formation without a link map: link slots that are close together on the pitch.
+    const s = formation.slots;
+    for (let i = 0; i < s.length; i++)
+      for (let j = i + 1; j < s.length; j++) if (Math.hypot(s[i].x - s[j].x, (s[i].y - s[j].y) * 1.1) < 36) add(s[i].id, s[j].id);
   }
-  const pairs = [...set].map((k) => k.split('|').map(Number)).sort((a, b) => a[0] - b[0] || a[1] - b[1]).map(([i, j]) => [s[i].id, s[j].id] as [string, string]);
   neighbourCache.set(formation.id, pairs);
   return pairs;
 }
