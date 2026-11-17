@@ -120,7 +120,27 @@ export async function drawSeasonCard(d: SeasonCardData): Promise<HTMLCanvasEleme
   const info = gradeLabel(s.grade, s.position);
   const manager = MANAGERS_BY_ID[d.managerId];
 
-  await Promise.all([document.fonts?.load(`800 80px ${DISPLAY}`), document.fonts?.load(`700 30px ${BODY}`), document.fonts?.load(`400 30px ${BODY}`)]).catch(() => undefined);
+  // Load the fonts for the exact text on the card. Web fonts come in parts (basic Latin, then accented
+  // letters like Ć, Č, Ł); a canvas never asks for the extra parts by itself, so without this an accented
+  // name is drawn in a fallback font.
+  const cardText = [
+    d.teamName,
+    s.verdict,
+    s.scout?.name ?? '',
+    s.eraName ?? '',
+    s.mvp?.name ?? '',
+    s.userTopScorer?.name ?? '',
+    s.userTopCreator?.name ?? '',
+    s.userKeeper?.name ?? '',
+    manager.name,
+    ...Object.values(lineup).map((c) => (c ? `${c.shortName} ${c.shortName.toUpperCase()}` : '')),
+    'PACKDRAFT 38 SEASON CARD DAILY DRAFT #0123456789 ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz ·→–+-',
+  ].join(' ');
+  await Promise.all(
+    [`800 80px ${DISPLAY}`, `italic 900 80px ${DISPLAY}`, `700 30px ${BODY}`, `800 30px ${BODY}`, `600 30px ${BODY}`, `400 30px ${BODY}`, `italic 500 30px ${BODY}`].map((f) =>
+      document.fonts?.load(f, cardText),
+    ),
+  ).catch(() => undefined);
 
   const canvas = document.createElement('canvas');
   canvas.width = W;
