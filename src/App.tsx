@@ -17,10 +17,11 @@ import { dailyRng, dailyShareText, dailyStreak, dayNumber, formFromResults, load
 import { discoverDuos, DUOS } from './data/duos';
 import { positionHistory } from './engine/scoutVerdict';
 import { shareText } from './engine/share';
+import { recordHistory, type RunPlayer } from './engine/history';
 import { isPulled, recordDrafted, recordPulled } from './engine/stickerBook';
 import { MANAGERS, MANAGERS_BY_ID } from './data/managers';
 import { FORMATIONS } from './data/formations';
-import { PLAYERS } from './data/players';
+import { PLAYERS, PLAYERS_BY_ID } from './data/players';
 import { bestSlotFor, computeTeamRating, fitFor } from './engine/chemistry';
 import { generatePack, TOTAL_PACKS } from './engine/packGenerator';
 import { buildLeague, buildSummary, ordinal, pickEra, SeasonSim, USER_TEAM_ID } from './engine/seasonSimulator';
@@ -305,6 +306,39 @@ export default function App() {
     const r = s.record;
     setCareer(recordRun({ grade: s.grade, position: s.position, lost: r.lost, won: r.won, points: r.points, gf: r.gf }));
     const results = sim.results.map((_, i) => sim.userResult(i)!).filter(Boolean);
+    // Season history: feeds personal records and the Best Ever XI in the vault.
+    const slotOfCard: Record<string, string> = {};
+    FORMATIONS[formationId].slots.forEach((sl) => lineup[sl.id] && (slotOfCard[lineup[sl.id]!.id] = sl.label));
+    const players: RunPlayer[] = Object.values(sim.stats)
+      .filter((p) => p.isUser && p.apps > 0 && PLAYERS_BY_ID[p.id])
+      .map((p) => ({
+        cardId: p.id,
+        slot: (slotOfCard[p.id] ?? PLAYERS_BY_ID[p.id].positions[0]) as RunPlayer['slot'],
+        goals: p.goals,
+        assists: p.assists,
+        cleanSheets: p.cleanSheets,
+        apps: p.apps,
+        avg: Math.round((p.ratingSum / p.apps) * 100) / 100,
+      }));
+    recordHistory({
+      id: `${Date.now()}`,
+      date: new Date().toISOString(),
+      teamName: teamName.trim() || 'PackDraft XI',
+      daily: !!dailyDay,
+      eraName: sim.era.name,
+      managerId,
+      formationId,
+      position: s.position,
+      grade: s.grade,
+      points: r.points,
+      w: r.won,
+      d: r.drawn,
+      l: r.lost,
+      gf: r.gf,
+      ga: r.ga,
+      rating: rating.overall,
+      players,
+    });
     if (dailyDay) {
       const result: DailyResult = {
         day: dailyDay,
@@ -566,6 +600,7 @@ export default function App() {
           career={career}
           onClose={() => setVaultOpen(false)}
           onDelete={(id) => setVault(deleteFromVault(id))}
+          onUpdate={(e) => setVault(saveToVault(e, true))}
         />
       )}
     </div>

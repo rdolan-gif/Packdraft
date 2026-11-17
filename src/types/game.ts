@@ -356,6 +356,8 @@ export interface VaultEntry {
   mvpName: string | null;
   topScorer: { name: string; goals: number } | null;
   invincible: boolean;
+  /** Replays of this team in other league eras (era id -> result). */
+  replays?: Record<string, { position: number; points: number; w: number; d: number; l: number; gf: number; ga: number }>;
 }
 
 export interface CareerStats {

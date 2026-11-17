@@ -26,8 +26,10 @@ export function loadVault(): VaultEntry[] {
   return read<VaultEntry[]>(VAULT_KEY, []);
 }
 
-export function saveToVault(entry: VaultEntry): VaultEntry[] {
-  const v = [entry, ...loadVault().filter((e) => e.id !== entry.id)].slice(0, 60);
+/** Add an entry to the top of the vault, or (keepPlace) update it where it is. */
+export function saveToVault(entry: VaultEntry, keepPlace = false): VaultEntry[] {
+  const cur = loadVault();
+  const v = keepPlace && cur.some((e) => e.id === entry.id) ? cur.map((e) => (e.id === entry.id ? entry : e)) : [entry, ...cur.filter((e) => e.id !== entry.id)].slice(0, 60);
   write(VAULT_KEY, v);
   return v;
 }
