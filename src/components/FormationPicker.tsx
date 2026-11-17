@@ -48,7 +48,7 @@ export function FormationPicker({ current, onChange, preferred = [], variant = '
                 onChange(id);
               }}
               className={`rounded-md border px-2 py-1 text-[11px] font-black transition ${
-                id === current ? 'border-emerald-400 bg-emerald-400/20 text-emerald-200' : 'border-white/15 bg-white/5 text-white/70 hover:bg-white/10'
+                id === current ? 'border-flare-400 bg-flare-400/20 text-flare-200' : 'border-white/15 bg-white/5 text-white/70 hover:bg-white/10'
               }`}
             >
               {id}
@@ -73,7 +73,7 @@ export function FormationPicker({ current, onChange, preferred = [], variant = '
             }}
             onMouseEnter={() => sfx.hover()}
             className={`group relative flex flex-col items-center gap-2 rounded-2xl border-2 p-3 text-center transition hover:-translate-y-1 ${
-              active ? 'border-emerald-400 bg-emerald-400/10 shadow-lg shadow-emerald-500/20' : 'border-white/10 bg-black/30 hover:border-white/30'
+              active ? 'border-flare-400 bg-flare-400/10 shadow-lg shadow-flare-500/20' : 'border-white/10 bg-black/30 hover:border-white/30'
             }`}
           >
             {preferred.includes(id) && (
@@ -81,7 +81,7 @@ export function FormationPicker({ current, onChange, preferred = [], variant = '
             )}
             <MiniPitch id={id} />
             <div className="font-display text-2xl leading-none text-white">{id}</div>
-            <div className="text-[11px] font-bold text-emerald-300">{f.name}</div>
+            <div className="text-[11px] font-bold text-flare-300">{f.name}</div>
             <div className="text-[11px] leading-snug text-white/55">{f.description}</div>
           </button>
         );

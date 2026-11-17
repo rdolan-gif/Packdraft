@@ -8,11 +8,14 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        display: ['"Bebas Neue"', 'Impact', 'sans-serif'],
+        display: ['"Saira Extra Condensed"', '"Arial Narrow"', 'Impact', 'sans-serif'],
         sans: ['Inter', 'system-ui', 'sans-serif'],
       },
       colors: {
         pitch: { 900: '#05110b', 800: '#0a1f14', 700: '#0f2e1d' },
+        // Brand: Flare (floodlight orange) on ink. Green stays for "good" states (natural fit, wins).
+        flare: { 50: '#fff4ed', 100: '#ffe4d2', 200: '#ffc6a5', 300: '#ffa06e', 400: '#ff8248', 500: '#ff6a2b', 600: '#eb5418', 700: '#c2410c', 800: '#9a3412', 900: '#7c2d12', 950: '#431407' },
+        ink: { DEFAULT: '#0b0e16', 950: '#07090f', 900: '#0b0e16', 800: '#151a26', 700: '#1e2433', 600: '#2a3244' },
       },
       keyframes: {
         shake: {

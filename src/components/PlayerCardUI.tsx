@@ -8,6 +8,7 @@ import { sfx } from '../engine/soundEffects';
 import { eraColour } from '../data/eraColours';
 import { devTheme } from '../data/devThemes';
 import { DevScene } from './DevScene';
+import { Crest } from './Crest';
 
 export const TIER_LABEL: Record<Tier, string> = {
   STANDARD: 'Squad Regular',
@@ -109,13 +110,21 @@ export function PlayerCardUI({ card, size = 'md', onClick, selected, dimmed, sho
       onPointerEnter={(e) => onClick && e.pointerType === 'mouse' && sfx.hover()}
       onPointerLeave={onLeave}
       onPointerCancel={onLeave}
-      className={`card-base tier-${card.tier} ${card.tier === 'ELITE' ? 'sweep' : ''} ${prime ? 'aura' : ''} ${
-        selected ? 'ring-4 ring-emerald-400 ring-offset-2 ring-offset-black' : ''
+      className={`card-base card-cut tier-${card.tier} ${card.tier === 'ELITE' ? 'sweep' : ''} ${prime ? 'aura' : ''} ${
+        selected ? '-translate-y-1' : ''
       } ${dimmed ? 'opacity-40 grayscale' : ''} ${onClick ? 'cursor-pointer' : ''} select-none shrink-0 ${className}`}
       // Era label colour: paints Elite (81–85) cards and gives gold (86–90) cards their glow.
-      style={{ width: d.w, height: d.h, ['--e1' as string]: era.light, ['--e2' as string]: era.mid, ['--e3' as string]: era.dark, ['--eb' as string]: era.border, ...style }}
+      style={{ width: d.w, height: d.h, ['--cut' as string]: `${Math.round(d.w * 0.13)}px`, ['--e1' as string]: era.light, ['--e2' as string]: era.mid, ['--e3' as string]: era.dark, ['--eb' as string]: era.border, ...style }}
     >
+      {/* floodlight band behind the player */}
+      <div className="card-band" style={{ background: prime ? 'rgba(255,255,255,.55)' : world ? 'rgba(255,255,255,.28)' : 'rgba(255,255,255,.06)' }} />
       {theme && <DevScene scene={theme.scene} />}
+      {/* the Flare notch along the torn corner */}
+      <div
+        className="card-notch"
+        style={{ background: secret ? 'conic-gradient(#ff6a2b, #ffd23f, #3ddc97, #3da9ff, #b26bff, #ff4fa3, #ff6a2b)' : world ? '#1b1405' : '#ff6a2b' }}
+      />
+      {selected && <div className="pointer-events-none absolute inset-0 z-20" style={{ boxShadow: 'inset 0 0 0 4px #ff8248, inset 0 0 18px 2px rgba(255,106,43,.6)' }} />}
       {(prime || secret) && <div className="holo" />}
       <div className="glare" />
       {(world || prime || secret) && (
@@ -130,8 +139,8 @@ export function PlayerCardUI({ card, size = 'md', onClick, selected, dimmed, sho
       <div className="absolute -right-6 top-0 h-full w-10 rotate-12 opacity-40" style={{ background: `linear-gradient(${kit.primary}, ${kit.secondary})` }} />
 
       {/* top-left: OVR + position */}
-      <div className={`absolute left-1.5 top-1 z-10 flex flex-col items-center leading-none ${prime ? 'text-slate-900 [text-shadow:0_1px_0_rgba(255,255,255,.9)]' : 'text-shadow'}`}>
-        <span className={`font-display ${d.ovr}`}>{card.ovr}</span>
+      <div className={`absolute left-1.5 top-1 z-10 flex flex-col items-center leading-none ${prime || world ? 'text-ink [text-shadow:0_1px_0_rgba(255,255,255,.7)]' : 'text-shadow'}`}>
+        <span className={`font-display italic ${d.ovr}`} style={{ fontWeight: 900 }}>{card.ovr}</span>
         <span className={`font-bold ${tiny ? 'text-[8px]' : 'text-xs'} tracking-wider`}>{card.positions[0]}</span>
         {!tiny && card.positions.length > 1 && <span className="mt-0.5 text-[8px] opacity-80">{card.positions.slice(1).join('/')}</span>}
         {prime && <Crown className={`${tiny ? 'h-3 w-3' : 'h-4 w-4'} mt-1 text-amber-400`} fill="currentColor" />}
@@ -154,13 +163,15 @@ export function PlayerCardUI({ card, size = 'md', onClick, selected, dimmed, sho
       </div>
 
       {/* portrait */}
-      <div className="absolute left-1/2 z-[5] -translate-x-1/2" style={{ top: tiny ? d.h * 0.1 : d.h * 0.09 }}>
-        <PlayerCaricature traits={card.traits} kitPrimaryColor={kit.primary} kitSecondaryColor={kit.secondary} kitSleeveColor={kit.sleeve} kitCollarColor={kit.collar} collarStyle={collarForSeason(card.season)} seed={card.id} size={d.face} />
+      <div className={`absolute left-1/2 z-[5] -translate-x-1/2 ${prime ? 'rim-prime' : world ? 'rim-gold' : ''}`} style={{ top: tiny ? d.h * 0.1 : d.h * 0.085 }}>
+        <PlayerCaricature traits={card.traits} kitPrimaryColor={kit.primary} kitSecondaryColor={kit.secondary} kitSleeveColor={kit.sleeve} kitCollarColor={kit.collar} collarStyle={collarForSeason(card.season)} seed={card.id} size={Math.round(d.face * 1.06)} />
       </div>
 
       {/* name panel */}
-      <div className="absolute inset-x-0 bottom-0 z-10 bg-gradient-to-t from-black/85 via-black/65 to-transparent px-1.5 pb-1.5 pt-3 text-center text-white">
-        <div className={`font-display ${d.name} leading-none truncate text-shadow`}>{card.shortName.toUpperCase()}</div>
+      <div className="absolute inset-x-0 bottom-0 z-10 bg-ink/90 px-1.5 pb-2 pt-1.5 text-center text-white">
+        <div className={`font-display italic ${d.name} leading-none truncate ${world ? 'text-[#f8de8c]' : ''}`} style={{ fontWeight: 900 }}>
+          {card.shortName.toUpperCase()}
+        </div>
         {!tiny && (
           <>
             <div className="mt-0.5 truncate text-[9px] font-semibold opacity-80">
@@ -182,6 +193,11 @@ export function PlayerCardUI({ card, size = 'md', onClick, selected, dimmed, sho
           </>
         )}
         {footer}
+        {/* club colours under the name */}
+        <div aria-hidden="true" className="absolute inset-x-0 bottom-0 flex h-[3px]">
+          <span className="flex-1" style={{ background: kit.primary }} />
+          <span className="flex-1" style={{ background: kit.secondary }} />
+        </div>
       </div>
     </div>
   );
@@ -192,19 +208,20 @@ export function CardBack({ size = 'md', glow, className = '', style }: { size?: 
   const d = DIM[size];
   return (
     <div
-      className={`card-base shrink-0 border-2 ${glow ? 'border-white aura animate-vibrate' : 'border-emerald-700'} ${className}`}
+      className={`card-base card-cut shrink-0 ${glow ? 'aura animate-vibrate' : ''} ${className}`}
       style={{
         width: d.w,
         height: d.h,
-        background: 'repeating-linear-gradient(45deg, #064e3b 0 8px, #065f46 8px 16px), #064e3b',
+        ['--cut' as string]: `${Math.round(d.w * 0.13)}px`,
+        background: 'repeating-linear-gradient(115deg, #151a26 0 12px, #0f131d 12px 24px)',
+        boxShadow: glow ? 'inset 0 0 0 3px #fff, inset 0 0 24px 4px #ff6a2b' : 'inset 0 0 0 3px #ff6a2b',
         ...style,
       }}
     >
-      <div className="absolute inset-2 flex items-center justify-center rounded-lg border border-emerald-400/30">
-        <div className="text-center">
-          <div className="font-display text-4xl text-yellow-300 drop-shadow">38</div>
-          <div className="text-[9px] font-black tracking-[0.3em] text-emerald-200">PACKDRAFT</div>
-        </div>
+      <div className="card-notch" style={{ background: '#ff6a2b' }} />
+      <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
+        <Crest size={Math.round(d.w * 0.46)} />
+        {d.w >= 120 && <div className="font-display text-[10px] tracking-[0.35em] text-white/50">RIP · DRAFT · SURVIVE</div>}
       </div>
     </div>
   );

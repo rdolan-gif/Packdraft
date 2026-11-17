@@ -36,7 +36,7 @@ interface Props {
 }
 
 const TONE: Record<FeedItem['tone'], string> = {
-  goal: 'bg-emerald-400/20 text-emerald-100 ring-1 ring-emerald-300/50',
+  goal: 'bg-flare-400/20 text-flare-100 ring-1 ring-flare-300/50',
   concede: 'bg-rose-500/20 text-rose-100 ring-1 ring-rose-400/40',
   chance: 'bg-amber-300/10 text-amber-100',
   info: 'bg-white/[0.04] text-white/75',
@@ -55,10 +55,10 @@ export function LiveMatchHero({ sim, live, minute, momentum, feed, celebration, 
     const oppRow = opp ? sim.table[opp.id] : null;
     const oppPos = opp ? sim.sortedTable().findIndex((x) => x.teamId === opp.id) + 1 : 0;
     return (
-      <section data-shake-zone className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-emerald-950 via-black to-black p-4 sm:p-5">
+      <section data-shake-zone className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-flare-950 via-black to-black p-4 sm:p-5">
         {sim.matchweek === 0 ? (
           <div className="text-center">
-            <div className="text-[10px] font-black uppercase tracking-[0.3em] text-emerald-300">This season's league</div>
+            <div className="text-[10px] font-black uppercase tracking-[0.3em] text-flare-300">This season's league</div>
             <div className="mt-1 font-display text-4xl leading-none text-white sm:text-5xl">{sim.era.name.toUpperCase()}</div>
             <div className="text-xs font-bold text-yellow-300">{sim.era.years}</div>
             <div className="mx-auto mt-2 max-w-md text-sm text-white/70">{sim.era.tagline}</div>
@@ -167,12 +167,12 @@ export function LiveMatchHero({ sim, live, minute, momentum, feed, celebration, 
       {/* timeline + momentum */}
       <div className="relative mt-3">
         <div className="relative h-2 rounded-full bg-white/10">
-          <div className="absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-emerald-500/60 to-yellow-300/70" style={{ width: `${Math.min(100, (clock / end) * 100)}%` }} />
+          <div className="absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-flare-500/60 to-yellow-300/70" style={{ width: `${Math.min(100, (clock / end) * 100)}%` }} />
           <div className="absolute inset-y-0 left-1/2 w-px bg-white/40" title="Half-time" />
           {markers.map((k, i) => (
             <span
               key={i}
-              className={`absolute top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full ${k.goal ? 'h-3.5 w-3.5 border-2 border-black text-[8px]' : 'h-1.5 w-1.5'} ${k.user ? 'bg-emerald-300' : 'bg-rose-400'}`}
+              className={`absolute top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full ${k.goal ? 'h-3.5 w-3.5 border-2 border-black text-[8px]' : 'h-1.5 w-1.5'} ${k.user ? 'bg-flare-300' : 'bg-rose-400'}`}
               style={{ left: `${Math.min(100, (k.m / end) * 100)}%` }}
             />
           ))}
@@ -227,7 +227,7 @@ function TeamSide({ name, colour, second, user, align }: { name: string; colour:
   return (
     <div className={`flex min-w-0 items-center gap-2 ${align === 'right' ? 'flex-row-reverse text-right' : ''}`}>
       <span className="h-10 w-10 shrink-0 rounded-xl border-2 border-black/50 shadow-lg sm:h-14 sm:w-14" style={{ background: `linear-gradient(135deg, ${colour} 55%, ${second} 55%)` }} />
-      <span className={`min-w-0 break-words font-display text-xl leading-none sm:text-3xl ${user ? 'text-emerald-300' : 'text-white'}`}>{name}</span>
+      <span className={`min-w-0 break-words font-display text-xl leading-none sm:text-3xl ${user ? 'text-flare-300' : 'text-white'}`}>{name}</span>
     </div>
   );
 }

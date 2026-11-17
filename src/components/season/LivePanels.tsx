@@ -118,12 +118,12 @@ export function LiveTable({ sim, rows, before, live }: { sim: SeasonSim; rows: T
             <div
               key={row.teamId}
               className={`row-move absolute inset-x-0 grid grid-cols-[24px_14px_1fr_22px_22px_22px_22px_32px_30px] items-center gap-1 rounded-md border-l-4 px-2 text-xs sm:grid-cols-[24px_14px_1fr_22px_22px_22px_22px_26px_26px_32px_30px_64px] ${zone} ${
-                team.isUser ? 'bg-gradient-to-r from-emerald-500/35 via-emerald-500/20 to-yellow-400/20 font-black text-white ring-1 ring-yellow-300/60' : idx % 2 ? 'bg-white/[0.03] text-white/85' : 'text-white/85'
+                team.isUser ? 'bg-gradient-to-r from-flare-500/35 via-flare-500/20 to-yellow-400/20 font-black text-white ring-1 ring-yellow-300/60' : idx % 2 ? 'bg-white/[0.03] text-white/85' : 'text-white/85'
               }`}
               style={{ transform: `translateY(${idx * ROW_H}px)`, height: ROW_H - 2 }}
             >
               <span className={`font-black ${pos === 1 ? 'text-yellow-300' : 'text-white/60'}`}>{pos}</span>
-              <span className={`text-[9px] font-black ${move > 0 ? 'text-emerald-400' : move < 0 ? 'text-rose-400' : 'text-transparent'}`}>{move > 0 ? '▲' : move < 0 ? '▼' : '•'}</span>
+              <span className={`text-[9px] font-black ${move > 0 ? 'text-flare-400' : move < 0 ? 'text-rose-400' : 'text-transparent'}`}>{move > 0 ? '▲' : move < 0 ? '▼' : '•'}</span>
               <span className="flex min-w-0 items-center gap-1.5">
                 <span className="h-3 w-3 shrink-0 rounded-sm border border-black/40" style={swatch(c.p, c.s)} />
                 <span className="truncate">{team.isUser ? `★ ${team.name}` : team.name}</span>

@@ -94,7 +94,7 @@ const Pub = () => (
     })}
     {/* chalkboard */}
     <rect x="30" y="34" width="40" height="18" rx="1.5" fill="#111827" stroke="#7c4a1e" strokeWidth="1.5" />
-    <text x="50" y="42" textAnchor="middle" fontSize="5.2" fill="#f8fafc" fontFamily="Bebas Neue, Impact, sans-serif" letterSpacing="0.3">LAST ORDERS</text>
+    <text x="50" y="42" textAnchor="middle" fontSize="5.2" fill="#f8fafc" fontFamily="'Saira Extra Condensed', Impact, sans-serif" fontWeight="800" letterSpacing="0.3">LAST ORDERS</text>
     <text x="50" y="48.5" textAnchor="middle" fontSize="3.4" fill="#fbbf24" fontFamily="Inter, Arial, sans-serif">2 for £10 · quiz tonight</text>
     {/* the bar */}
     <rect x="0" y="104" width="100" height="36" fill="#5b3415" />

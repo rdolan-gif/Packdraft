@@ -130,7 +130,7 @@ export function TransferWindow({ formationId, lineup, managerId, position, point
               {selected && outgoing && slot && after && fit && (
                 <div className="animate-pop rounded-2xl border border-sky-300/50 bg-sky-500/10 p-4">
                   <div className="flex flex-wrap items-center justify-center gap-2 text-center text-sm font-bold text-white">
-                    <span className="rounded-lg bg-emerald-500/20 px-2 py-1 text-emerald-200">
+                    <span className="rounded-lg bg-flare-500/20 px-2 py-1 text-flare-200">
                       IN: {selected.season} {selected.shortName} ({selected.ovr})
                     </span>
                     <ArrowRight className="h-4 w-4 text-white/50" />
@@ -161,7 +161,7 @@ export function TransferWindow({ formationId, lineup, managerId, position, point
                       sfx.fanfare();
                       onSign(selected, outSlot!);
                     }}
-                    className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-emerald-400 to-sky-300 px-4 py-3 font-display text-2xl tracking-wider text-black transition hover:scale-[1.02]"
+                    className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-flare-400 to-sky-300 px-4 py-3 font-display text-2xl tracking-wider text-black transition hover:scale-[1.02]"
                   >
                     <Check className="h-5 w-5" /> CONFIRM SIGNING
                   </button>

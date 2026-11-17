@@ -24,7 +24,7 @@ export function MilestonePop({ m }: { m: Milestone }) {
     <div className="pointer-events-none fixed left-1/2 top-16 z-[86] w-[min(92vw,460px)] -translate-x-1/2 animate-pop">
       <div
         className={`flex items-center gap-3 rounded-2xl border-2 px-4 py-2.5 shadow-2xl ${
-          sad ? 'border-slate-400/60 bg-slate-900/95' : m.size === 2 ? 'border-yellow-300 bg-gradient-to-r from-amber-600/90 to-yellow-500/90' : 'border-emerald-300/70 bg-emerald-950/95'
+          sad ? 'border-slate-400/60 bg-slate-900/95' : m.size === 2 ? 'border-yellow-300 bg-gradient-to-r from-amber-600/90 to-yellow-500/90' : 'border-flare-300/70 bg-flare-950/95'
         }`}
       >
         <span className="text-3xl">{m.icon}</span>
@@ -53,7 +53,7 @@ export function ChaseBadges({ sim, upto }: { sim: SeasonSim; upto: number }) {
         </span>
       ) : null}
       {s.win >= 3 && !s.perfect && <span className="rounded-lg bg-orange-500 px-2 py-0.5 font-display text-base leading-tight text-black">🔥 {s.win} WINS</span>}
-      <span className={`rounded-lg px-2 py-0.5 font-display text-base leading-tight ${s.pace >= 100 ? 'bg-fuchsia-500 text-white' : s.pace >= 90 ? 'bg-emerald-400 text-black' : 'bg-white/10 text-white/80'}`} title="Points if you keep this up for 38 games">
+      <span className={`rounded-lg px-2 py-0.5 font-display text-base leading-tight ${s.pace >= 100 ? 'bg-fuchsia-500 text-white' : s.pace >= 90 ? 'bg-flare-400 text-black' : 'bg-white/10 text-white/80'}`} title="Points if you keep this up for 38 games">
         PACE {s.pace} PTS
       </span>
     </div>

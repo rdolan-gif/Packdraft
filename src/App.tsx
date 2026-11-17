@@ -12,6 +12,7 @@ import { PlayerCardUI } from './components/PlayerCardUI';
 import { ManagerObjectivePanel, PlayerInspectPanel } from './components/InspectPanels';
 import { StickerBookModal } from './components/StickerBookModal';
 import { TrophyCabinetModal } from './components/TrophyCabinetModal';
+import { Crest } from './components/Crest';
 import { checkTrophies, TROPHIES, unlockedTrophies, type Trophy } from './engine/achievements';
 import { dailyRng, dailyShareText, dailyStreak, dayNumber, formFromResults, loadDaily, markDailyStarted, saveDailyResult, todayKey, untilTomorrow, type DailyResult } from './engine/daily';
 import { discoverDuos, DUOS } from './data/duos';
@@ -447,7 +448,7 @@ export default function App() {
 
         {phase === 'formation' && manager && (
           <div className="mx-auto flex max-w-6xl flex-col items-center px-4 py-8">
-            <div className="text-xs font-black uppercase tracking-[0.4em] text-emerald-400">Step 2 · The Shape</div>
+            <div className="text-xs font-black uppercase tracking-[0.4em] text-flare-400">Step 2 · The Shape</div>
             <h1 className="mt-1 text-center font-display text-5xl leading-none text-white sm:text-6xl">CHOOSE YOUR FORMATION</h1>
             <p className="mt-2 max-w-xl text-center text-sm text-white/60">
               {manager.emoji} <b className="text-white">{manager.name}</b> favours the starred shapes. Lock one in now, or keep it flexible: you can change it until your third pick, when it locks for good.
@@ -461,7 +462,7 @@ export default function App() {
                   setFormationLocked(true);
                   startDraft();
                 }}
-                className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-yellow-300 to-amber-500 px-6 py-3 font-display text-2xl tracking-wider text-black shadow-lg shadow-amber-500/30 transition hover:scale-105"
+                className="flex items-center gap-2 btn-cut bg-flare-500 hover:bg-flare-400 px-6 py-3 font-display text-2xl tracking-wider text-black shadow-lg shadow-flare-500/30 transition hover:scale-105"
               >
                 <Lock className="h-5 w-5" /> LOCK {formationId} & OPEN PACK 1
               </button>
@@ -496,11 +497,11 @@ export default function App() {
                     onReroll={reroll}
                   />
                   {selected && (
-                    <div className="mt-4 flex flex-wrap items-center justify-center gap-2 rounded-2xl border border-emerald-400/40 bg-emerald-500/10 p-3">
+                    <div className="mt-4 flex flex-wrap items-center justify-center gap-2 rounded-2xl border border-flare-400/40 bg-flare-500/10 p-3">
                       <span className="text-sm font-bold text-white">
-                        Drafting <span className="text-emerald-300">{selected.season} {selected.name}</span>
+                        Drafting <span className="text-flare-300">{selected.season} {selected.name}</span>
                       </span>
-                      <button onClick={autoPlace} className="flex items-center gap-1 rounded-lg bg-emerald-400 px-3 py-1.5 text-sm font-black text-black hover:bg-emerald-300">
+                      <button onClick={autoPlace} className="flex items-center gap-1 rounded-lg bg-flare-400 px-3 py-1.5 text-sm font-black text-black hover:bg-flare-300">
                         <Wand2 className="h-4 w-4" /> Auto-Place
                       </button>
                       <button onClick={() => setSelected(null)} className="rounded-lg border border-white/20 px-3 py-1.5 text-sm font-bold text-white/70 hover:bg-white/10">
@@ -611,7 +612,7 @@ function KickoffPanel({ teamName, setTeamName, lineup, rating, onKickOff }: { te
   const cards = (Object.values(lineup).filter(Boolean) as PlayerCard[]).sort((a, b) => b.ovr - a.ovr);
   return (
     <div className="flex flex-col items-center gap-4 py-4 text-center">
-      <div className="text-xs font-black uppercase tracking-[0.4em] text-emerald-400">Draft complete</div>
+      <div className="text-xs font-black uppercase tracking-[0.4em] text-flare-400">Draft complete</div>
       <h2 className="font-display text-5xl leading-none text-white">YOUR XI IS SET</h2>
       <div className="flex flex-wrap justify-center gap-1.5">
         {cards.slice(0, 3).map((c) => (
@@ -638,12 +639,12 @@ function KickoffPanel({ teamName, setTeamName, lineup, rating, onKickOff }: { te
           value={teamName}
           maxLength={24}
           onChange={(e) => setTeamName(e.target.value)}
-          className="rounded-xl border border-white/20 bg-black/50 px-4 py-2.5 font-display text-2xl tracking-wide text-white outline-none focus:border-emerald-400"
+          className="rounded-xl border border-white/20 bg-black/50 px-4 py-2.5 font-display text-2xl tracking-wide text-white outline-none focus:border-flare-400"
         />
       </label>
       <button
         onClick={onKickOff}
-        className="flex items-center gap-2 rounded-2xl bg-gradient-to-r from-emerald-400 via-emerald-500 to-yellow-300 px-8 py-4 font-display text-3xl tracking-wider text-black shadow-xl shadow-emerald-500/30 transition hover:scale-105 active:scale-95"
+        className="flex items-center gap-2 btn-cut bg-flare-500 hover:bg-flare-400 px-8 py-4 font-display text-3xl tracking-wider text-black shadow-xl shadow-flare-500/30 transition hover:scale-105 active:scale-95"
       >
         <Play className="h-7 w-7" fill="currentColor" /> KICK OFF 38-GAME SEASON
       </button>
@@ -678,13 +679,23 @@ function TitleScreen({
   }, []);
   return (
     <div className="mx-auto flex max-w-6xl flex-col items-center px-4 pb-10 pt-10 text-center sm:pt-14">
-      <div className="flex items-center gap-2 rounded-full border border-yellow-300/40 bg-yellow-300/10 px-3 py-1 text-[11px] font-black uppercase tracking-[0.3em] text-yellow-200">
+      <div className="flex items-center gap-2 border-l-4 border-flare-500 bg-ink-800 px-3 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-white/80 sm:text-[11px] sm:tracking-[0.3em]">
         <Sparkles className="h-3.5 w-3.5" /> 11 packs · {PLAYERS.filter((p) => p.tier !== 'SECRET_DEV').length} cards · 38 matchweeks
       </div>
-      <h1 className="mt-4 font-display text-7xl leading-[0.85] text-white drop-shadow-[0_6px_0_rgba(0,0,0,.5)] sm:text-9xl">
-        PACK<span className="text-emerald-400">DRAFT</span>
-        <span className="block text-yellow-300">38</span>
-      </h1>
+      <div className="mt-5 flex flex-row items-center gap-3 sm:gap-5">
+        <Crest size={112} title="PackDraft 38" className="h-auto w-[76px] drop-shadow-[0_8px_24px_rgba(255,106,43,.25)] sm:w-[112px]" />
+        <h1 className="m-0 flex flex-col items-start leading-[0.85]">
+          <span className="font-display text-6xl italic text-white sm:text-8xl" style={{ fontWeight: 900 }}>
+            PACKDRAFT
+          </span>
+          <span className="mt-2 flex items-center gap-3">
+            <span className="bg-flare-500 px-3 pt-1 font-display text-3xl italic text-ink sm:px-4 sm:text-5xl" style={{ fontWeight: 900, clipPath: 'polygon(10px 0, 100% 0, calc(100% - 10px) 100%, 0 100%)' }}>
+              38
+            </span>
+            <span className="font-display text-sm tracking-[0.18em] text-white/60 sm:text-lg sm:tracking-[0.22em]">RIP · DRAFT · SURVIVE</span>
+          </span>
+        </h1>
+      </div>
       <p className="mt-4 max-w-xl text-base text-white/70">
         Rip 11 packs. Draft one legend from each across every era of the Premier League. Then survive a live 38-game season and chase the holy grail: <b className="text-yellow-300">38-0. Invincible.</b>
       </p>
@@ -707,7 +718,7 @@ function TitleScreen({
 
       <button
         onClick={onStart}
-        className="group relative mt-12 overflow-hidden rounded-2xl bg-gradient-to-r from-yellow-300 via-amber-400 to-yellow-300 px-10 py-4 font-display text-4xl tracking-wider text-black shadow-2xl shadow-amber-500/40 transition hover:scale-105 active:scale-95"
+        className="group relative mt-12 overflow-hidden btn-cut bg-flare-500 px-10 py-4 font-display text-4xl tracking-wider text-black shadow-2xl shadow-flare-500/30 transition hover:scale-105 active:scale-95"
       >
         <span className="relative z-10">START THE DRAFT</span>
         <span className="absolute inset-0 -translate-x-full bg-white/50 transition duration-700 group-hover:translate-x-full" />

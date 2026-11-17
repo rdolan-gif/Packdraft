@@ -24,7 +24,7 @@ export interface SeasonCardData {
 
 const W = 1080;
 const H = 1350;
-const DISPLAY = '"Bebas Neue", Impact, sans-serif';
+const DISPLAY = '"Saira Extra Condensed", Impact, sans-serif';
 const BODY = 'Inter, Arial, sans-serif';
 
 export const GRADE_HEX: Record<Grade, [string, string]> = {
@@ -82,7 +82,7 @@ function roundRect(ctx: CanvasRenderingContext2D, x: number, y: number, w: numbe
 function fitText(ctx: CanvasRenderingContext2D, text: string, maxW: number, size: number, family: string, weight = '') {
   let s = size;
   do {
-    ctx.font = `${weight} ${s}px ${family}`.trim();
+    ctx.font = `${weight || (family === DISPLAY ? '800' : '')} ${s}px ${family}`.trim();
     if (ctx.measureText(text).width <= maxW) break;
     s -= 2;
   } while (s > 12);
@@ -120,7 +120,7 @@ export async function drawSeasonCard(d: SeasonCardData): Promise<HTMLCanvasEleme
   const info = gradeLabel(s.grade, s.position);
   const manager = MANAGERS_BY_ID[d.managerId];
 
-  await Promise.all([document.fonts?.load(`80px ${DISPLAY}`), document.fonts?.load(`700 30px ${BODY}`), document.fonts?.load(`400 30px ${BODY}`)]).catch(() => undefined);
+  await Promise.all([document.fonts?.load(`800 80px ${DISPLAY}`), document.fonts?.load(`700 30px ${BODY}`), document.fonts?.load(`400 30px ${BODY}`)]).catch(() => undefined);
 
   const canvas = document.createElement('canvas');
   canvas.width = W;
@@ -129,9 +129,9 @@ export async function drawSeasonCard(d: SeasonCardData): Promise<HTMLCanvasEleme
 
   // ── background
   const bg = ctx.createLinearGradient(0, 0, 0, H);
-  bg.addColorStop(0, '#0b1f14');
-  bg.addColorStop(0.55, '#06120b');
-  bg.addColorStop(1, '#020604');
+  bg.addColorStop(0, '#121726');
+  bg.addColorStop(0.55, '#0b0e16');
+  bg.addColorStop(1, '#07090f');
   ctx.fillStyle = bg;
   ctx.fillRect(0, 0, W, H);
   const glow = ctx.createRadialGradient(170, 250, 10, 170, 250, 520);
@@ -150,15 +150,22 @@ export async function drawSeasonCard(d: SeasonCardData): Promise<HTMLCanvasEleme
 
   // ── header
   ctx.textBaseline = 'alphabetic';
-  ctx.font = `60px ${DISPLAY}`;
+  ctx.font = `800 60px ${DISPLAY}`;
+  ctx.font = `italic 900 60px ${DISPLAY}`;
   ctx.fillStyle = '#fff';
-  ctx.fillText('PACK', 60, 102);
-  let x = 60 + ctx.measureText('PACK').width;
-  ctx.fillStyle = '#34d399';
-  ctx.fillText('DRAFT', x, 102);
-  x += ctx.measureText('DRAFT ').width;
-  ctx.fillStyle = '#fde047';
-  ctx.fillText('38', x, 102);
+  ctx.fillText('PACKDRAFT', 60, 102);
+  const x = 60 + ctx.measureText('PACKDRAFT').width + 14;
+  const tw = ctx.measureText('38').width + 28;
+  ctx.fillStyle = '#ff6a2b';
+  ctx.beginPath();
+  ctx.moveTo(x + 12, 46);
+  ctx.lineTo(x + tw, 46);
+  ctx.lineTo(x + tw - 12, 112);
+  ctx.lineTo(x, 112);
+  ctx.closePath();
+  ctx.fill();
+  ctx.fillStyle = '#0b0e16';
+  ctx.fillText('38', x + 14, 102);
   const chip = d.dailyNumber ? `DAILY DRAFT #${d.dailyNumber}` : 'SEASON CARD';
   ctx.font = `800 24px ${BODY}`;
   const cw = ctx.measureText(chip).width + 36;
@@ -182,7 +189,7 @@ export async function drawSeasonCard(d: SeasonCardData): Promise<HTMLCanvasEleme
   ctx.strokeStyle = 'rgba(255,255,255,.85)';
   ctx.stroke();
   ctx.fillStyle = s.grade === 'C' || s.grade === 'S' || s.grade === 'S+' || s.grade === 'D' ? '#111' : '#fff';
-  ctx.font = `${s.grade.length > 1 ? 104 : 130}px ${DISPLAY}`;
+  ctx.font = `800 ${s.grade.length > 1 ? 104 : 130}px ${DISPLAY}`;
   ctx.textAlign = 'center';
   ctx.fillText(s.grade, cx, cy + (s.grade.length > 1 ? 38 : 46));
   ctx.textAlign = 'left';
@@ -192,7 +199,7 @@ export async function drawSeasonCard(d: SeasonCardData): Promise<HTMLCanvasEleme
   fitText(ctx, team, W - tx - 60, 92, DISPLAY);
   ctx.fillStyle = '#fff';
   ctx.fillText(team, tx, 240);
-  ctx.font = `56px ${DISPLAY}`;
+  ctx.font = `800 56px ${DISPLAY}`;
   ctx.fillStyle = g1;
   ctx.fillText(info.title, tx, 300);
   ctx.font = `600 28px ${BODY}`;
@@ -279,7 +286,7 @@ export async function drawSeasonCard(d: SeasonCardData): Promise<HTMLCanvasEleme
     const img = faces[i];
     if (img) ctx.drawImage(img, fx - 33, fy - 50, 66, 73);
     const name = card.shortName.toUpperCase();
-    ctx.font = `24px ${DISPLAY}`;
+    ctx.font = `800 24px ${DISPLAY}`;
     const label = `${card.ovr} ${name}`;
     const lw = Math.min(124, ctx.measureText(label).width + 18);
     ctx.fillStyle = card.tier === 'PRIME_ICON' ? '#f8fafc' : card.tier === 'RISING_WORLD' ? '#facc15' : card.tier === 'SECRET_DEV' ? '#a855f7' : 'rgba(0,0,0,.75)';

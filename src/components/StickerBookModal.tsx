@@ -551,7 +551,7 @@ function Cover({ got, total, book, height, onOpen }: { got: number; total: numbe
               <br />
               STICKER ALBUM
             </div>
-            <div className="mt-2 font-display text-xl tracking-widest text-emerald-200">THIRTY YEARS OF THE PREMIER LEAGUE</div>
+            <div className="mt-2 font-display text-xl tracking-widest text-flare-200">THIRTY YEARS OF THE PREMIER LEAGUE</div>
             <div className="relative mt-6 flex h-40 items-end justify-center">
               {best.length === 0 ? (
                 <div className="font-display text-2xl text-white/60">Open packs to start collecting!</div>
@@ -657,7 +657,7 @@ function ClubFoil({ club }: { club: Club }) {
       <svg viewBox="0 0 40 46" className="h-11 w-10 drop-shadow">
         <path d="M20 2 L37 8 V22 C37 33 29 40 20 44 C11 40 3 33 3 22 V8 Z" fill={club.primary} stroke={club.accent} strokeWidth="2.5" />
         <path d="M20 2 L37 8 V22 C37 33 29 40 20 44 Z" fill={club.secondary} opacity=".35" />
-        <text x="20" y="28" textAnchor="middle" fontSize="11" fontWeight="900" fill={club.secondary} style={{ fontFamily: 'Bebas Neue, Impact, sans-serif' }}>
+        <text x="20" y="28" textAnchor="middle" fontSize="11" fontWeight="900" fill={club.secondary} style={{ fontFamily: "'Saira Extra Condensed', Impact, sans-serif" }}>
           {club.short}
         </text>
       </svg>

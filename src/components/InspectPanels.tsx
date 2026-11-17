@@ -53,7 +53,7 @@ const GK_STATS: [keyof PlayerCard['stats'], string][] = [
 ];
 
 function statColor(v: number) {
-  return v >= 90 ? 'bg-yellow-300' : v >= 82 ? 'bg-emerald-400' : v >= 70 ? 'bg-lime-400' : v >= 55 ? 'bg-amber-400' : 'bg-rose-500';
+  return v >= 90 ? 'bg-yellow-300' : v >= 82 ? 'bg-flare-400' : v >= 70 ? 'bg-lime-400' : v >= 55 ? 'bg-amber-400' : 'bg-rose-500';
 }
 
 export function PlayerInspectPanel({
@@ -178,7 +178,7 @@ export function PlayerInspectPanel({
             <ul className="mt-2 flex flex-col gap-1">
               {helps.map((h) => (
                 <li key={h} className="flex items-center gap-2 text-sm text-white/85">
-                  <Check className="h-4 w-4 text-emerald-400" /> {h}
+                  <Check className="h-4 w-4 text-flare-400" /> {h}
                 </li>
               ))}
             </ul>

@@ -1,6 +1,9 @@
 import { memo } from 'react';
 import type { CaricatureProps, CollarStyle, Expression, HairColor, HeadShape, SkinTone } from '../types/game';
 
+/** Brand ink: one outline colour and weight for every portrait. */
+const INK = '#161c2b';
+
 const SKIN: Record<SkinTone, { base: string; shade: string; blush: string; line: string }> = {
   pale: { base: '#f6d7c3', shade: '#e3b59c', blush: '#f0a49a', line: '#b98670' },
   light: { base: '#efc4a1', shade: '#d9a27c', blush: '#e8907c', line: '#ad7552' },
@@ -135,7 +138,7 @@ function PlayerCaricatureImpl({ traits, kitPrimaryColor, kitSecondaryColor, kitS
   const fair = traits.skinTone === 'pale' || traits.skinTone === 'light';
   const iris = fair && (traits.hairColor === 'blonde' || traits.hairColor === 'bleached' || traits.hairColor === 'ginger' || (h >> 11) % 4 === 0) ? '#4b7bb0' : '#4a2c18';
   const neck = collarStyle ?? (['crew', 'v', 'polo'] as const)[(h >> 9) % 3];
-  const hairStroke = { stroke: hair.line, strokeWidth: 0.7, strokeLinejoin: 'round' as const };
+  const hairStroke = { stroke: INK, strokeWidth: 0.9, strokeLinejoin: 'round' as const };
 
   // ── Hair behind the head
   const hairBack = (() => {
@@ -443,18 +446,23 @@ function PlayerCaricatureImpl({ traits, kitPrimaryColor, kitSecondaryColor, kitS
         <pattern id={`${uid}-stubble`} width="2.2" height="2.2" patternUnits="userSpaceOnUse">
           <circle cx="1" cy="1" r="0.45" fill={hair.base} opacity="0.7" />
         </pattern>
-        <radialGradient id={`${uid}-face`} cx="40%" cy="35%" r="70%">
+        <radialGradient id={`${uid}-face`} cx="38%" cy="34%" r="72%">
           <stop offset="0%" stopColor={skin.base} />
+          <stop offset="70%" stopColor={skin.base} />
+          <stop offset="70%" stopColor={skin.shade} />
           <stop offset="100%" stopColor={skin.shade} />
         </radialGradient>
         <linearGradient id={`${uid}-hair`} x1="0" x2="0.3" y1="0" y2="1">
           <stop offset="0%" stopColor={hair.hi} />
-          <stop offset="45%" stopColor={hair.base} />
+          <stop offset="20%" stopColor={hair.hi} />
+          <stop offset="20%" stopColor={hair.base} />
           <stop offset="100%" stopColor={hair.base} />
         </linearGradient>
         <linearGradient id={`${uid}-kitshade`} x1="0" x2="0" y1="0" y2="1">
           <stop offset="0%" stopColor="#000" stopOpacity="0" />
-          <stop offset="100%" stopColor="#000" stopOpacity="0.2" />
+          <stop offset="58%" stopColor="#000" stopOpacity="0" />
+          <stop offset="58%" stopColor="#000" stopOpacity="0.16" />
+          <stop offset="100%" stopColor="#000" stopOpacity="0.16" />
         </linearGradient>
         <clipPath id={`${uid}-shirt`}>
           <path d={shirt} />
@@ -465,7 +473,7 @@ function PlayerCaricatureImpl({ traits, kitPrimaryColor, kitSecondaryColor, kitS
       {hairBack}
 
       {/* neck first, so the shirt's neckline frames it */}
-      <path d="M 41 70 L 41 79 Q 40.5 83 35 85 L 35 102 L 65 102 L 65 85 Q 59.5 83 59 79 L 59 70 Z" fill={skin.shade} />
+      <path d="M 41 70 L 41 79 Q 40.5 83 35 85 L 35 102 L 65 102 L 65 85 Q 59.5 83 59 79 L 59 70 Z" fill={skin.shade} stroke={INK} strokeWidth="1.1" />
       <path d="M 41 74 Q 50 82 59 74 L 59 80 Q 50 86 41 80 Z" fill={skin.line} opacity="0.25" />
 
       {/* shirt, with the neck opening cut into it */}
@@ -497,19 +505,19 @@ function PlayerCaricatureImpl({ traits, kitPrimaryColor, kitSecondaryColor, kitS
           <path d={neckEdge} fill="none" stroke={collar} strokeWidth="2.9" strokeLinejoin="round" strokeLinecap="round" />
         </g>
       )}
-      <path d={shirt} fill="none" stroke="rgba(0,0,0,.35)" strokeWidth="0.8" />
+      <path d={shirt} fill="none" stroke={INK} strokeWidth="1.1" strokeLinejoin="round" />
       {acc === 'captainband' && <rect x="12" y="98" width="11" height="5" rx="1" fill="#facc15" stroke="#000" strokeWidth="0.5" transform="rotate(-14 17 100)" />}
       {acc === 'snood' && <path d="M 39 74 L 39 88 Q 50 93 61 88 L 61 74 Q 50 78 39 74 Z" fill="#111" />}
 
       {/* ears */}
-      <ellipse cx={50 - g.w - 0.5} cy={eyeY + 2} rx="4" ry="6" fill={skin.shade} />
-      <ellipse cx={50 + g.w + 0.5} cy={eyeY + 2} rx="4" ry="6" fill={skin.shade} />
+      <ellipse cx={50 - g.w - 0.5} cy={eyeY + 2} rx="4" ry="6" fill={skin.shade} stroke={INK} strokeWidth="0.9" />
+      <ellipse cx={50 + g.w + 0.5} cy={eyeY + 2} rx="4" ry="6" fill={skin.shade} stroke={INK} strokeWidth="0.9" />
       <path d={`M ${50 - g.w - 1.5} ${eyeY - 1} q -1.5 3 0 6`} stroke={skin.line} strokeWidth="0.7" fill="none" opacity="0.6" />
       <path d={`M ${50 + g.w + 1.5} ${eyeY - 1} q 1.5 3 0 6`} stroke={skin.line} strokeWidth="0.7" fill="none" opacity="0.6" />
       {acc === 'earring' && <circle cx={50 + g.w + 1} cy={eyeY + 8} r="1.6" fill="#f8fafc" stroke="#facc15" strokeWidth="0.6" />}
 
       {/* head */}
-      <path d={headPath(g)} fill={`url(#${uid}-face)`} stroke={skin.line} strokeWidth="0.9" />
+      <path d={headPath(g)} fill={`url(#${uid}-face)`} stroke={INK} strokeWidth="1.1" />
       {/* cheeks */}
       <ellipse cx={50 - g.w * 0.6} cy={mouthY - 4} rx="4" ry="2.4" fill={skin.blush} opacity="0.32" />
       <ellipse cx={50 + g.w * 0.6} cy={mouthY - 4} rx="4" ry="2.4" fill={skin.blush} opacity="0.32" />

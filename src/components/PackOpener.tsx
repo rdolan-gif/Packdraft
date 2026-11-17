@@ -7,6 +7,7 @@ import { Flag } from './Flag';
 import { highestTier, TOTAL_PACKS, tierRates } from '../engine/packGenerator';
 import { sfx } from '../engine/soundEffects';
 import { burstAt, goldConfetti, rainbowConfetti, shakeScreen } from '../engine/fx';
+import { Crest } from './Crest';
 import { CardBack, PlayerCardUI, TIER_TEXT } from './PlayerCardUI';
 
 type Stage = 'sealed' | 'dimming' | 'tell' | 'fanned' | 'revealed';
@@ -385,7 +386,7 @@ export function PackOpener({ packNumber, cards, packKey, selectedId, onSelect, r
           <div className="font-display text-3xl leading-none text-white sm:text-4xl">
             {title ?? (
               <>
-                PACK {packNumber} <span className="text-emerald-400">/ {TOTAL_PACKS}</span>
+                PACK {packNumber} <span className="text-flare-400">/ {TOTAL_PACKS}</span>
               </>
             )}
           </div>
@@ -394,9 +395,9 @@ export function PackOpener({ packNumber, cards, packKey, selectedId, onSelect, r
           ) : finale ? (
             <div className="text-xs font-black uppercase tracking-widest text-yellow-300">★ Captain's Finale · guaranteed 86+ · double Prime odds</div>
           ) : packNumber >= 9 ? (
-            <div className="text-xs font-bold uppercase tracking-widest text-emerald-300">Anti-softlock: 2+ cards fit your empty slots</div>
+            <div className="text-xs font-bold uppercase tracking-widest text-flare-300">Anti-softlock: 2+ cards fit your empty slots</div>
           ) : packNumber >= 6 ? (
-            <div className="text-xs font-bold uppercase tracking-widest text-emerald-300/80">Pity boost: empty positions ×2.5 more likely</div>
+            <div className="text-xs font-bold uppercase tracking-widest text-flare-300/80">Pity boost: empty positions ×2.5 more likely</div>
           ) : (
             <div className="text-xs font-bold uppercase tracking-widest text-white/50">5 cards · draft 1</div>
           )}
@@ -433,7 +434,7 @@ export function PackOpener({ packNumber, cards, packKey, selectedId, onSelect, r
             )}
             {/* top flap (tears away) */}
             <div
-              className="foil absolute inset-x-0 top-0 h-[44px] rounded-t-2xl border-2 border-b-0 border-emerald-300/40 transition-all duration-500"
+              className={`foil ${finale ? 'foil-finale' : ''} absolute inset-x-0 top-0 h-[44px] rounded-t-md border-2 border-b-0 border-flare-300/40 transition-all duration-500`}
               style={{
                 transform: stage !== 'sealed' ? 'translate(60px,-80px) rotate(28deg)' : 'none',
                 opacity: stage !== 'sealed' ? 0 : 1,
@@ -441,17 +442,21 @@ export function PackOpener({ packNumber, cards, packKey, selectedId, onSelect, r
               }}
             />
             {/* body */}
-            <div className={`foil absolute inset-x-0 bottom-0 top-[40px] overflow-hidden rounded-b-2xl border-2 border-t-0 border-emerald-300/40 shadow-2xl shadow-emerald-900/60 ${stage === 'tell' ? 'brightness-150' : ''}`}>
+            <div className={`foil ${finale ? 'foil-finale' : ''} absolute inset-x-0 bottom-0 top-[40px] overflow-hidden rounded-b-md border-2 border-t-0 border-flare-300/40 shadow-2xl shadow-flare-900/60 ${stage === 'tell' ? 'brightness-150' : ''}`}>
               <div className="absolute inset-0" style={{ background: `radial-gradient(circle at ${tilt.gx}% ${tilt.gy}%, rgba(255,255,255,.55), transparent 40%)`, mixBlendMode: 'overlay' }} />
               <div className="relative flex h-full flex-col items-center justify-center gap-2 text-center">
-                <div className="font-display text-7xl leading-none text-yellow-300 drop-shadow-[0_4px_0_rgba(0,0,0,.4)]">38</div>
-                <div className="font-display text-2xl tracking-[0.25em] text-white">PACKDRAFT</div>
-                <div className="rounded-full bg-black/40 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-emerald-200">
-                  {packLabel ?? (finale ? "Captain's Finale" : `Matchday Pack #${packNumber}`)}
+                {finale ? <Crest size={84} /> : <Crest size={84} variant="ink" />}
+                <div className={`font-display text-4xl italic leading-[0.9] ${finale ? 'text-white' : 'text-ink'}`} style={{ fontWeight: 900 }}>
+                  {finale ? 'FINAL' : 'MATCHDAY'}
+                  <br />
+                  PACK
+                </div>
+                <div className="bg-ink px-3 py-1 text-[10px] font-black uppercase tracking-widest text-flare-300">
+                  {packLabel ?? (finale ? "Captain's Finale" : `Pack ${packNumber} of ${TOTAL_PACKS}`)}
                 </div>
                 <div className="mt-2 flex gap-1">
                   {Array.from({ length: 5 }).map((_, i) => (
-                    <span key={i} className="h-2 w-6 rounded-full bg-white/25" />
+                    <span key={i} className={`h-2 w-6 ${finale ? 'bg-flare-500/50' : 'bg-ink/30'}`} />
                   ))}
                 </div>
               </div>
@@ -503,7 +508,7 @@ export function PackOpener({ packNumber, cards, packKey, selectedId, onSelect, r
               <div className="text-xs font-semibold text-white/60">Grab the ✂ handle and slide it right, or</div>
               <button
                 onClick={rip}
-                className="group relative overflow-hidden rounded-xl bg-gradient-to-r from-yellow-300 via-amber-400 to-yellow-300 px-8 py-3 font-display text-2xl tracking-wider text-black shadow-lg shadow-amber-500/30 transition hover:scale-105 active:scale-95"
+                className="group relative overflow-hidden btn-cut bg-flare-500 px-8 py-3 font-display text-2xl tracking-wider text-black shadow-lg shadow-flare-500/30 transition hover:scale-105 active:scale-95"
               >
                 <span className="relative z-10 flex items-center gap-2">
                   <Sparkles className="h-5 w-5" /> RIP OPEN PACK

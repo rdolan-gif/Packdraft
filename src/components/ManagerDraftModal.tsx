@@ -27,7 +27,7 @@ export function ManagerDraftModal({ offers, onPick }: Props) {
   return (
     <div className="mx-auto flex max-w-6xl flex-col items-center px-4 py-8">
       <div className="text-center">
-        <div className="text-xs font-black uppercase tracking-[0.4em] text-emerald-400">Step 1 · The Dugout</div>
+        <div className="text-xs font-black uppercase tracking-[0.4em] text-flare-400">Step 1 · The Dugout</div>
         <h1 className="mt-1 font-display text-5xl leading-none text-white sm:text-6xl">PICK YOUR MYSTERY MANAGER</h1>
         <p className="mx-auto mt-2 max-w-xl text-sm text-white/60">
           Three tactical philosophies have been dealt face-down. Flip them, read their bonuses, and appoint one. Their buffs shape which players are worth chasing.
@@ -75,7 +75,7 @@ export function ManagerDraftModal({ offers, onPick }: Props) {
                 {/* back */}
                 <button
                   onClick={(e) => reveal(i, e)}
-                  className="card-base absolute inset-0 flex flex-col items-center justify-center border-2 border-emerald-500/40 transition hover:border-yellow-300"
+                  className="card-base absolute inset-0 flex flex-col items-center justify-center border-2 border-flare-500/40 transition hover:border-yellow-300"
                   style={{
                     backfaceVisibility: 'hidden',
                     transform: 'rotateY(180deg)',
@@ -85,7 +85,7 @@ export function ManagerDraftModal({ offers, onPick }: Props) {
                 >
                   <HelpCircle className="h-20 w-20 text-yellow-300 drop-shadow-[0_0_20px_rgba(250,204,21,.6)]" />
                   <div className="mt-3 font-display text-3xl tracking-wider text-white">MYSTERY MANAGER</div>
-                  <div className="mt-1 text-xs font-bold uppercase tracking-widest text-emerald-300">Tap to flip</div>
+                  <div className="mt-1 text-xs font-bold uppercase tracking-widest text-flare-300">Tap to flip</div>
                 </button>
               </div>
             </div>

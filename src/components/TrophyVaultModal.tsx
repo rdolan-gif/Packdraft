@@ -380,7 +380,7 @@ function ReplayPanel({ run, original, saved, title = 'Replay in another era' }: 
   };
   return (
     <div className="rounded-xl border border-white/10 bg-white/5 p-3">
-      <div className="text-[10px] font-black uppercase tracking-widest text-emerald-300">{title}</div>
+      <div className="text-[10px] font-black uppercase tracking-widest text-flare-300">{title}</div>
       <div className="mt-0.5 text-xs text-white/50">A full 38-game season, simmed instantly. Every replay is a fresh season, so results vary.</div>
       <div className="mt-2 grid grid-cols-1 gap-1.5">
         {LEAGUE_ERA_IDS.map((id) => {
@@ -391,7 +391,7 @@ function ReplayPanel({ run, original, saved, title = 'Replay in another era' }: 
               <button
                 onClick={() => play(id)}
                 disabled={busy !== null}
-                className="w-36 shrink-0 rounded-lg bg-emerald-500/90 px-2 py-1.5 text-left text-xs font-black uppercase leading-tight text-black transition hover:bg-emerald-400 disabled:opacity-50"
+                className="w-36 shrink-0 rounded-lg bg-flare-500/90 px-2 py-1.5 text-left text-xs font-black uppercase leading-tight text-black transition hover:bg-flare-400 disabled:opacity-50"
               >
                 {busy === id ? 'Playing…' : LEAGUE_ERAS[id].name}
                 <span className="block text-[9px] font-bold normal-case opacity-70">{LEAGUE_ERAS[id].years}</span>
@@ -405,7 +405,7 @@ function ReplayPanel({ run, original, saved, title = 'Replay in another era' }: 
                     </b>{' '}
                     · {r.w}-{r.d}-{r.l} · GD {r.gf - r.ga >= 0 ? '+' : ''}
                     {r.gf - r.ga}
-                    {diff !== null && <span className={diff >= 0 ? 'text-emerald-300' : 'text-rose-300'}> ({diff >= 0 ? '+' : ''}{diff} vs original)</span>}
+                    {diff !== null && <span className={diff >= 0 ? 'text-flare-300' : 'text-rose-300'}> ({diff >= 0 ? '+' : ''}{diff} vs original)</span>}
                   </>
                 ) : (
                   <span className="text-white/40">Not played yet</span>

@@ -57,7 +57,7 @@ export function SeasonCardDownload(props: SeasonCardData) {
       <button
         onClick={make}
         disabled={busy}
-        className="flex items-center justify-center gap-2 rounded-xl border-2 border-sky-300/70 bg-sky-400/15 px-4 py-2.5 font-display text-xl tracking-wider text-sky-100 transition hover:bg-sky-400/25 disabled:opacity-60"
+        className="flex items-center justify-center gap-2 rounded-xl border-2 border-flare-400/70 bg-flare-500/10 px-4 py-2.5 font-display text-xl tracking-wider text-flare-100 transition hover:bg-flare-500/20 disabled:opacity-60"
       >
         {busy ? <Loader2 className="h-5 w-5 animate-spin" /> : <ImageIcon className="h-5 w-5" />} {busy ? 'DRAWING YOUR CARD…' : 'DOWNLOAD SEASON CARD'}
       </button>
@@ -71,11 +71,11 @@ export function SeasonCardDownload(props: SeasonCardData) {
             </button>
             <img src={preview.url} alt="Your season card" className="max-h-[72vh] w-full rounded-2xl object-contain shadow-2xl" />
             <div className="flex gap-2">
-              <button onClick={download} className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-sky-400 px-4 py-3 font-display text-xl tracking-wider text-black hover:bg-sky-300">
+              <button onClick={download} className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-flare-500 px-4 py-3 font-display text-xl tracking-wider text-black hover:bg-flare-400">
                 <Download className="h-5 w-5" /> SAVE IMAGE
               </button>
               {canShare && (
-                <button onClick={share} className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-emerald-400 px-4 py-3 font-display text-xl tracking-wider text-black hover:bg-emerald-300">
+                <button onClick={share} className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-flare-400 px-4 py-3 font-display text-xl tracking-wider text-black hover:bg-flare-300">
                   <Share2 className="h-5 w-5" /> SHARE
                 </button>
               )}

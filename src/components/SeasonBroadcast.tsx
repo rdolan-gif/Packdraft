@@ -421,7 +421,7 @@ export function SeasonBroadcast({ sim, onFinish, formationId, lineup, managerId,
   return (
     <div className="mx-auto flex max-w-7xl flex-col gap-3 px-3 py-4 sm:px-4">
       {/* Broadcast header */}
-      <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-r from-emerald-950 via-black to-emerald-950">
+      <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-r from-flare-950 via-black to-flare-950">
         <div className="flex flex-wrap items-center gap-x-3 gap-y-2 px-4 py-3">
           <div className="flex items-center gap-2">
             <span className="flex items-center gap-1 rounded bg-red-600 px-2 py-0.5 text-[10px] font-black uppercase tracking-widest text-white">
@@ -455,7 +455,7 @@ export function SeasonBroadcast({ sim, onFinish, formationId, lineup, managerId,
                   } else resume();
                 }}
                 disabled={!!decision || transferOpen || awardsOpen}
-                className="flex items-center gap-1 rounded-lg bg-emerald-500 px-3 py-1.5 text-sm font-black text-black transition hover:bg-emerald-400 disabled:opacity-40"
+                className="flex items-center gap-1 rounded-lg bg-flare-500 px-3 py-1.5 text-sm font-black text-black transition hover:bg-flare-400 disabled:opacity-40"
               >
                 {busy ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
                 {busy ? 'Pause' : sim.matchweek === 0 ? 'Kick Off' : 'Play'}
@@ -507,7 +507,7 @@ export function SeasonBroadcast({ sim, onFinish, formationId, lineup, managerId,
         </div>
         {/* progress */}
         <div className="h-1 w-full bg-white/10">
-          <div className="h-full bg-gradient-to-r from-emerald-400 to-yellow-300 transition-all duration-500" style={{ width: `${(completed / 38) * 100}%` }} />
+          <div className="h-full bg-gradient-to-r from-flare-400 to-yellow-300 transition-all duration-500" style={{ width: `${(completed / 38) * 100}%` }} />
         </div>
       </div>
 
@@ -523,7 +523,7 @@ export function SeasonBroadcast({ sim, onFinish, formationId, lineup, managerId,
                 resume();
               }}
               disabled={!!decision || transferOpen || awardsOpen}
-              className="animate-pop rounded-2xl bg-gradient-to-r from-emerald-400 via-yellow-300 to-emerald-400 py-3 font-display text-3xl tracking-wider text-black shadow-xl shadow-emerald-500/20 transition hover:scale-[1.01]"
+              className="animate-pop btn-cut bg-flare-500 hover:bg-flare-400 py-3 font-display text-3xl tracking-wider text-black shadow-xl shadow-flare-500/20 transition hover:scale-[1.01]"
             >
               {sim.matchweek === 0 ? 'KICK OFF THE SEASON' : 'PLAY NEXT MATCHWEEK'}
             </button>
@@ -578,7 +578,7 @@ export function SeasonBroadcast({ sim, onFinish, formationId, lineup, managerId,
               sfx.select();
               onFinish();
             }}
-            className="rounded-xl bg-gradient-to-r from-yellow-300 to-amber-500 px-6 py-2.5 font-display text-2xl tracking-wider text-black transition hover:scale-105"
+            className="btn-cut bg-flare-500 hover:bg-flare-400 px-6 py-2.5 font-display text-2xl tracking-wider text-black transition hover:scale-105"
           >
             REVEAL SEASON REVIEW CARD
           </button>
@@ -640,7 +640,7 @@ const Leaders = memo(function Leaders({ rows, kind, sim }: { rows: PlayerSeasonS
       {rows.map((p, i) => {
         const team = sim.teamById[p.teamId];
         return (
-          <div key={p.id} className={`relative flex items-center gap-2 overflow-hidden rounded-lg px-2 py-1.5 text-xs ${p.isUser ? 'bg-emerald-500/15 ring-1 ring-yellow-300/50' : 'bg-white/[0.03]'}`}>
+          <div key={p.id} className={`relative flex items-center gap-2 overflow-hidden rounded-lg px-2 py-1.5 text-xs ${p.isUser ? 'bg-flare-500/15 ring-1 ring-yellow-300/50' : 'bg-white/[0.03]'}`}>
             <div className="absolute inset-y-0 left-0 bg-gradient-to-r from-yellow-300/15 to-transparent transition-all duration-500" style={{ width: `${(p[kind] / max) * 100}%` }} />
             <span className={`relative w-5 font-black ${i === 0 ? 'text-yellow-300' : 'text-white/50'}`}>{i + 1}</span>
             <span className="relative h-3 w-3 shrink-0 rounded-sm" style={{ background: `linear-gradient(135deg, ${team.primary} 50%, ${team.secondary} 50%)` }} />
@@ -670,9 +670,9 @@ function DecisionOverlay({ d, sim, onChoose }: { d: DecisionContext; sim: Season
       <div className="w-full max-w-3xl animate-pop overflow-hidden rounded-3xl border-2 border-yellow-300/70 bg-gradient-to-b from-zinc-900 to-black shadow-[0_0_80px_rgba(250,204,21,.25)]">
         <div className="bg-yellow-300 px-5 py-2 text-center text-xs font-black uppercase tracking-[0.35em] text-black">Touchline Tactical Decision</div>
         <div className="p-5 text-center sm:p-7">
-          <div className="text-[11px] font-black uppercase tracking-widest text-emerald-400">Matchweek {d.matchweek} · {d.title}</div>
+          <div className="text-[11px] font-black uppercase tracking-widest text-flare-400">Matchweek {d.matchweek} · {d.title}</div>
           <div className="mt-3 flex flex-wrap items-center justify-center gap-x-4 gap-y-1">
-            <div className="min-w-0 break-words font-display text-2xl text-emerald-300 sm:text-4xl">{sim.teamById[USER_TEAM_ID].name}</div>
+            <div className="min-w-0 break-words font-display text-2xl text-flare-300 sm:text-4xl">{sim.teamById[USER_TEAM_ID].name}</div>
             <div className="font-display text-xl text-white/50 sm:text-2xl">{d.home ? 'vs' : '@'}</div>
             <div className="flex min-w-0 items-center gap-2 break-words font-display text-2xl text-white sm:text-4xl">
               <span className="h-5 w-5 rounded" style={{ background: `linear-gradient(135deg, ${opp.primary} 50%, ${opp.secondary} 50%)` }} />

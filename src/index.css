@@ -14,7 +14,7 @@ body,
 
 body {
   margin: 0;
-  background: #05110b;
+  background: #0b0e16;
   color: #e5e7eb;
   font-family: Inter, system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -24,15 +24,18 @@ body {
 /* Stadium backdrop: floodlights, mown stripes, procedural noise */
 .stadium-bg {
   background:
-    radial-gradient(ellipse 60% 40% at 15% -5%, rgba(255, 255, 255, 0.12), transparent 60%),
-    radial-gradient(ellipse 60% 40% at 85% -5%, rgba(255, 255, 255, 0.12), transparent 60%),
-    radial-gradient(ellipse 120% 70% at 50% 120%, rgba(16, 185, 129, 0.22), transparent 70%),
-    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.018) 0 60px, transparent 60px 120px),
-    linear-gradient(180deg, #071a10 0%, #05110b 55%, #03140c 100%);
+    radial-gradient(ellipse 55% 35% at 12% -8%, rgba(255, 255, 255, 0.09), transparent 60%),
+    radial-gradient(ellipse 55% 35% at 88% -8%, rgba(255, 255, 255, 0.09), transparent 60%),
+    radial-gradient(ellipse 120% 60% at 50% 120%, rgba(255, 106, 43, 0.12), transparent 70%),
+    repeating-linear-gradient(115deg, rgba(255, 255, 255, 0.014) 0 70px, transparent 70px 140px),
+    linear-gradient(180deg, #0d111b 0%, #0b0e16 55%, #090c13 100%);
 }
 
+/* Brand display face: Saira Extra Condensed, heavy and upper case (the Matchday look). */
 .font-display {
-  letter-spacing: 0.03em;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.01em;
 }
 
 /* ────────── Card tiers ────────── */
@@ -50,13 +53,13 @@ body {
 /* Tier skins, Prime shimmer and aura live in the components layer so Tailwind utilities
    (selection ring, opacity, z-index) can override them. */
 @layer components {
+  /* Squad (up to 80): brushed steel */
   .tier-STANDARD {
     background:
-      repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.035) 0 1px, transparent 1px 12px),
-      repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.035) 0 1px, transparent 1px 12px),
-      linear-gradient(160deg, #3a4250 0%, #1e232c 55%, #12151b 100%);
-    border: 1.5px solid #6b7280;
-    color: #e5e7eb;
+      repeating-linear-gradient(100deg, rgba(255, 255, 255, 0.03) 0 2px, transparent 2px 6px),
+      linear-gradient(165deg, #3a4356 0%, #232a39 60%, #1a1f2b 100%);
+    border: 1.5px solid #4a5468;
+    color: #f5f7fa;
   }
 
   /* Elite (81–85): brushed metal in the card's era-label colour (--e1/--e2/--e3/--eb set on the card). */
@@ -69,19 +72,17 @@ body {
   }
 
   /* Rising Star / World Class (86–90): rich gold foil */
+  /* Rising Star / World Class (86–90): gold leaf with an inner trim in the era-label colour (--e2). */
   .tier-RISING_WORLD {
     background:
-      radial-gradient(ellipse at 30% 0%, rgba(255, 255, 255, 0.45), transparent 50%),
-      linear-gradient(150deg, #fff7c2 0%, #facc15 25%, #d97706 60%, #78350f 100%);
-    border: 2px solid #fde68a;
-    color: #fffbeb;
-    /* Outer glow in the era-label colour (--e2 is set on each card). First line is the
-       fallback for browsers without color-mix. */
-    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.35), 0 0 16px 4px var(--e2);
+      radial-gradient(ellipse at 30% 0%, rgba(255, 255, 255, 0.5), transparent 50%),
+      linear-gradient(165deg, #f8de8c 0%, #e3b24e 55%, #b7832b 100%);
+    border: 2px solid #fff1b8;
+    color: #1b1405;
+    box-shadow: inset 0 0 0 2px var(--e2), inset 0 0 18px 2px var(--e2);
     box-shadow:
-      inset 0 0 0 1px rgba(255, 255, 255, 0.35),
-      0 0 14px 3px var(--e2),
-      0 0 30px 6px color-mix(in srgb, var(--e2) 45%, transparent);
+      inset 0 0 0 2px var(--e2),
+      inset 0 0 22px 3px color-mix(in srgb, var(--e2) 55%, transparent);
   }
 
   /* Prime Icon (91–96): gleaming pearl white */
@@ -89,9 +90,9 @@ body {
     background:
       radial-gradient(ellipse at 50% 0%, #ffffff 0%, rgba(255, 255, 255, 0) 60%),
       repeating-linear-gradient(120deg, rgba(148, 163, 184, 0.08) 0 2px, transparent 2px 6px),
-      linear-gradient(155deg, #ffffff 0%, #f8fafc 30%, #e2e8f0 62%, #cbd5e1 100%);
-    border: 2px solid #ffffff;
-    color: #0f172a;
+      linear-gradient(165deg, #ffffff 0%, #f3f5fb 30%, #e2e7f4 62%, #cfd7ec 100%);
+    border: 2px solid #ff6a2b;
+    color: #0b0e16;
   }
   /* Secret dev cards: black, with a soft rainbow drifting across and a slowly colour-cycling rim. */
   .tier-SECRET_DEV {
@@ -244,9 +245,17 @@ body {
 /* ────────── Foil pack ────────── */
 .foil {
   background:
-    linear-gradient(115deg, rgba(255, 255, 255, 0) 30%, rgba(255, 255, 255, 0.45) 45%, rgba(255, 255, 255, 0) 60%),
-    repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.06) 0 2px, transparent 2px 6px),
-    conic-gradient(from 200deg at 50% 40%, #0f766e, #065f46, #14532d, #1e3a8a, #4c1d95, #0f766e);
+    linear-gradient(115deg, rgba(255, 255, 255, 0) 30%, rgba(255, 255, 255, 0.4) 45%, rgba(255, 255, 255, 0) 60%),
+    repeating-linear-gradient(115deg, rgba(255, 255, 255, 0.07) 0 3px, transparent 3px 9px),
+    conic-gradient(from 200deg at 50% 40%, #ff8a4c, #ff6a2b, #c2410c, #ff6a2b, #ffa06e, #ff8a4c);
+  background-size: 250% 250%, auto, auto;
+}
+/* The final pack: dark ink foil with a Flare sheen. */
+.foil.foil-finale {
+  background:
+    linear-gradient(115deg, rgba(255, 255, 255, 0) 30%, rgba(255, 140, 80, 0.45) 45%, rgba(255, 255, 255, 0) 60%),
+    repeating-linear-gradient(115deg, rgba(255, 106, 43, 0.1) 0 3px, transparent 3px 9px),
+    conic-gradient(from 200deg at 50% 40%, #1e2433, #0b0e16, #151a26, #2a3244, #1e2433);
   background-size: 250% 250%, auto, auto;
 }
 
@@ -360,7 +369,7 @@ html.lite .sweep:hover::after {
   animation: none;
 }
 html.lite .stadium-bg {
-  background: linear-gradient(180deg, #071a10 0%, #05110b 55%, #03140c 100%);
+  background: linear-gradient(180deg, #0d111b 0%, #0b0e16 55%, #090c13 100%);
 }
 
 /* Pack-reveal fireworks: rocket climbs to its tile position, then fades. */
@@ -423,3 +432,48 @@ html.lite .foil-holo, html.lite .foil-gold { animation: none; }
   75% { box-shadow: 0 0 16px 3px rgba(167, 139, 250, 0.6), 0 0 34px 8px rgba(167, 139, 250, 0.18); }
 }
 html.lite .tier-SECRET_DEV { animation: none; box-shadow: 0 0 14px 3px rgba(192, 132, 252, 0.55); }
+
+/* Brand: the torn-corner card shape (top-right cut, smaller bottom-left cut). --cut is set per card size. */
+.card-cut {
+  border-radius: 3px;
+  clip-path: polygon(0 0, calc(100% - var(--cut, 16px)) 0, 100% var(--cut, 16px), 100% 100%, calc(var(--cut, 16px) * 0.8) 100%, 0 calc(100% - var(--cut, 16px) * 0.8));
+}
+/* The Flare notch: a stripe along the top-right cut. */
+.card-notch {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: calc(var(--cut, 16px) * 1.55);
+  height: calc(var(--cut, 16px) * 1.55);
+  clip-path: polygon(0 0, 100% 100%, 100% 0);
+  pointer-events: none;
+  z-index: 8;
+}
+/* Diagonal floodlight band behind the player. */
+.card-band {
+  position: absolute;
+  top: -20%;
+  left: 34%;
+  width: 26%;
+  height: 140%;
+  transform: rotate(20deg);
+  pointer-events: none;
+  z-index: 1;
+}
+/* Rim light on the best cards' portraits. */
+.rim-gold {
+  filter: drop-shadow(-1px -1px 0 rgba(255, 255, 255, 0.85)) drop-shadow(0 0 2px rgba(255, 255, 255, 0.5));
+}
+.rim-prime {
+  filter: drop-shadow(-1.5px -1px 0 #ff8248) drop-shadow(0 0 3px rgba(255, 106, 43, 0.55));
+}
+html.lite .rim-gold,
+html.lite .rim-prime {
+  filter: none;
+}
+
+/* Brand: the angled "broadcast" cut on primary buttons. */
+.btn-cut {
+  clip-path: polygon(14px 0, 100% 0, calc(100% - 14px) 100%, 0 100%);
+  border-radius: 0;
+}

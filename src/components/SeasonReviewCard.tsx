@@ -15,7 +15,7 @@ import { SeasonCardDownload } from './SeasonCardDownload';
 export const GRADE_STYLE: Record<Grade, { stamp: string; text: string; glow: string }> = {
   'S+': { stamp: 'bg-[conic-gradient(from_0deg,#facc15,#f472b6,#22d3ee,#a3e635,#facc15)] text-black border-yellow-100', text: 'text-yellow-200', glow: 'shadow-[0_0_60px_rgba(250,204,21,.8)]' },
   S: { stamp: 'bg-gradient-to-br from-yellow-200 via-yellow-400 to-amber-600 text-black border-yellow-100', text: 'text-yellow-300', glow: 'shadow-[0_0_50px_rgba(250,204,21,.6)]' },
-  A: { stamp: 'bg-gradient-to-br from-emerald-400 via-emerald-600 to-yellow-500 text-white border-emerald-200', text: 'text-emerald-300', glow: 'shadow-[0_0_40px_rgba(16,185,129,.5)]' },
+  A: { stamp: 'bg-gradient-to-br from-flare-400 via-flare-600 to-yellow-500 text-white border-flare-200', text: 'text-flare-300', glow: 'shadow-[0_0_40px_rgba(16,185,129,.5)]' },
   B: { stamp: 'bg-gradient-to-br from-sky-400 to-blue-700 text-white border-sky-200', text: 'text-sky-300', glow: 'shadow-[0_0_40px_rgba(56,189,248,.5)]' },
   C: { stamp: 'bg-gradient-to-br from-slate-200 to-slate-500 text-black border-white', text: 'text-slate-200', glow: 'shadow-[0_0_30px_rgba(226,232,240,.35)]' },
   D: { stamp: 'bg-gradient-to-br from-amber-400 to-orange-700 text-black border-amber-200', text: 'text-amber-300', glow: 'shadow-[0_0_30px_rgba(245,158,11,.45)]' },
@@ -135,12 +135,12 @@ export function SeasonReviewCard({ summary, teamName, formationId, lineup, manag
 
   return (
     <div className="mx-auto max-w-6xl px-3 py-6 sm:px-4">
-      <div data-shake-zone className={`relative overflow-hidden rounded-3xl border-2 bg-gradient-to-br from-zinc-900 via-black to-emerald-950 p-4 sm:p-6 ${g === 'S+' ? 'border-yellow-300' : 'border-white/15'}`}>
+      <div data-shake-zone className={`relative overflow-hidden rounded-3xl border-2 bg-gradient-to-br from-zinc-900 via-black to-flare-950 p-4 sm:p-6 ${g === 'S+' ? 'border-yellow-300' : 'border-white/15'}`}>
         {g === 'S+' && <div className="holo z-0 opacity-30" />}
         <div className="relative grid grid-cols-1 gap-6 lg:grid-cols-[1fr_1.1fr]">
           {/* left: grade + verdict */}
           <div className="flex flex-col">
-            <div className="text-[11px] font-black uppercase tracking-[0.35em] text-emerald-400">Season Review · {teamName}</div>
+            <div className="text-[11px] font-black uppercase tracking-[0.35em] text-flare-400">Season Review · {teamName}</div>
             <div className="mt-1 font-display text-4xl leading-none text-white sm:text-5xl">{info.subtitle.toUpperCase()}</div>
 
             <div className="relative my-6 flex h-48 items-center justify-center">
@@ -230,7 +230,7 @@ export function SeasonReviewCard({ summary, teamName, formationId, lineup, manag
             )}
 
             <div className="rounded-2xl border border-white/10 bg-black/40 p-4">
-              <div className="text-[10px] font-black uppercase tracking-widest text-emerald-300">Season Highlights</div>
+              <div className="text-[10px] font-black uppercase tracking-widest text-flare-300">Season Highlights</div>
               <ul className="mt-2 flex flex-col gap-1.5">
                 {summary.highlights.map((h, i) => (
                   <li key={i} className="flex gap-2 text-sm text-white/85">
@@ -241,10 +241,10 @@ export function SeasonReviewCard({ summary, teamName, formationId, lineup, manag
             </div>
 
             <div className="flex flex-wrap gap-2">
-              <button onClick={copy} className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-emerald-500 px-4 py-3 font-display text-xl tracking-wider text-black transition hover:bg-emerald-400">
+              <button onClick={copy} className="flex flex-1 items-center justify-center gap-2 rounded-xl border-2 border-white/25 px-4 py-3 font-display text-xl tracking-wider text-white transition hover:bg-white/10">
                 {copied ? <Check className="h-5 w-5" /> : <Copy className="h-5 w-5" />} {copied ? 'COPIED!' : 'COPY SHARE GRID'}
               </button>
-              <button onClick={onNewRun} className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-yellow-300 to-amber-500 px-4 py-3 font-display text-xl tracking-wider text-black transition hover:scale-[1.02]">
+              <button onClick={onNewRun} className="flex flex-1 items-center justify-center gap-2 btn-cut bg-flare-500 hover:bg-flare-400 px-4 py-3 font-display text-xl tracking-wider text-black transition hover:scale-[1.02]">
                 <RotateCcw className="h-5 w-5" /> DRAFT AGAIN
               </button>
             </div>

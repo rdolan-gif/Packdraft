@@ -3,6 +3,7 @@ import { Award, BookOpen, Gauge, RotateCcw, Sparkles, Trophy, Volume2, VolumeX }
 import { isMuted, onMuteChange, setMuted, sfx } from '../engine/soundEffects';
 import { isLite, onLiteChange, setLite } from '../engine/perf';
 import { TOTAL_PACKS } from '../engine/packGenerator';
+import { Crest, Wordmark } from './Crest';
 
 interface Props {
   phase: string;
@@ -47,13 +48,11 @@ export function Header({ phase, packNumber, picksMade, vaultCount, onOpenVault, 
   }, []);
 
   return (
-    <header className="sticky top-0 z-50 border-b border-white/10 bg-black/90">
+    <header className="sticky top-0 z-50 border-b-2 border-flare-500 bg-ink-800/95">
       <div className="mx-auto flex max-w-7xl items-center gap-3 px-4 py-2">
         <button onClick={requestNewRun} className="flex items-center gap-2" aria-label="PackDraft 38 home">
-          <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-yellow-300 to-amber-600 font-display text-xl text-black shadow-lg shadow-amber-500/30">38</span>
-          <span className="hidden font-display text-2xl leading-none tracking-wider text-white sm:block">
-            PACK<span className="text-emerald-400">DRAFT</span> 38
-          </span>
+          <Crest size={30} variant="solid" />
+          <Wordmark className="hidden text-2xl sm:inline-flex" />
         </button>
         {dailyNumber !== null && phase !== 'title' && (
           <span className="rounded-full bg-sky-400 px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-black">Daily #{dailyNumber}</span>
@@ -67,7 +66,7 @@ export function Header({ phase, packNumber, picksMade, vaultCount, onOpenVault, 
                 <span
                   key={i}
                   className={`h-2 flex-1 rounded-full transition-all ${
-                    i < picksMade ? 'bg-emerald-400' : i === packNumber - 1 ? 'animate-pulse bg-yellow-300' : 'bg-white/15'
+                    i < picksMade ? 'bg-flare-400' : i === packNumber - 1 ? 'animate-pulse bg-yellow-300' : 'bg-white/15'
                   } ${i === TOTAL_PACKS - 1 ? 'ring-1 ring-yellow-300/60' : ''}`}
                 />
               ))}
@@ -93,7 +92,7 @@ export function Header({ phase, packNumber, picksMade, vaultCount, onOpenVault, 
             sfx.click();
             onOpenCabinet();
           }}
-          className="flex items-center gap-1.5 rounded-lg border border-amber-500/40 bg-amber-600/15 px-3 py-1.5 text-xs font-black uppercase tracking-wider text-amber-100 transition hover:bg-amber-600/25"
+          className={`${phase === 'title' ? 'flex' : 'hidden sm:flex'} items-center gap-1.5 rounded-lg border border-amber-500/40 bg-amber-600/15 px-3 py-1.5 text-xs font-black uppercase tracking-wider text-amber-100 transition hover:bg-amber-600/25`}
           aria-label="Trophy cabinet"
         >
           <Award className="h-4 w-4" />
@@ -105,7 +104,7 @@ export function Header({ phase, packNumber, picksMade, vaultCount, onOpenVault, 
             sfx.click();
             onOpenVault();
           }}
-          className="relative flex items-center gap-1.5 rounded-lg border border-yellow-400/40 bg-yellow-400/10 px-3 py-1.5 text-xs font-black uppercase tracking-wider text-yellow-200 transition hover:bg-yellow-400/20"
+          className={`relative ${phase === 'title' ? 'flex' : 'hidden sm:flex'} items-center gap-1.5 rounded-lg border border-yellow-400/40 bg-yellow-400/10 px-3 py-1.5 text-xs font-black uppercase tracking-wider text-yellow-200 transition hover:bg-yellow-400/20`}
         >
           <Trophy className="h-4 w-4" />
           <span className="hidden sm:inline">Trophy Vault</span>

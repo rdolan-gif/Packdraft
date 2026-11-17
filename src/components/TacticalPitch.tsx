@@ -55,7 +55,7 @@ export function TacticalPitch({ formationId, lineup, rating, managerId, pendingC
             <div className="text-[10px] font-bold uppercase tracking-widest text-white/50">Chemistry</div>
             <div className="font-display text-3xl leading-none text-cyan-300">{rating.chemistry}</div>
             <div className="mx-auto mt-1 h-1.5 w-full overflow-hidden rounded-full bg-white/10">
-              <div className="h-full rounded-full bg-gradient-to-r from-cyan-500 to-emerald-400 transition-all duration-500" style={{ width: `${rating.chemistry}%` }} />
+              <div className="h-full rounded-full bg-gradient-to-r from-cyan-500 to-flare-400 transition-all duration-500" style={{ width: `${rating.chemistry}%` }} />
             </div>
           </div>
           <Pressable
