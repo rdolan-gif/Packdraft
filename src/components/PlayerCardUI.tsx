@@ -3,7 +3,7 @@ import { Crown, Star } from 'lucide-react';
 import type { PlayerCard, Tier } from '../types/game';
 import { getClub } from '../data/clubs';
 import { PlayerCaricature } from './PlayerCaricature';
-import { collarForSeason } from '../data/kits';
+import { collarForSeason, kitForCard } from '../data/kits';
 import { sfx } from '../engine/soundEffects';
 import { eraColour } from '../data/eraColours';
 import { devTheme } from '../data/devThemes';
@@ -164,7 +164,7 @@ export function PlayerCardUI({ card, size = 'md', onClick, selected, dimmed, sho
 
       {/* portrait */}
       <div className={`absolute left-1/2 z-[5] -translate-x-1/2 ${prime ? 'rim-prime' : world ? 'rim-gold' : ''}`} style={{ top: tiny ? d.h * 0.1 : d.h * 0.085 }}>
-        <PlayerCaricature traits={card.traits} kitPrimaryColor={kit.primary} kitSecondaryColor={kit.secondary} kitSleeveColor={kit.sleeve} kitCollarColor={kit.collar} collarStyle={collarForSeason(card.season)} seed={card.id} size={Math.round(d.face * 1.06)} />
+        <PlayerCaricature traits={card.traits} kitPrimaryColor={kit.primary} kitSecondaryColor={kit.secondary} kitSleeveColor={kit.sleeve} kitCollarColor={kit.collar} collarStyle={collarForSeason(card.season)} kit={kitForCard(card, theme?.fanClub)} seed={card.id} size={Math.round(d.face * 1.06)} />
       </div>
 
       {/* name panel */}

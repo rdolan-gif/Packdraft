@@ -11,7 +11,7 @@ import type { Club, PlayerCard, Position, Tier } from '../types/game';
 import { PlayerCaricature } from './PlayerCaricature';
 import { PlayerCardUI } from './PlayerCardUI';
 import { Flag } from './Flag';
-import { collarForSeason } from '../data/kits';
+import { collarForSeason, kitForCard } from '../data/kits';
 import { devTheme } from '../data/devThemes';
 import { DevScene } from './DevScene';
 
@@ -691,7 +691,7 @@ function Sticker({ card, drafted, totw, onClick }: { card: PlayerCard; drafted?:
           )}
           <div className="absolute inset-0 opacity-25" style={{ background: 'radial-gradient(rgba(255,255,255,.6) 1px, transparent 1.3px) 0 0/4px 4px' }} />
           <div className="absolute left-1/2 top-2 -translate-x-1/2">
-            <PlayerCaricature traits={card.traits} kitPrimaryColor={club.primary} kitSecondaryColor={club.secondary} kitSleeveColor={club.sleeve} kitCollarColor={club.collar} collarStyle={collarForSeason(card.season)} seed={card.id} size={60} />
+            <PlayerCaricature traits={card.traits} kitPrimaryColor={club.primary} kitSecondaryColor={club.secondary} kitSleeveColor={club.sleeve} kitCollarColor={club.collar} collarStyle={collarForSeason(card.season)} kit={kitForCard(card, theme?.fanClub)} seed={card.id} size={60} />
           </div>
           <div className="absolute left-0.5 top-0.5 rounded-sm bg-black/60 px-0.5 text-[7px] font-black leading-tight text-white">{theme ? theme.emoji : card.season}</div>
           <div className="absolute right-0.5 top-0.5 rounded-sm bg-white/85 px-0.5 font-display text-[10px] leading-tight text-black">{card.ovr}</div>

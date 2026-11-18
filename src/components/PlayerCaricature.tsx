@@ -1,5 +1,14 @@
 import { memo } from 'react';
-import type { CaricatureProps, CollarStyle, Expression, HairColor, HeadShape, SkinTone } from '../types/game';
+import type { CaricatureProps, CollarStyle, Expression, HairColor, HeadShape, KitDesign, SkinTone } from '../types/game';
+import { hairLayers, type HairTone } from './portrait/hair';
+import { facialHair } from './portrait/facialHair';
+
+/** Blend two hex colours (t = share of b). */
+function mix(a: string, b: string, t: number) {
+  const pa = [1, 3, 5].map((i) => parseInt(a.slice(i, i + 2), 16));
+  const pb = [1, 3, 5].map((i) => parseInt(b.slice(i, i + 2), 16));
+  return `#${pa.map((v, i) => Math.round(v + (pb[i] - v) * t).toString(16).padStart(2, '0')).join('')}`;
+}
 
 /** Brand ink: one outline colour and weight for every portrait. */
 const INK = '#161c2b';
@@ -54,7 +63,7 @@ function headPath({ t, w, j, c, m }: HeadGeo) {
   return `M50 ${t} C ${50 + w * 0.98} ${t} ${50 + w} ${t + 12} ${50 + w} ${m} C ${50 + w} ${m + 11} ${50 + j} ${c - 5} 50 ${c} C ${50 - j} ${c - 5} ${50 - w} ${m + 11} ${50 - w} ${m} C ${50 - w} ${t + 12} ${50 - w * 0.98} ${t} 50 ${t} Z`;
 }
 
-/** Skull cap (for short hair styles) hugging the top of the head down to `to` y. */
+/** Skull cap shape (used by the scrum cap accessory). */
 function capPath({ t, w }: HeadGeo, to: number, lift = 2, sideDrop = 0) {
   return `M ${50 - w - 0.8} ${to + sideDrop} C ${50 - w - 1.5} ${t + 6} ${50 - w * 0.7} ${t - lift} 50 ${t - lift} C ${50 + w * 0.7} ${t - lift} ${50 + w + 1.5} ${t + 6} ${50 + w + 0.8} ${to + sideDrop} C ${50 + w * 0.6} ${to - 6} ${50 - w * 0.6} ${to - 6} ${50 - w - 0.8} ${to + sideDrop} Z`;
 }
@@ -116,9 +125,89 @@ function Mouth({ expression, skinShade, cx = 50, y }: { expression: Expression; 
   }
 }
 
-function PlayerCaricatureImpl({ traits, kitPrimaryColor, kitSecondaryColor, kitSleeveColor, kitCollarColor, collarStyle, seed, size = 120, className }: CaricatureProps) {
-  const sleeve = kitSleeveColor ?? kitSecondaryColor;
-  const collar = kitCollarColor ?? kitSecondaryColor;
+/** Shirt pattern, drawn inside the shirt's clip and under the sleeves. */
+function KitPattern({ kit }: { kit: KitDesign }) {
+  const c = kit.patternColor;
+  switch (kit.pattern) {
+    case 'stripes': {
+      const w = 100 / (kit.bands * 2 + 1);
+      return (
+        <g fill={c}>
+          {Array.from({ length: kit.bands }).map((_, i) => (
+            <rect key={i} x={w * (2 * i + 1)} y="80" width={w} height="32" />
+          ))}
+        </g>
+      );
+    }
+    case 'hoops':
+      return (
+        <g fill={c}>
+          {[0, 1, 2].map((i) => (
+            <rect key={i} x="0" y={88 + i * 8} width="100" height="4" />
+          ))}
+        </g>
+      );
+    case 'halves':
+      return <rect x="50" y="80" width="50" height="32" fill={c} />;
+    case 'sash':
+      return <path d="M 18 82 L 28 82 L 88 112 L 78 112 Z" fill={c} />;
+    case 'pinstripes':
+      return (
+        <g stroke={c} strokeWidth="0.45" opacity="0.75">
+          {Array.from({ length: 30 }).map((_, i) => (
+            <path key={i} d={`M ${2 + i * 3.4} 80 L ${2 + i * 3.4} 112`} />
+          ))}
+        </g>
+      );
+    case 'shadow':
+      return (
+        <g fill={c} opacity="0.12">
+          {Array.from({ length: 16 }).map((_, i) => (
+            <path key={i} d={`M ${-20 + i * 8} 112 L ${-12 + i * 8} 112 L ${18 + i * 8} 80 L ${10 + i * 8} 80 Z`} />
+          ))}
+        </g>
+      );
+    case 'chestband':
+      return <rect x="0" y="93" width="100" height="5" fill={c} />;
+    case 'yoke':
+      return <path d="M 0 80 L 100 80 L 100 92 Q 50 88 0 92 Z" fill={c} />;
+    default:
+      return null;
+  }
+}
+
+/** Our own club badge (never a real crest) and a generic maker's mark, on the chest. */
+function KitBadges({ kit }: { kit: KitDesign }) {
+  const bx = 60.8;
+  const by = 94.2;
+  const shape =
+    kit.badge.shape === 'round'
+      ? <circle cx={bx} cy={by + 2.4} r="2.6" />
+      : kit.badge.shape === 'crest'
+        ? <path d={`M ${bx - 2.6} ${by} L ${bx + 2.6} ${by} L ${bx + 2.6} ${by + 3} Q ${bx + 2.6} ${by + 5.2} ${bx} ${by + 6} Q ${bx - 2.6} ${by + 5.2} ${bx - 2.6} ${by + 3} Z`} />
+        : <path d={`M ${bx - 2.5} ${by + 0.4} Q ${bx} ${by - 0.6} ${bx + 2.5} ${by + 0.4} L ${bx + 2.3} ${by + 3.4} Q ${bx + 1.6} ${by + 5.4} ${bx} ${by + 6} Q ${bx - 1.6} ${by + 5.4} ${bx - 2.3} ${by + 3.4} Z`} />;
+  const mx = 39.2;
+  const my = 95.6;
+  const m = kit.maker;
+  const mark =
+    m.mark === 'chevron' ? <path d={`M ${mx - 1.6} ${my - 0.6} L ${mx} ${my + 0.8} L ${mx + 1.6} ${my - 0.6}`} fill="none" stroke={m.color} strokeWidth="0.75" strokeLinecap="round" strokeLinejoin="round" />
+    : m.mark === 'bars' ? <path d={`M ${mx - 1.4} ${my + 0.9} L ${mx - 0.4} ${my - 0.9} M ${mx + 0.4} ${my + 0.9} L ${mx + 1.4} ${my - 0.9}`} stroke={m.color} strokeWidth="0.7" strokeLinecap="round" />
+    : m.mark === 'diamond' ? <path d={`M ${mx} ${my - 1.2} L ${mx + 1.2} ${my} L ${mx} ${my + 1.2} L ${mx - 1.2} ${my} Z`} fill={m.color} />
+    : <circle cx={mx} cy={my} r="0.9" fill={m.color} />;
+  return (
+    <g>
+      <g fill={kit.badge.fill} stroke={INK} strokeWidth="0.45">{shape}</g>
+      <rect x={bx - 2.4} y={by + 2.1} width="4.8" height="1.1" fill={kit.badge.band} />
+      {mark}
+    </g>
+  );
+}
+
+function PlayerCaricatureImpl({ traits, kitPrimaryColor: plainBody, kitSecondaryColor, kitSleeveColor, kitCollarColor, collarStyle: plainCollar, kit, seed, size = 120, className }: CaricatureProps) {
+  const kitPrimaryColor = kit?.body ?? plainBody;
+  const sleeve = kit?.sleeve ?? kitSleeveColor ?? kitSecondaryColor;
+  const collar = kit?.collar ?? kitCollarColor ?? kitSecondaryColor;
+  const collarStyle = kit?.collarStyle ?? plainCollar;
   const h = hash(seed);
   const uid = `pc${h.toString(36)}`;
   const skin = SKIN[traits.skinTone];
@@ -138,302 +227,11 @@ function PlayerCaricatureImpl({ traits, kitPrimaryColor, kitSecondaryColor, kitS
   const fair = traits.skinTone === 'pale' || traits.skinTone === 'light';
   const iris = fair && (traits.hairColor === 'blonde' || traits.hairColor === 'bleached' || traits.hairColor === 'ginger' || (h >> 11) % 4 === 0) ? '#4b7bb0' : '#4a2c18';
   const neck = collarStyle ?? (['crew', 'v', 'polo'] as const)[(h >> 9) % 3];
-  const hairStroke = { stroke: INK, strokeWidth: 0.9, strokeLinejoin: 'round' as const };
-
-  // ── Hair behind the head
-  const hairBack = (() => {
-    switch (hs) {
-      case 'afro':
-        return <circle cx="50" cy={g.t + 10} r={g.w + 13} fill={hair.base} {...hairStroke} />;
-      case 'long':
-        return <path d={`M ${50 - g.w - 4} ${g.t + 10} Q 50 ${g.t - 12} ${50 + g.w + 4} ${g.t + 10} L ${50 + g.w + 6} ${g.c + 8} Q 50 ${g.c + 2} ${50 - g.w - 6} ${g.c + 8} Z`} fill={`url(#${uid}-hair)`} {...hairStroke} />;
-      case 'mullet':
-        // business at the front, party at the back: hair hangs to the shoulders behind the neck
-        return <path d={`M ${50 - g.w - 1} ${g.m - 6} Q ${50 - g.w - 3} ${g.c + 4} ${50 - g.w + 2} ${g.c + 12} L ${50 + g.w - 2} ${g.c + 12} Q ${50 + g.w + 3} ${g.c + 4} ${50 + g.w + 1} ${g.m - 6} Z`} fill={`url(#${uid}-hair)`} {...hairStroke} />;
-      case 'dreads':
-        return (
-          <g fill={hair.base} {...hairStroke}>
-            {Array.from({ length: 9 }).map((_, i) => {
-              const x = 50 - g.w - 3 + i * ((g.w * 2 + 6) / 8);
-              return <rect key={i} x={x - 2.2} y={g.t + 6} width="4.4" height={g.c - g.t + 2 - Math.abs(i - 4) * 2} rx="2.2" />;
-            })}
-          </g>
-        );
-      case 'ponytail':
-        // tied at the back: the tail falls behind the neck and shows over the right shoulder
-        return (
-          <g>
-            <path d={`M ${50 + g.w * 0.55} ${g.t + 12} C ${50 + g.w + 10} ${g.t + 18} ${50 + g.w + 9} ${g.c - 2} ${50 + g.w + 3} ${g.c + 11} C ${50 + g.w} ${g.c + 4} ${50 + g.w + 1} ${g.t + 24} ${50 + g.w * 0.4} ${g.t + 18} Z`} fill={`url(#${uid}-hair)`} {...hairStroke} />
-            <path d={`M ${50 + g.w + 4} ${g.m - 4} Q ${50 + g.w + 6} ${g.m + 6} ${50 + g.w + 4} ${g.m + 14}`} stroke={hair.hi} strokeWidth="0.9" fill="none" opacity="0.6" />
-          </g>
-        );
-      default:
-        return null;
-    }
-  })();
-
-  // A soft shadow under the hairline gives the hair some depth on the forehead.
-  const hairShadow = (to: number, lift: number, side: number) => <path d={capPath(g, to + 1.6, lift - 1.6, side)} fill={skin.shade} opacity="0.55" />;
-
-  // ── Hair on top of the head
-  const hairFront = (() => {
-    const cap = (to: number, lift = 2, side = 0) => (
-      <>
-        {hairShadow(to, lift, side)}
-        <path d={capPath(g, to, lift, side)} fill={`url(#${uid}-hair)`} {...hairStroke} />
-      </>
-    );
-    const shine = (op = 0.55) => <path d={`M ${50 - g.w * 0.55} ${g.t + 4} Q ${50 - g.w * 0.1} ${g.t - 1} ${50 + g.w * 0.35} ${g.t + 1}`} stroke={hair.hi} strokeWidth="1.6" strokeLinecap="round" fill="none" opacity={op} />;
-    switch (hs) {
-      case 'bald':
-        return <ellipse cx={50 - g.w * 0.35} cy={g.t + 7} rx="6" ry="3" fill="#fff" opacity="0.28" />;
-      case 'receding': {
-        // receding hairline: thin on top, an M-shaped retreat at the temples, short at the sides
-        const side = (s: number) => `M ${50 + s * (g.w + 0.8)} ${g.m - 1} C ${50 + s * (g.w + 1.4)} ${g.t + 12} ${50 + s * g.w * 0.8} ${g.t + 4} ${50 + s * g.w * 0.45} ${g.t + 6} C ${50 + s * g.w * 0.62} ${g.t + 12} ${50 + s * g.w * 0.8} ${g.t + 18} ${50 + s * (g.w - 2)} ${g.m - 2} Z`;
-        return (
-          <g>
-            <path d={capPath(g, g.t + 9, 0.5, 2)} fill={`url(#${uid}-stubble)`} opacity="0.55" />
-            <path d={`M ${50 - g.w * 0.3} ${g.t + 2} Q 50 ${g.t + 5} ${50 + g.w * 0.3} ${g.t + 2} Q 50 ${g.t - 0.8} ${50 - g.w * 0.3} ${g.t + 2} Z`} fill={hair.base} opacity="0.75" />
-            <path d={side(-1)} fill={hair.base} opacity="0.92" />
-            <path d={side(1)} fill={hair.base} opacity="0.92" />
-            <ellipse cx={50 - g.w * 0.2} cy={g.t + 9} rx="5" ry="2.2" fill="#fff" opacity="0.22" />
-          </g>
-        );
-      }
-      case 'buzz':
-        return (
-          <g opacity="0.92">
-            <path d={capPath(g, g.t + 13, 0.5, 4)} fill={hair.base} opacity="0.85" />
-            <path d={capPath(g, g.t + 13, 0.5, 4)} fill={`url(#${uid}-stubble)`} />
-            <path d={`M ${50 - g.w * 0.5} ${g.t + 3} Q 50 ${g.t} ${50 + g.w * 0.3} ${g.t + 2}`} stroke={hair.hi} strokeWidth="1.2" fill="none" opacity="0.35" strokeLinecap="round" />
-          </g>
-        );
-      case 'short':
-        return (
-          <g>
-            {cap(g.t + 14, 3, 5)}
-            <path d={`M ${50 - g.w * 0.7} ${g.t + 9} Q 50 ${g.t + 15} ${50 + g.w * 0.6} ${g.t + 8}`} stroke={hair.line} strokeWidth="0.8" fill="none" opacity="0.5" />
-            {shine()}
-          </g>
-        );
-      case 'sidepart': {
-        const px = 50 - g.w * 0.38;
-        return (
-          <g>
-            {cap(g.t + 13, 3.5, 5)}
-            {/* the swept side lifts over the parting */}
-            <path d={`M ${px} ${g.t + 1} C ${50 + g.w * 0.2} ${g.t - 4} ${50 + g.w * 0.9} ${g.t - 1} ${50 + g.w + 1} ${g.t + 12} C ${50 + g.w * 0.6} ${g.t + 5} ${50} ${g.t + 6} ${px + 1} ${g.t + 9} Z`} fill={hair.base} {...hairStroke} />
-            <path d={`M ${px} ${g.t + 0.5} L ${px + 0.6} ${g.t + 10}`} stroke={skin.shade} strokeWidth="0.9" strokeLinecap="round" />
-            <path d={`M ${px + 3} ${g.t + 1} C ${50 + g.w * 0.3} ${g.t - 2} ${50 + g.w * 0.7} ${g.t + 1} ${50 + g.w * 0.85} ${g.t + 7}`} stroke={hair.hi} strokeWidth="1.3" fill="none" opacity="0.65" strokeLinecap="round" />
-          </g>
-        );
-      }
-      case 'curtains': {
-        // centre parting, two curtains framing the forehead (very mid-90s)
-        const curtain = (s: number) =>
-          `M 50 ${g.t - 1} C ${50 + s * g.w * 0.5} ${g.t - 1} ${50 + s * (g.w + 1.5)} ${g.t + 4} ${50 + s * (g.w + 1.2)} ${g.t + 20} C ${50 + s * g.w * 0.8} ${g.t + 14} ${50 + s * g.w * 0.45} ${g.t + 15} ${50 + s * 2} ${g.t + 17} C ${50 + s * 3} ${g.t + 10} ${50 + s * 1.5} ${g.t + 4} 50 ${g.t - 1} Z`;
-        return (
-          <g>
-            {hairShadow(g.t + 15, 3, 5)}
-            <path d={capPath(g, g.t + 12, 3, 6)} fill={hair.base} />
-            <path d={curtain(-1)} fill={`url(#${uid}-hair)`} {...hairStroke} />
-            <path d={curtain(1)} fill={`url(#${uid}-hair)`} {...hairStroke} />
-            <path d={`M ${50 - 4} ${g.t + 4} Q ${50 - g.w * 0.6} ${g.t + 5} ${50 - g.w * 0.85} ${g.t + 14}`} stroke={hair.hi} strokeWidth="1.1" fill="none" opacity="0.6" />
-            <path d={`M ${50 + 4} ${g.t + 4} Q ${50 + g.w * 0.6} ${g.t + 5} ${50 + g.w * 0.85} ${g.t + 14}`} stroke={hair.hi} strokeWidth="1.1" fill="none" opacity="0.6" />
-          </g>
-        );
-      }
-      case 'quiff':
-        return (
-          <g>
-            {cap(g.t + 13, 3, 5)}
-            <path d={`M ${50 - g.w * 0.8} ${g.t + 6} C ${50 - g.w * 0.6} ${g.t - 14} ${50 + g.w * 0.9} ${g.t - 16} ${50 + g.w * 0.8} ${g.t + 4} C ${50 + g.w * 0.3} ${g.t - 4} ${50 - g.w * 0.3} ${g.t - 2} ${50 - g.w * 0.8} ${g.t + 6} Z`} fill={`url(#${uid}-hair)`} {...hairStroke} />
-            <path d={`M ${50 - g.w * 0.4} ${g.t - 3} C ${50} ${g.t - 11} ${50 + g.w * 0.5} ${g.t - 11} ${50 + g.w * 0.7} ${g.t - 2}`} stroke={hair.hi} strokeWidth="1.6" fill="none" opacity="0.7" />
-          </g>
-        );
-      case 'gelled': {
-        // wet-look: short faded sides, the top gelled up into glossy points
-        const spikes = Array.from({ length: 6 }).map((_, i) => {
-          const x = 50 - g.w * 0.62 + i * ((g.w * 1.24) / 5);
-          const tip = g.t - 8 + Math.abs(i - 2.5) * 1.8;
-          return `M ${x - 4.2} ${g.t + 5} Q ${x - 1} ${g.t - 1} ${x + 1.5} ${tip} Q ${x + 2} ${g.t} ${x + 4.2} ${g.t + 5} Z`;
-        });
-        return (
-          <g>
-            <path d={capPath(g, g.t + 14, 0.5, 5)} fill={hair.base} opacity="0.55" />
-            <path d={capPath(g, g.t + 14, 0.5, 5)} fill={`url(#${uid}-stubble)`} />
-            {hairShadow(g.t + 7, 3, 1)}
-            <path d={capPath(g, g.t + 7, 3, 1)} fill={hair.base} {...hairStroke} />
-            {spikes.map((d, i) => (
-              <path key={i} d={d} fill={`url(#${uid}-hair)`} {...hairStroke} />
-            ))}
-            {spikes.map((_, i) => {
-              const x = 50 - g.w * 0.62 + i * ((g.w * 1.24) / 5);
-              return <path key={`s${i}`} d={`M ${x - 0.5} ${g.t + 2} L ${x + 1} ${g.t - 4 + Math.abs(i - 2.5) * 1.6}`} stroke="#fff" strokeWidth="0.8" opacity="0.45" strokeLinecap="round" />;
-            })}
-          </g>
-        );
-      }
-      case 'frosted':
-        // textured curls with bleached tips (early-2000s frosted tips)
-        return (
-          <g>
-            {cap(g.t + 12, 2, 5)}
-            {Array.from({ length: 9 }).map((_, i) => {
-              const x = 50 - g.w * 0.78 + i * ((g.w * 1.56) / 8);
-              const y = g.t + 1 + (i % 2) * 2.5 - (4 - Math.abs(i - 4)) * 0.6;
-              return (
-                <g key={i}>
-                  <circle cx={x} cy={y} r="3.6" fill={hair.base} stroke={hair.line} strokeWidth="0.5" />
-                  <circle cx={x + 0.4} cy={y - 1.3} r="2.1" fill={FROST} />
-                </g>
-              );
-            })}
-          </g>
-        );
-      case 'curly':
-        return (
-          <g fill={hair.base}>
-            {cap(g.t + 12, 2, 6)}
-            {Array.from({ length: 11 }).map((_, i) => {
-              const a = Math.PI + (i / 10) * Math.PI;
-              return <circle key={i} cx={50 + Math.cos(a) * (g.w + 1)} cy={g.t + 12 + Math.sin(a) * 14} r="5.2" stroke={hair.line} strokeWidth="0.5" />;
-            })}
-            {Array.from({ length: 6 }).map((_, i) => (
-              <circle key={`h${i}`} cx={50 - g.w * 0.55 + i * g.w * 0.22} cy={g.t + 1 + (i % 2) * 2} r="2" fill={hair.hi} opacity="0.35" />
-            ))}
-          </g>
-        );
-      case 'afro':
-        return (
-          <g fill={hair.base}>
-            {cap(g.t + 12, 3, 8)}
-            {Array.from({ length: 14 }).map((_, i) => {
-              const a = Math.PI * 0.95 + (i / 13) * Math.PI * 1.1;
-              return <circle key={i} cx={50 + Math.cos(a) * (g.w + 10)} cy={g.t + 10 + Math.sin(a) * (g.w + 10)} r="7" />;
-            })}
-            <path d={`M ${50 - g.w * 0.6} ${g.t - 6} Q 50 ${g.t - 10} ${50 + g.w * 0.4} ${g.t - 7}`} stroke={hair.hi} strokeWidth="2" fill="none" opacity="0.3" strokeLinecap="round" />
-          </g>
-        );
-      case 'ponytail':
-      case 'slick':
-        // pulled straight back from the hairline
-        return (
-          <g>
-            {cap(g.t + 12, 2.5, 5)}
-            {[-0.45, -0.15, 0.15, 0.45].map((k) => (
-              <path key={k} d={`M ${50 + k * g.w * 1.2} ${g.t + 10} Q ${50 + k * g.w * 0.9} ${g.t + 2} ${50 + k * g.w * 0.6} ${g.t - 1.5}`} stroke={hair.hi} strokeWidth="0.9" fill="none" opacity="0.6" strokeLinecap="round" />
-            ))}
-          </g>
-        );
-      case 'mullet':
-        return (
-          <g>
-            {cap(g.t + 13, 3, 6)}
-            <path d={`M ${50 - g.w * 0.7} ${g.t + 9} Q 50 ${g.t + 14} ${50 + g.w * 0.6} ${g.t + 8}`} stroke={hair.line} strokeWidth="0.8" fill="none" opacity="0.5" />
-            {shine()}
-          </g>
-        );
-      case 'manbun':
-        return (
-          <g>
-            {cap(g.t + 12, 2.5, 5)}
-            <ellipse cx="50" cy={g.t - 5} rx="7" ry="6" fill={`url(#${uid}-hair)`} {...hairStroke} />
-            <path d={`M 45 ${g.t - 1} Q 50 ${g.t + 1} 55 ${g.t - 1}`} stroke={hair.hi} strokeWidth="1" fill="none" />
-          </g>
-        );
-      case 'long':
-        return (
-          <g>
-            {cap(g.t + 14, 3, 8)}
-            <path d={`M 50 ${g.t - 2} Q ${50 - g.w * 0.5} ${g.t + 8} ${50 - g.w - 1} ${g.m}`} stroke={hair.hi} strokeWidth="1.2" fill="none" opacity="0.5" />
-          </g>
-        );
-      case 'mohawk':
-        return (
-          <g>
-            <path d={capPath(g, g.t + 12, 0, 4)} fill={`url(#${uid}-stubble)`} opacity="0.7" />
-            <path d={`M 44 ${g.t + 8} Q 46 ${g.t - 6} 50 ${g.t - 15} Q 54 ${g.t - 6} 56 ${g.t + 8} Z`} fill={`url(#${uid}-hair)`} {...hairStroke} />
-            <path d={`M 49 ${g.t - 9} L 50 ${g.t + 4}`} stroke={hair.hi} strokeWidth="1" opacity="0.6" />
-          </g>
-        );
-      case 'dreads':
-        return (
-          <g>
-            {cap(g.t + 13, 3, 4)}
-            {Array.from({ length: 5 }).map((_, i) => (
-              <path key={i} d={`M ${50 - g.w * 0.7 + i * g.w * 0.35} ${g.t + 2} l 0 10`} stroke={hair.hi} strokeWidth="1" opacity="0.4" />
-            ))}
-          </g>
-        );
-      case 'spiky':
-        return (
-          <g>
-            {cap(g.t + 12, 2, 4)}
-            {Array.from({ length: 7 }).map((_, i) => {
-              const x = 50 - g.w * 0.85 + i * ((g.w * 1.7) / 6);
-              return <path key={i} d={`M ${x - 4} ${g.t + 4} L ${x + (i - 3) * 0.8} ${g.t - 9 + Math.abs(i - 3)} L ${x + 4} ${g.t + 4} Z`} fill={hair.base} {...hairStroke} />;
-            })}
-          </g>
-        );
-      case 'fringe':
-        return (
-          <g>
-            {cap(g.t + 18, 3, 3)}
-            <path d={`M ${50 - g.w} ${g.t + 15} Q 50 ${g.t + 22} ${50 + g.w} ${g.t + 15} L ${50 + g.w} ${g.t + 10} L ${50 - g.w} ${g.t + 10} Z`} fill={hair.base} />
-            {shine(0.45)}
-          </g>
-        );
-      case 'cornrows':
-        return (
-          <g>
-            {cap(g.t + 13, 1.5, 4)}
-            {Array.from({ length: 6 }).map((_, i) => {
-              const x = 50 - g.w * 0.75 + i * ((g.w * 1.5) / 5);
-              return <path key={i} d={`M ${x} ${g.t + 12} Q ${x * 0.9 + 5} ${g.t + 2} ${50 + (x - 50) * 0.4} ${g.t - 1}`} stroke={hair.hi} strokeWidth="1" fill="none" opacity="0.7" />;
-            })}
-          </g>
-        );
-      default:
-        return null;
-    }
-  })();
-
-  const facialHair = (() => {
-    const beardColor = hair.base;
-    const jaw = `M ${50 - g.w + 1} ${g.m + 2} C ${50 - g.w + 1} ${g.m + 14} ${50 - g.j} ${g.c - 3} 50 ${g.c + 1} C ${50 + g.j} ${g.c - 3} ${50 + g.w - 1} ${g.m + 14} ${50 + g.w - 1} ${g.m + 2}`;
-    const tache = `M 40.5 ${mouthY - 0.5} C 42 ${mouthY - 6.5} 47 ${mouthY - 7} 50 ${mouthY - 5.5} C 53 ${mouthY - 7} 58 ${mouthY - 6.5} 59.5 ${mouthY - 0.5} C 56 ${mouthY - 2.5} 53 ${mouthY - 3} 50 ${mouthY - 2.5} C 47 ${mouthY - 3} 44 ${mouthY - 2.5} 40.5 ${mouthY - 0.5} Z`;
-    switch (fh) {
-      case 'stubble':
-        return <path d={`${jaw} C ${50 + g.w - 6} ${mouthY - 2} ${50 - g.w + 6} ${mouthY - 2} ${50 - g.w + 1} ${g.m + 2} Z`} fill={`url(#${uid}-stubble)`} opacity="0.85" />;
-      case 'goatee':
-        // a solid chin beard joined to a moustache, clearly more than stubble
-        return (
-          <g fill={beardColor} stroke={hair.line} strokeWidth="0.4">
-            <path d={`M 43 ${mouthY - 1.5} C 45 ${mouthY - 6} 48 ${mouthY - 6} 50 ${mouthY - 5} C 52 ${mouthY - 6} 55 ${mouthY - 6} 57 ${mouthY - 1.5} C 54 ${mouthY - 3} 52 ${mouthY - 3} 50 ${mouthY - 2.5} C 48 ${mouthY - 3} 46 ${mouthY - 3} 43 ${mouthY - 1.5} Z`} />
-            <path d={`M 43.5 ${mouthY - 1} L 44.5 ${mouthY + 4} Q 50 ${g.c + 5} 55.5 ${mouthY + 4} L 56.5 ${mouthY - 1} Q 55 ${mouthY + 3} 50 ${mouthY + 3.8} Q 45 ${mouthY + 3} 43.5 ${mouthY - 1} Z`} />
-          </g>
-        );
-      case 'moustache':
-        return <path d={tache} fill={beardColor} stroke={hair.line} strokeWidth="0.4" />;
-      case 'beard':
-      case 'fullbeard': {
-        const full = fh === 'fullbeard';
-        const drop = full ? 6 : 2;
-        return (
-          <g fill={beardColor} stroke={hair.line} strokeWidth="0.4">
-            <path
-              d={`M ${50 - g.w + 0.5} ${g.m - 2} C ${50 - g.w} ${g.m + 16} ${50 - g.j - 2} ${g.c + drop} 50 ${g.c + drop + 2} C ${50 + g.j + 2} ${g.c + drop} ${50 + g.w} ${g.m + 16} ${50 + g.w - 0.5} ${g.m - 2} L ${50 + g.w - 4} ${g.m + 4} C ${50 + 9} ${mouthY - 4} ${50 - 9} ${mouthY - 4} ${50 - g.w + 4} ${g.m + 4} Z`}
-            />
-            <path d={tache} />
-            {full && <path d={`M ${50 - g.j} ${g.c - 1} Q 50 ${g.c + drop + 1} ${50 + g.j} ${g.c - 1}`} stroke={hair.hi} strokeWidth="0.8" fill="none" opacity="0.4" />}
-          </g>
-        );
-      }
-      default:
-        return null;
-    }
-  })();
+  // Organic hair and facial hair (see ./portrait): shapes vary per player, shaded in the brand style.
+  const dark = traits.hairColor === 'black' || traits.hairColor === 'darkbrown';
+  const tone: HairTone = { base: hair.base, hi: hair.hi, sh: mix(hair.base, '#000000', dark ? 0.35 : 0.24), flow: dark ? hair.hi : mix(hair.base, '#000000', 0.42) };
+  const { back: hairBack, front: hairFront } = hairLayers({ g, tone, style: hs, seed: h, uid, ink: INK, frost: FROST, skinShade: skin.shade });
+  const facial = facialHair({ g, mouthY, tone, ink: INK, seed: h, uid, style: fh });
 
   const acc = traits.accessory;
   const browColor = traits.hairColor === 'bleached' || traits.hairColor === 'blonde' ? '#8a6a30' : traits.hairColor === 'grey' ? '#6b6b6b' : hair.base;
@@ -479,10 +277,12 @@ function PlayerCaricatureImpl({ traits, kitPrimaryColor, kitSecondaryColor, kitS
       {/* shirt, with the neck opening cut into it */}
       <path d={shirt} fill={kitPrimaryColor} />
       <g clipPath={`url(#${uid}-shirt)`}>
+        {kit && <KitPattern kit={kit} />}
         {/* raglan sleeves in the sleeve colour */}
         <path d="M 4 110 C 6 96 15 89 31 85.4 C 27 93 23 101 22 112 Z" fill={sleeve} />
         <path d="M 96 110 C 94 96 85 89 69 85.4 C 73 93 77 101 78 112 Z" fill={sleeve} />
         <path d="M 31 85.4 C 27 93 23 101 22 112 M 69 85.4 C 73 93 77 101 78 112" stroke="rgba(0,0,0,.22)" strokeWidth="0.7" fill="none" />
+        {kit?.piping && <path d="M 31.6 85.4 C 27.6 93 23.6 101 22.6 112 M 68.4 85.4 C 72.4 93 76.4 101 77.4 112" stroke={kit.trim} strokeWidth="1.1" fill="none" />}
         {/* soft folds */}
         <path d="M 38 100 Q 42 104 40 110 M 62 100 Q 58 104 60 110" stroke="rgba(0,0,0,.12)" strokeWidth="1.2" fill="none" />
         {/* shadow cast by the head */}
@@ -505,6 +305,7 @@ function PlayerCaricatureImpl({ traits, kitPrimaryColor, kitSecondaryColor, kitS
           <path d={neckEdge} fill="none" stroke={collar} strokeWidth="2.9" strokeLinejoin="round" strokeLinecap="round" />
         </g>
       )}
+      {kit && <KitBadges kit={kit} />}
       <path d={shirt} fill="none" stroke={INK} strokeWidth="1.1" strokeLinejoin="round" />
       {acc === 'captainband' && <rect x="12" y="98" width="11" height="5" rx="1" fill="#facc15" stroke="#000" strokeWidth="0.5" transform="rotate(-14 17 100)" />}
       {acc === 'snood' && <path d="M 39 74 L 39 88 Q 50 93 61 88 L 61 74 Q 50 78 39 74 Z" fill="#111" />}
@@ -522,7 +323,7 @@ function PlayerCaricatureImpl({ traits, kitPrimaryColor, kitSecondaryColor, kitS
       <ellipse cx={50 - g.w * 0.6} cy={mouthY - 4} rx="4" ry="2.4" fill={skin.blush} opacity="0.32" />
       <ellipse cx={50 + g.w * 0.6} cy={mouthY - 4} rx="4" ry="2.4" fill={skin.blush} opacity="0.32" />
 
-      {facialHair}
+      {facial}
 
       {/* eyes: almond shape, coloured iris, a lid line that sets the mood */}
       {[-1, 1].map((s) => {

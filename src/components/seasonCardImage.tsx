@@ -2,7 +2,7 @@ import { flushSync } from 'react-dom';
 import { createRoot } from 'react-dom/client';
 import { FORMATIONS } from '../data/formations';
 import { getClub } from '../data/clubs';
-import { collarForSeason } from '../data/kits';
+import { collarForSeason, kitForCard } from '../data/kits';
 import { devTheme } from '../data/devThemes';
 import { MANAGERS_BY_ID } from '../data/managers';
 import { gradeLabel, ordinal } from '../engine/seasonSimulator';
@@ -52,6 +52,7 @@ function portraitImage(card: PlayerCard): Promise<HTMLImageElement> {
         kitSleeveColor={kit.sleeve}
         kitCollarColor={kit.collar}
         collarStyle={collarForSeason(card.season)}
+        kit={kitForCard(card, theme?.fanClub)}
         seed={card.id}
         size={200}
       />,

@@ -85,6 +85,29 @@ export interface CaricatureTraits {
 
 export type CollarStyle = 'crew' | 'v' | 'polo';
 
+export type KitPattern = 'plain' | 'stripes' | 'hoops' | 'halves' | 'sash' | 'pinstripes' | 'shadow' | 'chestband' | 'yoke';
+
+/** A shirt design for one club and season (or a goalkeeper kit), drawn in vector on the portrait. */
+export interface KitDesign {
+  body: string;
+  sleeve: string;
+  collar: string;
+  /** Piping, cuffs and other small details. */
+  trim: string;
+  collarStyle: CollarStyle;
+  pattern: KitPattern;
+  patternColor: string;
+  /** Stripes or hoops across the shirt. */
+  bands: number;
+  /** Raglan-seam piping in the trim colour. */
+  piping: boolean;
+  /** Our own badge (never a real crest): a shape in the club's colours. */
+  badge: { shape: 'shield' | 'round' | 'crest'; fill: string; band: string };
+  /** A small generic maker's mark (never a real brand). */
+  maker: { mark: 'chevron' | 'bars' | 'diamond' | 'dot'; color: string };
+  gk: boolean;
+}
+
 export interface CaricatureProps {
   traits: CaricatureTraits;
   kitPrimaryColor: string;
@@ -93,6 +116,8 @@ export interface CaricatureProps {
   kitCollarColor?: string; // defaults to kitSecondaryColor
   /** Neckline: polo collar (90s), V-neck (2000s) or crew neck (modern). Defaults from the seed. */
   collarStyle?: CollarStyle;
+  /** A full kit design; when set it replaces the plain kit colours. */
+  kit?: KitDesign;
   seed: string;
   size?: number;
   className?: string;
