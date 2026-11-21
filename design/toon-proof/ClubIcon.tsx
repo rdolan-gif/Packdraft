@@ -403,7 +403,17 @@ const ICONS: Record<string, () => JSX.Element> = {
 
 };
 
-export function ClubIcon({ code, size = 32, ring = '#ffffff' }: { code: string; size?: number; ring?: string }) {
+/** Google Flow club icons (cut-out PNGs); the dev team keeps our own shield. */
+const FLOW_ICONS = import.meta.glob('./flow-icons/*.png', { eager: true, query: '?url', import: 'default' }) as Record<string, string>;
+
+export function ClubIcon({ code, size = 32, ring = '#ffffff', mine = false }: { code: string; size?: number; ring?: string; mine?: boolean }) {
+  const flow = !mine && FLOW_ICONS[`./flow-icons/${code}.png`];
+  if (flow)
+    return (
+      <span style={{ width: size, height: size, borderRadius: '50%', background: ring, border: `${Math.max(1.5, size / 22)}px solid ${K}`, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', flex: 'none' }}>
+        <img src={flow} alt="" style={{ width: '80%', height: '80%', objectFit: 'contain', maxWidth: 'none' }} />
+      </span>
+    );
   const draw = ICONS[code];
   return (
     <svg viewBox="-3 -3 46 46" width={size} height={size} aria-hidden="true">
