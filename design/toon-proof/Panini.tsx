@@ -6,6 +6,8 @@ import { kitForCard } from '../data/kits';
 import { eraColour } from '../data/eraColours';
 import { Crest } from '../components/Crest';
 import { Toon } from './Toon';
+import { ClubIcon } from './ClubIcon';
+import { Flag } from './Flag';
 import './panini.css';
 
 const STATS: [keyof PlayerCard['stats'], string][] = [['pac', 'PAC'], ['sho', 'SHO'], ['pas', 'PAS'], ['dri', 'DRI'], ['def', 'DEF'], ['phy', 'PHY']];
@@ -100,7 +102,7 @@ export function TradingCard({ card }: { card: PlayerCard }) {
         <div className={`tc-photo ${shiny(card) ? 'pn-foil' : ''}`}>
           {shiny(card) && <Sparkles />}
           <div className="tc-toon">
-            <Toon traits={card.traits} kit={kitForCard(card)} seed={card.id} size={200} boil={boil(card)} />
+            <Toon traits={card.traits} kit={kitForCard(card)} seed={card.id} size={158} boil={boil(card)} />
           </div>
           <div className="tc-star">
             <b>{card.ovr}</b>
@@ -109,13 +111,16 @@ export function TradingCard({ card }: { card: PlayerCard }) {
           <div className="tc-side">
             {card.season} · {card.tier === 'SECRET_DEV' ? 'SECRET RARE' : card.era}
           </div>
-          <div className="tc-badge">{club.short}</div>
+          <div className="tc-badge">
+            <ClubIcon code={card.club} size={40} />
+          </div>
         </div>
         <div className="tc-ribbon">
           <b>{card.shortName}</b>
         </div>
         <div className="tc-sub">
-          {card.archetype} · {card.nation}
+          <Flag nation={card.nation} height={13} />
+          <span>{card.archetype}</span>
         </div>
         <div className="tc-stats">
           {stats.map(([k, l]) => (

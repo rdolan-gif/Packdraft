@@ -365,3 +365,11 @@
 .pn-stats { padding-bottom: 11px; }
 .pn-toon { bottom: -6px; }
 .tc-sub { margin-top: 9px; }
+/* v2: club icon badge, flag, zoomed-out portrait */
+.tc-badge { background: none; border: none; width: auto; height: auto; top: 6px; right: 6px; }
+.tc-toon { bottom: -4px; }
+.tc-sub { display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 11px; }
+.tc-side { top: 52px; }
+.tc-toon { bottom: 0; }
+.tc-ribbon { margin-top: -14px; }
+.pn-toon { bottom: -26px; }

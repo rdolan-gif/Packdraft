@@ -9,7 +9,7 @@ const INK = '#161c2b';
 const CX = 100;
 const CY = 102; // widest point of the skull (cheekbones)
 const W = 200;
-const H = 230;
+const H = 252; // a deep chest so the kit shows on cards
 
 const SKIN: Record<SkinTone, { base: string; shade: string; deep: string }> = {
   pale: { base: '#f6d3c0', shade: '#e6b29a', deep: '#c98d74' },
@@ -626,14 +626,14 @@ function Shirt({ kit, uid }: { kit: KitDesign; uid: string }) {
     const n = kit.pattern === 'stripes' ? 7 : 16;
     for (let i = 0; i < n; i++) {
       const x = (W / n) * i + W / n / 2;
-      pat.push(kit.pattern === 'stripes' ? <rect key={i} x={x - W / n / 4} y={180} width={W / n / 2} height={60} fill={pc} /> : <rect key={i} x={x} y={180} width={1.2} height={60} fill={pc} opacity={0.6} />);
+      pat.push(kit.pattern === 'stripes' ? <rect key={i} x={x - W / n / 4} y={180} width={W / n / 2} height={80} fill={pc} /> : <rect key={i} x={x} y={180} width={1.2} height={80} fill={pc} opacity={0.6} />);
     }
-  } else if (kit.pattern === 'hoops') for (let i = 0; i < 3; i++) pat.push(<rect key={i} x={0} y={202 + i * 14} width={W} height={7} fill={pc} />);
-  else if (kit.pattern === 'halves') pat.push(<rect key="h" x={CX} y={180} width={CX} height={60} fill={pc} />);
-  else if (kit.pattern === 'sash') pat.push(<path key="s" d={`M 40 180 L 70 180 L 170 240 L 140 240 Z`} fill={pc} />);
+  } else if (kit.pattern === 'hoops') for (let i = 0; i < 4; i++) pat.push(<rect key={i} x={0} y={202 + i * 14} width={W} height={7} fill={pc} />);
+  else if (kit.pattern === 'halves') pat.push(<rect key="h" x={CX} y={180} width={CX} height={80} fill={pc} />);
+  else if (kit.pattern === 'sash') pat.push(<path key="s" d={`M 40 180 L 70 180 L 200 262 L 170 262 Z`} fill={pc} />);
   else if (kit.pattern === 'chestband') pat.push(<rect key="c" x={0} y={214} width={W} height={9} fill={pc} />);
   else if (kit.pattern === 'yoke') pat.push(<path key="y" d={`M 0 180 L ${W} 180 L ${W} 208 Q ${CX} 222 0 208 Z`} fill={pc} />);
-  else if (kit.pattern === 'shadow') for (let i = -4; i < 10; i++) pat.push(<path key={i} d={`M ${i * 26} 240 L ${i * 26 + 40} 180 L ${i * 26 + 50} 180 L ${i * 26 + 10} 240 Z`} fill={pc} opacity={0.12} />);
+  else if (kit.pattern === 'shadow') for (let i = -4; i < 10; i++) pat.push(<path key={i} d={`M ${i * 26} 262 L ${i * 26 + 54} 180 L ${i * 26 + 64} 180 L ${i * 26 + 10} 262 Z`} fill={pc} opacity={0.12} />);
   const collar =
     kit.collarStyle === 'polo' ? (
       <g fill={kit.collar} stroke={INK} strokeWidth={2.2} strokeLinejoin="round">
