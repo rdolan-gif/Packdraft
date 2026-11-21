@@ -13,10 +13,20 @@ import './panini.css';
 const STATS: [keyof PlayerCard['stats'], string][] = [['pac', 'PAC'], ['sho', 'SHO'], ['pas', 'PAS'], ['dri', 'DRI'], ['def', 'DEF'], ['phy', 'PHY']];
 const GK: [keyof PlayerCard['stats'], string][] = [['pac', 'DIV'], ['sho', 'HAN'], ['pas', 'KIC'], ['dri', 'REF'], ['def', 'SPD'], ['phy', 'POS']];
 
+const lum = (c: string) => {
+  const [r, g, b] = [1, 3, 5].map((i) => parseInt(c.slice(i, i + 2), 16) / 255);
+  return 0.299 * r + 0.587 * g + 0.114 * b;
+};
+/** Sunburst colour: the club's second colour, unless it's near-white (it would vanish), then a tint of the main colour. */
+function burst(primary: string, secondary: string) {
+  if (lum(secondary) < 0.85) return secondary;
+  return lum(primary) < 0.2 ? '#8b93a3' : `color-mix(in srgb, ${primary} 55%, white)`;
+}
+
 function vars(card: PlayerCard): CSSProperties {
   const club = getClub(card.club);
   const era = eraColour(card.era);
-  return { ['--c1' as string]: club.primary, ['--c2' as string]: club.secondary, ['--ca' as string]: club.accent, ['--e1' as string]: era.light, ['--e2' as string]: era.mid, ['--e3' as string]: era.dark } as CSSProperties;
+  return { ['--frame' as string]: lum(club.primary) > 0.85 ? club.secondary : club.primary, ['--bg' as string]: burst(club.primary, club.secondary), ['--c1' as string]: club.primary, ['--c2' as string]: club.secondary, ['--ca' as string]: club.accent, ['--e1' as string]: era.light, ['--e2' as string]: era.mid, ['--e3' as string]: era.dark } as CSSProperties;
 }
 const shiny = (c: PlayerCard) => c.tier === 'RISING_WORLD' || c.tier === 'PRIME_ICON' || c.tier === 'SECRET_DEV';
 const boil = (c: PlayerCard) => c.tier === 'PRIME_ICON' || c.tier === 'SECRET_DEV';

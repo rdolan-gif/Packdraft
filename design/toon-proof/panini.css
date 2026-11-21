@@ -373,3 +373,13 @@
 .tc-toon { bottom: 0; }
 .tc-ribbon { margin-top: -14px; }
 .pn-toon { bottom: -26px; }
+
+/* sunburst uses --bg (never near-white) */
+.tc-photo {
+  background:
+    repeating-conic-gradient(from 0deg at 50% 62%, rgba(255, 255, 255, 0.2) 0 9deg, transparent 9deg 18deg),
+    radial-gradient(circle at 50% 62%, color-mix(in srgb, var(--bg) 55%, white), var(--bg) 75%);
+}
+
+/* frame: the club's main colour, or its second colour when the main one is near-white */
+.tc-STANDARD .tc-frame { background: var(--frame); }
