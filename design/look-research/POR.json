@@ -10,8 +10,8 @@
  },
  "cards": {
   "james_david_0708": {
-   "skinTone": "dark",
-   "hairStyle": "bald",
+   "skinTone": "brown",
+   "hairStyle": "curly",
    "hairColor": "black",
    "facialHair": "none",
    "headShape": "long",
@@ -20,8 +20,8 @@
    "eyes": "standard",
    "nose": "standard",
    "detail": "none",
-   "notes": "37 years old, cleanly shaved head, tall and long-faced, broad toothy smile",
-   "confidence": "high"
+   "notes": "short tight black curls cropped close, light-to-medium brown skin, tall and long-faced, broad toothy smile",
+   "confidence": "medium (Commons photo 2005)"
   },
   "campbell_sol_0708": {
    "skinTone": "deep",
@@ -128,12 +128,12 @@
    "facialHair": "stubble",
    "headShape": "oval",
    "expression": "cool",
-   "accessory": "alice",
+   "accessory": "none",
    "eyes": "heavy",
    "nose": "standard",
    "detail": "none",
-   "notes": "straight brown hair to the chin held back by a thin black alice band, stubble, laid-back look",
-   "confidence": "high"
+   "notes": "straight brown hair to the shoulders, heavy stubble, laid-back look",
+   "confidence": "high (Commons photo 2009)"
   },
   "mendes_pedro_0708": {
    "skinTone": "olive",
@@ -161,11 +161,11 @@
    "nose": "bulbous",
    "detail": "none",
    "notes": "34 years old, short brown hair, cheeky grin, ruddy cheeks",
-   "confidence": "medium"
+   "confidence": "medium (Commons photo 2007, after this season)"
   },
   "kanu_nwankwo_0708": {
    "skinTone": "deep",
-   "hairStyle": "buzz",
+   "hairStyle": "curly",
    "hairColor": "black",
    "facialHair": "moustache",
    "headShape": "long",
@@ -174,8 +174,8 @@
    "eyes": "standard",
    "nose": "standard",
    "detail": "none",
-   "notes": "very tall, very long narrow face, close-cropped hair, thin moustache, big smile",
-   "confidence": "medium"
+   "notes": "very tall, very long narrow face, short tight black curls on top, thin moustache, big smile",
+   "confidence": "medium (Commons photo 2007)"
   },
   "crouch_peter_0809": {
    "skinTone": "pale",
