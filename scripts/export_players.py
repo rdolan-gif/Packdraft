@@ -17,7 +17,7 @@ from openpyxl.utils import get_column_letter as L
 from openpyxl.worksheet.datavalidation import DataValidation
 
 from pd38_schema import (ERA_COLOUR_NAMES, BASE_COLS, ACCESSORIES, ARCHETYPES, CLUB_HEADERS, CLUB_ROWS, CLUBS, COL, ERAS, EXPRESSIONS, FACIAL_HAIR, HAIR_COLOURS, HAIR_STYLES, HEAD_SHAPES, HEADERS,
-                         OVR_MAX, OVR_MIN, POSITION_GROUP, POSITIONS, ROOT, SKIN, STAT_KEYS, STAT_MAX, STAT_MIN, TIERS, TRAIT_COLS)
+                         OVR_MAX, OVR_MIN, POSITION_GROUP, POSITIONS, ROOT, SKIN, STAT_KEYS, STAT_MAX, STAT_MIN, TIERS, TRAIT_COLS, TRAIT_DEFAULTS, EYES, NOSES, DETAILS)
 
 OUT = sys.argv[1] if len(sys.argv) > 1 else str(ROOT / "PackDraft38_Players.xlsx")
 players = json.loads(subprocess.check_output(["node", "scripts/dump-players.mjs"], cwd=ROOT))
@@ -58,7 +58,24 @@ guide = [
     ("Archetype: from the dropdown. Managers' bonuses look for specific archetypes.", ""),
     ("PAC to PHY follow OVR: change a card's OVR and every stat moves by the same amount from its starting value (the grey Base columns at the far right). Type a number into a stat to set it by hand instead.", ""),
     (f"PAC to PHY: {STAT_MIN} to {STAT_MAX}. Goalkeepers: PAC = speed, SHO = not used (leave 30-40), PAS = kicking, DRI = handling, DEF = shot-stopping, PHY = positioning.", ""),
-    ("Look columns (Skin Tone to Accessory): change the caricature. Pick from the dropdowns.", ""),
+    ("Look columns (Skin Tone to Face Detail): describe how the player looks. Pick from the dropdowns. Eyes, Nose and Face Detail can be left blank (= standard / none).", ""),
+    ("Look Notes: free text for anything the dropdowns can't say, e.g. 'curtains bleached at the front', 'big ears', 'headband pushed back'. Used when making portrait prompts.", ""),
+    ("", ""),
+    ("LOOK OPTIONS", "h"),
+    ("Skin Tone: pale · freckled (pale with freckles) · light · tan · olive · brown · dark (dark brown) · deep", ""),
+    ("Head Shape: round · oval · square (square jaw) · long (long and narrow) · heart (wide cheeks, pointed chin) · flattop (wide, flat-topped skull) · pear (narrow top, heavy jaw) · rugby (pointed top and chin)", ""),
+    ("Hair Style, short: bald · buzz · short (short textured) · quiff · slick (slicked back) · sidepart · fringe · curtains (90s centre parting) · bowl · flattop", ""),
+    ("Hair Style, spiked: spiky · frosted (frosted tips) · gelled (wet-look spikes)", ""),
+    ("Hair Style, fades & shaved: fade (skin fade, crisp line-up) · hightop (high-top fade) · shavedline (shaved head with a line design) · mohawk", ""),
+    ("Hair Style, textured: curly (tight curls) · afro · twists · cornrows (flat to the head) · braids (with hanging ends) · dreads", ""),
+    ("Hair Style, long: long (centre parting) · longwavy · ponytail · manbun · mullet · receding (receding hairline)", ""),
+    ("Hair Colour: black · darkbrown · brown · blonde · ginger · grey · bleached (platinum)", ""),
+    ("Facial Hair: none · stubble · moustache · goatee · soulpatch · chinstrap · beard (short) · fullbeard", ""),
+    ("Expression: calm (calm smile) · grin · smirk · determined · roar · cool (relaxed, heavy lids) · focused · tongue (cheeky tongue out)", ""),
+    ("Eyes: standard · dot (small dot eyes) · heavy (heavy-lidded) · wide · narrow", ""),
+    ("Nose: standard · button · long · bulbous · hooked", ""),
+    ("Accessory: none · headband · sweatband · alice (alice band) · scrumcap · goggles · facemask (clear mask) · bandage (head bandage) · earring · captainband · snood", ""),
+    ("Face Detail: none · plaster (on the cheek) · nosestrip · scar (through the eyebrow) · blackeye · gaptooth", ""),
     ("", ""),
     ("TIER RULES (card type)", "h"),
 ]
@@ -110,6 +127,9 @@ lists = [
     ("Head Shape", HEAD_SHAPES),
     ("Expression", EXPRESSIONS),
     ("Accessory", ACCESSORIES),
+    ("Eyes", EYES),
+    ("Nose", NOSES),
+    ("Face Detail", DETAILS),
     ("Tier", [t[0] for t in TIERS]),
     ("Tier Name", [t[1] for t in TIERS]),
     ("Tier Min OVR", [t[2] for t in TIERS]),
@@ -128,6 +148,7 @@ ls.cell(row=1, column=len(lists) + 2, value="Allowed values come from the game c
 # ───────────────────────── One tab per club ─────────────────────────
 # Each club's cards on their own tab (sorted by position, then rarity, then OVR), so the sheet is easy to
 # work through club by club. The importer reads every tab that has these columns.
+LOOK_NOTES = json.loads((ROOT / 'design/look-notes.json').read_text()) if (ROOT / 'design/look-notes.json').exists() else {}
 POSITION_ORDER = ["GK", "RB", "CB", "LB", "CDM", "CM", "CAM", "RM", "LM", "RW", "LW", "ST"]
 TIER_RANK = {t[0]: i for i, t in enumerate(TIERS)}
 SPARE_ROWS = 40  # empty rows (with formulas and dropdowns) for adding players to a club
@@ -174,7 +195,8 @@ def player_sheet(title, plist):
             "Season": p["season"], "Born": (datetime.date.fromisoformat(p["born"]) if p.get("born") else None), "Era Label": p["era"], "OVR": p["ovr"], "Positions": "/".join(p["positions"]),
             "Club": p["club"], "Archetype": p["archetype"],
             **{h: p["stats"][k] for h, k in STAT_KEYS},
-            **{h: p["traits"][k] for h, k, _ in TRAIT_COLS},
+            **{h: p["traits"].get(k, TRAIT_DEFAULTS.get(k)) for h, k, _ in TRAIT_COLS},
+            "Look Notes": LOOK_NOTES.get(p["id"], ""),
         }
         for h, v in values.items():
             c = ws.cell(row=r, column=COL[h], value=v)
@@ -208,7 +230,7 @@ def player_sheet(title, plist):
 
     # Column widths
     widths = {"Born": 12, "Age (auto)": 7, "Card ID": 24, "Player ID": 22, "Full Name": 24, "Short Name": 16, "Nation": 18, "Season": 9, "Era Label": 13, "OVR": 7, "Tier (auto)": 14, "Card Colour (auto)": 22,
-              "Positions": 12, "Club": 8, "Archetype": 21, "Primary Pos (auto)": 11, "Group (auto)": 9}
+              "Positions": 12, "Club": 8, "Archetype": 21, "Primary Pos (auto)": 11, "Group (auto)": 9, "Look Notes": 40}
     for h, ci in COL.items():
         ws.column_dimensions[L(ci)].width = widths.get(h, 7 if h in dict(STAT_KEYS) else 13)
     for h in BASE_COLS:

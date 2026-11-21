@@ -30,6 +30,11 @@ FACIAL_HAIR = union("FacialHair")
 HEAD_SHAPES = union("HeadShape")
 EXPRESSIONS = union("Expression")
 ACCESSORIES = union("Accessory")
+EYES = union("EyeStyle")
+NOSES = union("NoseStyle")
+DETAILS = union("FaceDetail")
+# Optional look columns: a blank cell means this default (and defaults are left out of players.ts)
+TRAIT_DEFAULTS = {"eyes": "standard", "nose": "standard", "detail": "none"}
 CLUBS = re.findall(r"code: '([A-Z]{3})', name: '([^']+)'", CLUBS_TS)  # [(code, name)]
 # Full rows: code, name, short, primary (shirt), secondary (stripe/badge text/table), accent (badge outline), sleeve, collar
 CLUB_ROWS = re.findall(
@@ -54,12 +59,16 @@ TRAIT_COLS = [
     ("Head Shape", "headShape", HEAD_SHAPES),
     ("Expression", "expression", EXPRESSIONS),
     ("Accessory", "accessory", ACCESSORIES),
+    ("Eyes", "eyes", EYES),
+    ("Nose", "nose", NOSES),
+    ("Face Detail", "detail", DETAILS),
 ]
 
 HEADERS = (
     ["Card ID", "Player ID", "Full Name", "Short Name", "Nation", "Season", "Born", "Age (auto)", "Era Label", "OVR", "Tier (auto)", "Card Colour (auto)", "Positions", "Club", "Archetype"]
     + [h for h, _ in STAT_KEYS]
     + [h for h, _, _ in TRAIT_COLS]
+    + ["Look Notes"]
     + ["Primary Pos (auto)", "Group (auto)"]
     + ["Base OVR"] + [f"Base {h}" for h, _ in STAT_KEYS]
 )

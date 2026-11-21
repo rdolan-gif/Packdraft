@@ -15,6 +15,7 @@ const INK = '#161c2b';
 
 const SKIN: Record<SkinTone, { base: string; shade: string; blush: string; line: string }> = {
   pale: { base: '#f6d7c3', shade: '#e3b59c', blush: '#f0a49a', line: '#b98670' },
+  freckled: { base: '#f6d7c3', shade: '#e3b59c', blush: '#f0a49a', line: '#b98670' },
   light: { base: '#efc4a1', shade: '#d9a27c', blush: '#e8907c', line: '#ad7552' },
   tan: { base: '#d9a27a', shade: '#bf8159', blush: '#cf7a62', line: '#94603d' },
   olive: { base: '#c99468', shade: '#a87549', blush: '#b8705a', line: '#835632' },
@@ -48,6 +49,9 @@ const HEAD: Record<HeadShape, HeadGeo> = {
   square: { t: 22, w: 23, j: 20, c: 75, m: 48 },
   long: { t: 15, w: 19, j: 12, c: 81, m: 46 },
   heart: { t: 22, w: 25, j: 10, c: 76, m: 43 },
+  flattop: { t: 21, w: 24, j: 18, c: 75, m: 46 },
+  pear: { t: 24, w: 22, j: 21, c: 77, m: 50 },
+  rugby: { t: 17, w: 21, j: 11, c: 79, m: 46 },
 };
 
 function hash(s: string) {
@@ -222,8 +226,10 @@ function PlayerCaricatureImpl({ traits, kitPrimaryColor: plainBody, kitSecondary
   const ex = traits.expression;
   const angry = ex === 'roar' || ex === 'determined' || ex === 'focused';
   const lidded = ex === 'cool' || ex === 'smirk';
-  const hs = traits.hairStyle;
-  const fh = traits.facialHair;
+  const HAIR_FALLBACK: Partial<Record<string, typeof traits.hairStyle>> = { braids: 'cornrows', fade: 'buzz', twists: 'curly', flattop: 'buzz', shavedline: 'buzz', hightop: 'short', bowl: 'fringe', longwavy: 'long' };
+  const FACIAL_FALLBACK: Partial<Record<string, typeof traits.facialHair>> = { chinstrap: 'beard', soulpatch: 'goatee' };
+  const hs = HAIR_FALLBACK[traits.hairStyle] ?? traits.hairStyle;
+  const fh = FACIAL_FALLBACK[traits.facialHair] ?? traits.facialHair;
   const fair = traits.skinTone === 'pale' || traits.skinTone === 'light';
   const iris = fair && (traits.hairColor === 'blonde' || traits.hairColor === 'bleached' || traits.hairColor === 'ginger' || (h >> 11) % 4 === 0) ? '#4b7bb0' : '#4a2c18';
   const neck = collarStyle ?? (['crew', 'v', 'polo'] as const)[(h >> 9) % 3];

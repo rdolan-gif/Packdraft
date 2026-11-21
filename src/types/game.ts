@@ -44,7 +44,7 @@ export type Archetype =
 
 // ───────────────────────────── Caricature traits ─────────────────────────────
 
-export type SkinTone = 'pale' | 'light' | 'tan' | 'olive' | 'brown' | 'dark' | 'deep';
+export type SkinTone = 'pale' | 'freckled' | 'light' | 'tan' | 'olive' | 'brown' | 'dark' | 'deep';
 export type HairStyle =
   | 'buzz'
   | 'short'
@@ -66,12 +66,23 @@ export type HairStyle =
   | 'curtains'
   | 'sidepart'
   | 'frosted'
-  | 'gelled';
+  | 'gelled'
+  | 'braids'
+  | 'fade'
+  | 'twists'
+  | 'flattop'
+  | 'shavedline'
+  | 'hightop'
+  | 'bowl'
+  | 'longwavy';
 export type HairColor = 'black' | 'darkbrown' | 'brown' | 'blonde' | 'ginger' | 'grey' | 'bleached';
-export type FacialHair = 'none' | 'stubble' | 'goatee' | 'beard' | 'fullbeard' | 'moustache';
-export type HeadShape = 'round' | 'oval' | 'square' | 'long' | 'heart';
-export type Expression = 'grin' | 'smirk' | 'determined' | 'roar' | 'cool' | 'focused' | 'tongue';
-export type Accessory = 'none' | 'headband' | 'scrumcap' | 'goggles' | 'alice' | 'earring' | 'captainband' | 'snood';
+export type FacialHair = 'none' | 'stubble' | 'goatee' | 'beard' | 'fullbeard' | 'moustache' | 'chinstrap' | 'soulpatch';
+export type HeadShape = 'round' | 'oval' | 'square' | 'long' | 'heart' | 'flattop' | 'pear' | 'rugby';
+export type Expression = 'grin' | 'smirk' | 'determined' | 'roar' | 'cool' | 'focused' | 'tongue' | 'calm';
+export type Accessory = 'none' | 'headband' | 'sweatband' | 'scrumcap' | 'goggles' | 'alice' | 'earring' | 'captainband' | 'snood' | 'facemask' | 'bandage';
+export type EyeStyle = 'standard' | 'dot' | 'heavy' | 'wide' | 'narrow';
+export type NoseStyle = 'standard' | 'button' | 'long' | 'bulbous' | 'hooked';
+export type FaceDetail = 'none' | 'plaster' | 'nosestrip' | 'scar' | 'blackeye' | 'gaptooth';
 
 export interface CaricatureTraits {
   skinTone: SkinTone;
@@ -81,6 +92,10 @@ export interface CaricatureTraits {
   headShape: HeadShape;
   expression: Expression;
   accessory: Accessory;
+  /** Optional extras (default: standard / standard / none). */
+  eyes?: EyeStyle;
+  nose?: NoseStyle;
+  detail?: FaceDetail;
 }
 
 export type CollarStyle = 'crew' | 'v' | 'polo';

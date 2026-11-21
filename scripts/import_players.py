@@ -14,7 +14,7 @@ from collections import OrderedDict
 
 from openpyxl import load_workbook
 
-from pd38_schema import (TIERS, ARCHETYPES, CLUB_COLOUR_COLS, CLUB_ROWS, CLUBS, COL, ERAS, OVR_MAX, OVR_MIN, POSITION_GROUP, POSITIONS, ROOT, STAT_KEYS, STAT_MAX, STAT_MIN, TRAIT_COLS)
+from pd38_schema import (TIERS, ARCHETYPES, CLUB_COLOUR_COLS, CLUB_ROWS, CLUBS, COL, ERAS, OVR_MAX, OVR_MIN, POSITION_GROUP, POSITIONS, ROOT, STAT_KEYS, STAT_MAX, STAT_MIN, TRAIT_COLS, TRAIT_DEFAULTS)
 
 if len(sys.argv) < 2:
     raise SystemExit(__doc__)
@@ -42,7 +42,8 @@ def use_tab(name):
     ws, vws = wb[name], vwb[name]
     header = [str(c.value).strip() if c.value is not None else "" for c in ws[1]]
     col = {h: i for i, h in enumerate(header)}
-    missing = [h for h in COL if h not in col and "(auto)" not in h and h not in ("Card ID", "Born") and not h.startswith("Base ")]  # Born is optional (older sheets)
+    optional = ("Card ID", "Born", "Eyes", "Nose", "Face Detail", "Look Notes")  # optional (older sheets don't have them)
+    missing = [h for h in COL if h not in col and "(auto)" not in h and h not in optional and not h.startswith("Base ")]
     if missing:
         raise SystemExit(f"Missing columns on the {name} tab: {', '.join(missing)}")
 
@@ -110,6 +111,7 @@ if "Clubs" in wb.sheetnames:
         clubs_new.append((code, name, short, *[vals[f].lower() for f in FIELDS]))
 club_codes = {c[0] for c in clubs_new} if clubs_new else {c for c, _ in CLUBS}
 cards = []
+look_notes = {}
 
 
 def text(row, h):
@@ -169,7 +171,9 @@ for tab, r, row in ((t, r, row) for t in PLAYER_TABS if use_tab(t) is None for r
     stats = {k: number(row, h, STAT_MIN, STAT_MAX, where) for h, k in STAT_KEYS}
     traits = {}
     for h, k, allowed in TRAIT_COLS:
-        v = text(row, h)
+        v = text(row, h) if h in col else ''
+        if not v and k in TRAIT_DEFAULTS:
+            v = TRAIT_DEFAULTS[k]   # optional look columns: blank = standard / none
         if v not in allowed:
             errors.append(f"{where}: {h} '{v}' isn't allowed. Use one of: {', '.join(allowed)}.")
         traits[k] = v
@@ -190,6 +194,9 @@ for tab, r, row in ((t, r, row) for t in PLAYER_TABS if use_tab(t) is None for r
                 errors.append(f"{where}: Born {born} looks wrong (year should be 1940–2015).")
         except ValueError:
             errors.append(f"{where}: Born '{born}' must be a date like 1977-08-17.")
+    note = text(row, "Look Notes") if "Look Notes" in col else ""
+    if note:
+        look_notes[f"{pid}_{season.replace('-', '')}"] = note
     cards.append(dict(r=where, pid=pid, name=name, short=short, nation=nation, season=season, era=era, ovr=ovr, positions=positions, club=club, arch=arch, stats=stats, traits=traits, born=born))
 
 # Cross-row checks
@@ -241,7 +248,7 @@ for cid, c in after_ids.items():
     if b["positions"] != c["positions"]:
         diffs.append(f"positions {'/'.join(b['positions'])}→{'/'.join(c['positions'])}")
     sd = [f"{k.upper()} {b['stats'][k]}→{c['stats'][k]}" for _, k in STAT_KEYS if b["stats"][k] != c["stats"][k]]
-    td = [f"{k} {b['traits'][k]}→{c['traits'][k]}" for _, k, _ in TRAIT_COLS if b["traits"][k] != c["traits"][k]]
+    td = [f"{k} {b['traits'].get(k, TRAIT_DEFAULTS.get(k))}→{c['traits'][k]}" for _, k, _ in TRAIT_COLS if b["traits"].get(k, TRAIT_DEFAULTS.get(k)) != c["traits"][k]]
     diffs += sd + td
     if diffs:
         changed.append(f"{cid}: " + ", ".join(diffs))
@@ -269,7 +276,7 @@ for g, items in by_group.items():
     lines.append(f"  // ── {GROUP_TITLE[g]} ──")
     for pid, cs in items:
         base = cs[0]["traits"]
-        trait_src = ", ".join(f"{k}: {ts(v)}" for k, v in base.items())
+        trait_src = ", ".join(f"{k}: {ts(v)}" for k, v in base.items() if TRAIT_DEFAULTS.get(k) != v)
         lines.append(f"  ...player({ts(pid)}, {ts(cs[0]['name'])}, {ts(cs[0]['short'])}, {ts(cs[0]['nation'])},")
         lines.append(f"    {{ {trait_src} }},")
         lines.append("    [")
@@ -333,6 +340,10 @@ if DRY:
 else:
     OUT.write_text("\n".join(lines), encoding="utf-8")
     print(f"\nWrote {OUT.relative_to(ROOT)}")
+    notes_path = ROOT / "design/look-notes.json"
+    notes_path.parent.mkdir(exist_ok=True)
+    notes_path.write_text(json.dumps(dict(sorted(look_notes.items())), indent=1, ensure_ascii=False) + "\n", encoding="utf-8")
+    print(f"Wrote {notes_path.relative_to(ROOT)} ({len(look_notes)} look notes)")
     if born_changes:
         body = "\n".join(f"  {pid}: '{d}'," for pid, d in sorted(births.items()))
         src = re.sub(r"(export const BORN: Record<string, string> = \{\n)(.*?)(\n\};)", lambda m: m.group(1) + body + m.group(3), src, flags=re.S)
