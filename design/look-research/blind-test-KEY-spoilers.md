@@ -12,3 +12,8 @@ Cells are numbered left to right, top row first. Looks come from memory, not pho
 | 6 | schmeichel_peter 95-96 (MUN, GK) | short blond hair, huge square face, shouting |
 | 7 | ljungberg_freddie 01-02 (ARS) | red-dyed mohawk strip |
 | 8 | okocha_jayjay 03-04 (BOL) | short black hair, big grin, captain's armband |
+
+## Result (user's guesses)
+Davids ✓, Torres ✗ (Savage), Bergkamp ✗ (Ravanelli), Stam/Rooney ✓, Fellaini ✓, Schmeichel ✓, Ljungberg ✓, Defoe ✗ (Okocha): 5/8.
+Flow drew cell 3 with white sleeves (prompt said red), which made it read as Arsenal. Framing still stopped at the shoulders
+despite "bottom third is shirt"; the border lines are gone.
