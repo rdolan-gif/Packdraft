@@ -8,7 +8,7 @@ Attach your style reference image with every prompt.
 | Cell | Card | Confidence |
 |---|---|---|
 | 1 | james_david_0708 | high |
-| 2 | campbell_sol_0708 | medium |
+| 2 | campbell_sol_0708 | high (user-confirmed) |
 | 3 | crouch_peter_0809 | high |
 | 4 | defoe_jermain_0708 | medium |
 | 5 | diarra_lassana_0708 | medium |
@@ -25,7 +25,7 @@ FRAMING (identical in every cell): front-facing and symmetrical, from the top of
 
 PLAYERS:
 1. Head shape: long and narrow. Skin tone: dark brown. Nationality: England. Hairstyle: none (bald). Hair colour: black. Facial hair: clean-shaven. Eyes: standard. Nose: standard. Expression: big grin showing teeth. Accessories: none. Shirt: goalkeeper long-sleeved crew neck, dark grey body with yellow trim, arms down. Details: 37 years old, cleanly shaved head, tall and long-faced, broad toothy smile.
-2. Head shape: square jaw. Skin tone: deep dark brown. Nationality: England. Hairstyle: buzz cut. Hair colour: black. Facial hair: chin strap beard. Eyes: standard. Nose: standard. Expression: determined. Accessories: captain's armband on the upper arm. Shirt: 2000s V-neck, royal blue body, royal blue sleeves, white collar with thin yellow trim. Details: club captain, very short cropped hair, short neat beard along the jaw, big powerful square jaw and thick neck.
+2. Head shape: square jaw. Skin tone: deep dark brown. Nationality: England. Hairstyle: none (bald). Hair colour: black. Facial hair: clean-shaven. Eyes: standard. Nose: standard. Expression: determined. Accessories: captain's armband on the upper arm. Shirt: 2000s V-neck, royal blue body, royal blue sleeves, white collar with thin yellow trim. Details: club captain, cleanly shaved bald head, clean-shaven, big powerful square jaw and thick neck.
 3. Head shape: long and narrow. Skin tone: pale. Nationality: England. Hairstyle: spiky. Hair colour: brown. Facial hair: clean-shaven. Eyes: standard. Nose: long. Expression: big grin showing teeth. Accessories: none. Shirt: 2000s V-neck, royal blue body, royal blue sleeves, gold collar trim. Details: extremely long thin face and long neck, short brown hair spiked up at the front, slightly sticking-out ears, goofy grin.
 4. Head shape: round. Skin tone: deep dark brown. Nationality: England. Hairstyle: skin fade with a crisp line-up. Hair colour: black. Facial hair: moustache. Eyes: standard. Nose: standard. Expression: focused. Accessories: none. Shirt: 2000s V-neck, royal blue body, royal blue sleeves, white collar with thin yellow trim. Details: short fade with a sharp line-up, thin moustache, round face, small and sharp.
 5. Head shape: oval. Skin tone: deep dark brown. Nationality: France. Hairstyle: buzz cut. Hair colour: black. Facial hair: clean-shaven. Eyes: standard. Nose: standard. Expression: focused. Accessories: none. Shirt: 2000s V-neck, royal blue body, royal blue sleeves, white collar with thin yellow trim. Details: 22 years old, very short hair, slim youthful face, clean-shaven.
