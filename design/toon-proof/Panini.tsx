@@ -103,7 +103,7 @@ export function StickerBack() {
 }
 
 /** B: the 90s trading card. Club-colour frame, sunburst photo, starburst rating, slanted name ribbon. */
-export function TradingCard({ card }: { card: PlayerCard }) {
+export function TradingCard({ card, photo }: { card: PlayerCard; photo?: string }) {
   const club = getClub(card.club);
   const stats = card.positions[0] === 'GK' ? GK : STATS;
   return (
@@ -112,7 +112,11 @@ export function TradingCard({ card }: { card: PlayerCard }) {
         <div className={`tc-photo ${shiny(card) ? 'pn-foil' : ''}`}>
           {shiny(card) && <Sparkles />}
           <div className="tc-toon">
-            <Toon traits={card.traits} kit={kitForCard(card)} seed={card.id} size={158} boil={boil(card)} />
+            {photo ? (
+              <img src={photo} alt="" className="tc-flow" />
+            ) : (
+              <Toon traits={card.traits} kit={kitForCard(card)} seed={card.id} size={158} boil={boil(card)} />
+            )}
           </div>
           <div className="tc-star">
             <b>{card.ovr}</b>

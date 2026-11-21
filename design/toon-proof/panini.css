@@ -383,3 +383,6 @@
 
 /* frame: the club's main colour, or its second colour when the main one is near-white */
 .tc-STANDARD .tc-frame { background: var(--frame); }
+
+/* Flow portrait drawn as a whole player */
+.tc-flow { display: block; width: 172px; max-width: none; height: auto; }
