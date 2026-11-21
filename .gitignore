@@ -5,3 +5,4 @@ dist-single
 .DS_Store
 PackDraft38_Players*.xlsx
 __pycache__/
+design/flow/assets/
