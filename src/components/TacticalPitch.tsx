@@ -22,7 +22,9 @@ interface Props {
   compact?: boolean;
 }
 
-const LINK_COLOR = { club: '#facc15', nation: '#22d3ee', decade: '#a78bfa', duo: '#f472b6' } as const;
+// Sticker-album colours: yellow club, blue nation, red decade, cream famous duo (dashed). Every link has a navy outline.
+const LINK_COLOR = { club: '#ffd400', nation: '#3d7bff', decade: '#e62e2d', duo: '#fff6e0' } as const;
+const LINK_INK = '#14183a';
 const FIT_STYLE = {
   natural: 'border-emerald-400 bg-emerald-400/20 text-emerald-200',
   secondary: 'border-lime-300 bg-lime-300/15 text-lime-200',
@@ -98,21 +100,20 @@ export function TacticalPitch({ formationId, lineup, rating, managerId, pendingC
             const a = slotById[l.a];
             const b = slotById[l.b];
             if (!a || !b) return null;
+            const w = 3 + l.strength * 1.1; // px, thicker for stronger links
+            const pts = { x1: a.x, y1: pitchY(a.y), x2: b.x, y2: pitchY(b.y) };
             return (
-              <line
-                key={`${l.a}-${l.b}-${l.kind}`}
-                x1={a.x}
-                y1={pitchY(a.y)}
-                x2={b.x}
-                y2={pitchY(b.y)}
-                stroke={LINK_COLOR[l.kind]}
-                strokeWidth={0.35 + l.strength * 0.18}
-                strokeLinecap="round"
-                opacity="0.85"
-                strokeDasharray={l.kind === 'duo' ? '5 4' : undefined}
-                style={{ filter: `drop-shadow(0 0 1.2px ${LINK_COLOR[l.kind]})` }}
-                vectorEffect="non-scaling-stroke"
-              />
+              <g key={`${l.a}-${l.b}-${l.kind}`}>
+                <line {...pts} stroke={LINK_INK} strokeWidth={w + 4} strokeLinecap="round" vectorEffect="non-scaling-stroke" />
+                <line
+                  {...pts}
+                  stroke={LINK_COLOR[l.kind]}
+                  strokeWidth={w}
+                  strokeLinecap="round"
+                  strokeDasharray={l.kind === 'duo' ? '8 7' : undefined}
+                  vectorEffect="non-scaling-stroke"
+                />
+              </g>
             );
           })}
         </svg>
