@@ -1,60 +1,41 @@
-// The PackDraft 38 crest: a shield with a torn-pack edge across the top (every season starts by
-// ripping a pack open), "38" in the brand's italic display face.
+// The PackDraft 38 badge: a comic starburst (the sticker-album "NEW!" burst) with a big outlined 38.
 
-const SHIELD = 'M6 18 L22 6 L38 18 L54 6 L66 14 L78 6 L94 18 L110 6 L126 18 L126 92 C126 122 98 142 66 152 C34 142 6 122 6 92 Z';
+const BURST = 'M66.0 13.0 L76.5 30.5 L92.9 19.7 L95.3 40.3 L114.5 38.3 L108.3 58.0 L126.4 65.1 L113.0 80.0 L126.4 94.9 L108.3 102.0 L114.5 121.7 L95.3 119.7 L92.9 140.3 L76.5 129.5 L66.0 147.0 L55.5 129.5 L39.1 140.3 L36.7 119.7 L17.5 121.7 L23.7 102.0 L5.6 94.9 L19.0 80.0 L5.6 65.1 L23.7 58.0 L17.5 38.3 L36.7 40.3 L39.1 19.7 L55.5 30.5 Z';
+const FONT = "Bangers, Impact, sans-serif";
 
 interface Props {
   size?: number;
-  /** 'full': outlined shield with the wordmark; 'solid': filled shield, number only (small sizes). */
+  /** 'full': red burst, yellow 38, navy shadow; 'solid': yellow burst, red 38 (small sizes); 'ink': navy burst, yellow 38. */
   variant?: 'full' | 'solid' | 'ink';
   className?: string;
   title?: string;
 }
 
+const LOOK = {
+  full: { burst: '#e62e2d', num: '#ffd400' },
+  solid: { burst: '#ffd400', num: '#e62e2d' },
+  ink: { burst: '#14183a', num: '#ffd400' },
+};
+
 export function Crest({ size = 48, variant = 'full', className, title }: Props) {
   const h = (size * 156) / 132;
+  const c = LOOK[variant];
   return (
     <svg width={size} height={h} viewBox="0 0 132 156" className={className} role={title ? 'img' : undefined} aria-label={title} aria-hidden={title ? undefined : true}>
-      {variant === 'full' ? (
-        <>
-          <path d={SHIELD} fill="#151a26" stroke="#ff6a2b" strokeWidth="6" strokeLinejoin="round" />
-          <path d="M18 34 L114 34" stroke="#ff6a2b" strokeWidth="3" opacity="0.5" />
-          <text x="66" y="57" textAnchor="middle" fontFamily="'Saira Extra Condensed', sans-serif" fontWeight="800" fontSize="19" letterSpacing="2.5" fill="#f5f7fa">
-            PACKDRAFT
-          </text>
-          <text x="66" y="116" textAnchor="middle" fontFamily="'Saira Extra Condensed', sans-serif" fontWeight="900" fontStyle="italic" fontSize="78" fill="#ff6a2b">
-            38
-          </text>
-        </>
-      ) : variant === 'ink' ? (
-        <>
-          <path d={SHIELD} fill="#0b0e16" />
-          <text x="66" y="112" textAnchor="middle" fontFamily="'Saira Extra Condensed', sans-serif" fontWeight="900" fontStyle="italic" fontSize="84" fill="#ff6a2b">
-            38
-          </text>
-        </>
-      ) : (
-        <>
-          <path d={SHIELD} fill="#ff6a2b" />
-          <text x="66" y="112" textAnchor="middle" fontFamily="'Saira Extra Condensed', sans-serif" fontWeight="900" fontStyle="italic" fontSize="84" fill="#0b0e16">
-            38
-          </text>
-        </>
-      )}
+      <path d={BURST} fill="#14183a" transform="translate(5 6)" />
+      <path d={BURST} fill={c.burst} stroke="#14183a" strokeWidth="4" strokeLinejoin="round" />
+      <text x="66" y="104" textAnchor="middle" fontFamily={FONT} fontSize="70" fill={c.num} stroke="#14183a" strokeWidth="7" strokeLinejoin="round" paintOrder="stroke" letterSpacing="1">
+        38
+      </text>
     </svg>
   );
 }
 
-/** "PACKDRAFT [38]" wordmark: heavy italic name with the angled Flare 38 tab. */
+/** "PACKDRAFT" in outlined comic yellow (sits beside the 38 badge). */
 export function Wordmark({ className = '', big }: { className?: string; big?: boolean }) {
   return (
-    <span className={`inline-flex items-center gap-2 font-display italic leading-none ${className}`}>
-      <span className="text-white" style={{ fontWeight: 900 }}>
-        PACKDRAFT
-      </span>
-      <span className="bg-flare-500 text-ink" style={{ fontWeight: 900, padding: big ? '0.02em 0.32em 0' : '0.04em 0.3em 0', clipPath: 'polygon(0.25em 0, 100% 0, calc(100% - 0.25em) 100%, 0 100%)' }}>
-        38
-      </span>
+    <span className={`inline-flex items-center gap-1.5 font-display leading-none ${className}`}>
+      <span style={{ color: '#ffd400', WebkitTextStroke: big ? '3px #14183a' : '2px #14183a', paintOrder: 'stroke fill', textShadow: big ? '4px 4px 0 #14183a' : '2px 2px 0 #14183a' }}>PACKDRAFT</span>
     </span>
   );
 }

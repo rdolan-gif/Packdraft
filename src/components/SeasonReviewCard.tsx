@@ -175,7 +175,7 @@ export function SeasonReviewCard({ summary, teamName, formationId, lineup, manag
               {r.won}W · {r.drawn}D · {r.lost}L · {r.gf} GF · {r.ga} GA
             </div>
 
-            <div className="mt-4 rounded-2xl border border-white/10 bg-black/40 p-4">
+            <div className="mt-4 rounded-2xl comic-panel p-4">
               <div className="text-[10px] font-black uppercase tracking-widest text-yellow-300">
                 Scout's Verdict{summary.scout && <span className="text-white/60"> · {summary.scout.emoji} {summary.scout.name}</span>}
               </div>
@@ -229,7 +229,7 @@ export function SeasonReviewCard({ summary, teamName, formationId, lineup, manag
               </button>
             )}
 
-            <div className="rounded-2xl border border-white/10 bg-black/40 p-4">
+            <div className="rounded-2xl comic-panel p-4">
               <div className="text-[10px] font-black uppercase tracking-widest text-flare-300">Season Highlights</div>
               <ul className="mt-2 flex flex-col gap-1.5">
                 {summary.highlights.map((h, i) => (

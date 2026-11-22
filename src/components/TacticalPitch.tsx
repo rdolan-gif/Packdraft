@@ -45,19 +45,19 @@ export function TacticalPitch({ formationId, lineup, rating, managerId, pendingC
       {/* Rating bar */}
       {!compact && (
         <div className="grid grid-cols-3 gap-2 text-center">
-          <div className="rounded-xl border border-white/10 bg-black/40 p-2">
-            <div className="text-[10px] font-bold uppercase tracking-widest text-white/50">Team Rating</div>
-            <div className="font-display text-3xl leading-none text-yellow-300">{filled ? rating.overall.toFixed(1) : '--'}</div>
+          <div className="rounded-[14px] border-4 border-ink bg-flare-500 p-2 text-ink shadow-[5px_5px_0_#14183a]">
+            <div className="text-[11px] font-black uppercase tracking-widest">Team Rating</div>
+            <div className="font-display text-[40px] leading-none">{filled ? rating.overall.toFixed(1) : '--'}</div>
             <div className="text-[10px] text-white/50">
               base {filled ? rating.baseAvg.toFixed(1) : '--'} {rating.chemBonus >= 0 ? '+' : ''}
               {rating.chemBonus.toFixed(1)} chem
             </div>
           </div>
-          <div className="rounded-xl border border-white/10 bg-black/40 p-2">
-            <div className="text-[10px] font-bold uppercase tracking-widest text-white/50">Chemistry</div>
-            <div className="font-display text-3xl leading-none text-cyan-300">{rating.chemistry}</div>
-            <div className="mx-auto mt-1 h-1.5 w-full overflow-hidden rounded-full bg-white/10">
-              <div className="h-full rounded-full bg-gradient-to-r from-cyan-500 to-flare-400 transition-all duration-500" style={{ width: `${rating.chemistry}%` }} />
+          <div className="rounded-[14px] border-4 border-ink bg-white p-2 text-ink shadow-[5px_5px_0_#14183a]">
+            <div className="text-[11px] font-black uppercase tracking-widest">Chemistry</div>
+            <div className="font-display text-[40px] leading-none text-album-blue">{rating.chemistry}</div>
+            <div className="mx-auto mt-1 h-2.5 w-full overflow-hidden rounded-md border-2 border-ink bg-album-cream">
+              <div className="h-full bg-album-blue transition-all duration-500" style={{ width: `${rating.chemistry}%` }} />
             </div>
           </div>
           <Pressable
@@ -65,20 +65,20 @@ export function TacticalPitch({ formationId, lineup, rating, managerId, pendingC
             onHold={onManagerInfo}
             showHoldRing={false}
             ariaLabel="Show manager objective"
-            className={`group rounded-xl border p-2 transition hover:border-yellow-300/70 active:scale-95 ${rating.managerActive ? 'border-yellow-400/60 bg-yellow-400/10' : 'border-white/10 bg-black/40'}`}
+            className={`group rounded-[14px] border-4 border-ink p-2 text-ink shadow-[5px_5px_0_#14183a] transition active:translate-y-0.5 ${rating.managerActive ? 'bg-white' : 'bg-album-cream'}`}
           >
-            <Info className="absolute right-1.5 top-1.5 h-3 w-3 text-white/40 group-hover:text-yellow-300" />
-            <div className="text-[10px] font-bold uppercase tracking-widest text-white/50">Manager</div>
-            <div className={`font-display text-3xl leading-none ${rating.managerBonus > 0 ? 'text-yellow-300' : 'text-white/40'}`}>
+            <Info className="absolute right-1.5 top-1.5 h-3 w-3 text-ink/40 group-hover:text-album-red" />
+            <div className="text-[11px] font-black uppercase tracking-widest">Manager</div>
+            <div className={`font-display text-[40px] leading-none ${rating.managerBonus > 0 ? 'text-album-red' : 'text-ink/40'}`}>
               {manager?.id === 'fergie_time' ? '⌚' : `+${rating.managerBonus.toFixed(1)}`}
             </div>
-            <div className="truncate text-[10px] text-white/50">{manager?.emoji} {rating.managerActive ? 'ACTIVE' : 'inactive'}</div>
+            <div className="truncate text-[10px] font-bold text-ink/60">{manager?.emoji} {rating.managerActive ? 'ACTIVE' : 'inactive'}</div>
           </Pressable>
         </div>
       )}
 
       {/* Pitch */}
-      <div className="pitch relative mx-auto aspect-[4/5] w-full max-w-[460px] overflow-hidden rounded-2xl border-2 border-white/15 shadow-2xl">
+      <div className="pitch relative mx-auto aspect-[4/5] w-full max-w-[460px] overflow-hidden rounded-[22px] border-[5px] border-ink shadow-[8px_8px_0_#14183a]">
         {/* markings */}
         <svg viewBox="0 0 100 125" preserveAspectRatio="none" className="absolute inset-0 h-full w-full opacity-40">
           <g fill="none" stroke="white" strokeWidth="0.4">
@@ -151,12 +151,12 @@ export function TacticalPitch({ formationId, lineup, rating, managerId, pendingC
               ) : (
                 <div
                   className={`flex h-[92px] w-[64px] flex-col items-center justify-center rounded-[14px] border-2 border-dashed text-center ${
-                    preview ? `${FIT_STYLE[preview.fit]} animate-pulse` : swapTarget ? 'border-sky-400 bg-sky-400/10 text-sky-200' : 'border-white/35 bg-black/25 text-white/70'
+                    preview ? `${FIT_STYLE[preview.fit]} animate-pulse` : swapTarget ? 'border-sky-400 bg-sky-400/10 text-sky-200' : 'border-album-cream/90 bg-ink/20 text-album-cream'
                   }`}
                 >
                   <span className="font-display text-xl leading-none">{slot.label}</span>
                   {preview && <span className="mt-1 text-[8px] font-black uppercase">{preview.fit === 'natural' ? (preview.penalty ? 'good' : 'perfect') : `${preview.fit} −${preview.penalty}`}</span>}
-                  {!preview && <span className="mt-1 text-[8px] font-bold uppercase opacity-60">empty</span>}
+                  {!preview && <span className="mt-1 text-[8px] font-black uppercase">stick here</span>}
                 </div>
               )}
             </Pressable>
@@ -166,12 +166,12 @@ export function TacticalPitch({ formationId, lineup, rating, managerId, pendingC
 
       {!compact && (
         <div className="flex flex-col gap-1.5 text-[11px]">
-          <div className="flex flex-wrap items-center justify-center gap-3 text-white/60">
+          <div className="flex flex-wrap items-center justify-center gap-3 font-bold text-ink/75">
             <span className="flex items-center gap-1"><Link2 className="h-3 w-3" style={{ color: LINK_COLOR.club }} /> Club</span>
             <span className="flex items-center gap-1"><Link2 className="h-3 w-3" style={{ color: LINK_COLOR.nation }} /> Nation</span>
             <span className="flex items-center gap-1"><Link2 className="h-3 w-3" style={{ color: LINK_COLOR.decade }} /> Decade</span>
             {rating.links.some((l) => l.kind === 'duo') && (
-              <span className="flex items-center gap-1 font-bold text-pink-300"><Link2 className="h-3 w-3" style={{ color: LINK_COLOR.duo }} /> Famous duo</span>
+              <span className="flex items-center gap-1 font-bold text-album-red"><Link2 className="h-3 w-3" style={{ color: LINK_COLOR.duo }} /> Famous duo</span>
             )}
             {fine ? (
               <span className="flex items-center gap-1"><MousePointerClick className="h-3 w-3" /> Click a player for stats &amp; Move</span>
@@ -182,18 +182,18 @@ export function TacticalPitch({ formationId, lineup, rating, managerId, pendingC
               </>
             )}
             {rerollAvailable !== undefined && (
-              <span className={`flex items-center gap-1 ${rerollAvailable ? 'text-sky-300' : 'text-white/30 line-through'}`}>
+              <span className={`flex items-center gap-1 ${rerollAvailable ? 'text-album-blue' : 'text-ink/35 line-through'}`}>
                 <RefreshCw className="h-3 w-3" /> Scout Reroll {rerollAvailable ? 'ready' : 'used'}
               </span>
             )}
           </div>
           {manager && (
-            <button onClick={onManagerInfo} className="rounded-lg bg-white/5 px-2 py-1 text-center text-white/70 transition hover:bg-white/10">
-              {manager.emoji} {rating.managerNote} <span className="text-yellow-300/80">· details</span>
+            <button onClick={onManagerInfo} className="rounded-lg border-2 border-ink bg-white px-2 py-1 text-center font-semibold text-ink transition hover:bg-album-cream">
+              {manager.emoji} {rating.managerNote} <span className="text-album-red">· details</span>
             </button>
           )}
-          {rating.balanceNote && <div className="rounded-lg bg-amber-500/10 px-2 py-1 text-center text-amber-200">⚠ {rating.balanceNote}</div>}
-          {rating.oopPenalty > 0.3 && <div className="rounded-lg bg-rose-500/10 px-2 py-1 text-center text-rose-200">⚠ Out-of-position penalties cost {rating.oopPenalty.toFixed(1)} team rating.</div>}
+          {rating.balanceNote && <div className="rounded-lg border-2 border-ink bg-flare-200 px-2 py-1 text-center font-semibold text-ink">⚠ {rating.balanceNote}</div>}
+          {rating.oopPenalty > 0.3 && <div className="rounded-lg border-2 border-ink bg-album-red px-2 py-1 text-center font-semibold text-white">⚠ Out-of-position penalties cost {rating.oopPenalty.toFixed(1)} team rating.</div>}
         </div>
       )}
     </div>

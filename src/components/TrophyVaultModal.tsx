@@ -236,7 +236,7 @@ export function TrophyVaultModal({ vault, career, onClose, onDelete, onUpdate }:
                   return r;
                 }}
               />
-              <pre className="whitespace-pre-wrap rounded-xl border border-white/10 bg-black/60 p-3 font-sans text-xs text-white/80">{flexText(current)}</pre>
+              <pre className="whitespace-pre-wrap rounded-xl comic-panel p-3 font-sans text-xs text-white/80">{flexText(current)}</pre>
               <div className="flex gap-2">
                 <button onClick={() => copy(current)} className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-yellow-300 px-4 py-2.5 font-display text-xl tracking-wider text-black hover:bg-yellow-200">
                   {copied ? <Check className="h-5 w-5" /> : <Copy className="h-5 w-5" />} {copied ? 'COPIED' : 'COPY FLEX CARD'}

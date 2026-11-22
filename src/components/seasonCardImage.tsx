@@ -24,8 +24,8 @@ export interface SeasonCardData {
 
 const W = 1080;
 const H = 1350;
-const DISPLAY = '"Saira Extra Condensed", Impact, sans-serif';
-const BODY = 'Inter, Arial, sans-serif';
+const DISPLAY = 'Bangers, Impact, sans-serif';
+const BODY = 'Archivo, Arial, sans-serif';
 
 export const GRADE_HEX: Record<Grade, [string, string]> = {
   'S+': ['#fde68a', '#f472b6'],
@@ -83,7 +83,7 @@ function roundRect(ctx: CanvasRenderingContext2D, x: number, y: number, w: numbe
 function fitText(ctx: CanvasRenderingContext2D, text: string, maxW: number, size: number, family: string, weight = '') {
   let s = size;
   do {
-    ctx.font = `${weight || (family === DISPLAY ? '800' : '')} ${s}px ${family}`.trim();
+    ctx.font = `${weight || (family === DISPLAY ? '400' : '')} ${s}px ${family}`.trim();
     if (ctx.measureText(text).width <= maxW) break;
     s -= 2;
   } while (s > 12);
@@ -138,7 +138,7 @@ export async function drawSeasonCard(d: SeasonCardData): Promise<HTMLCanvasEleme
     'PACKDRAFT 38 SEASON CARD DAILY DRAFT #0123456789 ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz ·→–+-',
   ].join(' ');
   await Promise.all(
-    [`800 80px ${DISPLAY}`, `italic 900 80px ${DISPLAY}`, `700 30px ${BODY}`, `800 30px ${BODY}`, `600 30px ${BODY}`, `400 30px ${BODY}`, `italic 500 30px ${BODY}`].map((f) =>
+    [`400 80px ${DISPLAY}`, `400 80px ${DISPLAY}`, `700 30px ${BODY}`, `800 30px ${BODY}`, `600 30px ${BODY}`, `400 30px ${BODY}`, `italic 500 30px ${BODY}`].map((f) =>
       document.fonts?.load(f, cardText),
     ),
   ).catch(() => undefined);
@@ -171,8 +171,8 @@ export async function drawSeasonCard(d: SeasonCardData): Promise<HTMLCanvasEleme
 
   // ── header
   ctx.textBaseline = 'alphabetic';
-  ctx.font = `800 60px ${DISPLAY}`;
-  ctx.font = `italic 900 60px ${DISPLAY}`;
+  ctx.font = `400 60px ${DISPLAY}`;
+  ctx.font = `400 60px ${DISPLAY}`;
   ctx.fillStyle = '#fff';
   ctx.fillText('PACKDRAFT', 60, 102);
   const x = 60 + ctx.measureText('PACKDRAFT').width + 14;
@@ -210,7 +210,7 @@ export async function drawSeasonCard(d: SeasonCardData): Promise<HTMLCanvasEleme
   ctx.strokeStyle = 'rgba(255,255,255,.85)';
   ctx.stroke();
   ctx.fillStyle = s.grade === 'C' || s.grade === 'S' || s.grade === 'S+' || s.grade === 'D' ? '#111' : '#fff';
-  ctx.font = `800 ${s.grade.length > 1 ? 104 : 130}px ${DISPLAY}`;
+  ctx.font = `400 ${s.grade.length > 1 ? 104 : 130}px ${DISPLAY}`;
   ctx.textAlign = 'center';
   ctx.fillText(s.grade, cx, cy + (s.grade.length > 1 ? 38 : 46));
   ctx.textAlign = 'left';
@@ -220,7 +220,7 @@ export async function drawSeasonCard(d: SeasonCardData): Promise<HTMLCanvasEleme
   fitText(ctx, team, W - tx - 60, 92, DISPLAY);
   ctx.fillStyle = '#fff';
   ctx.fillText(team, tx, 240);
-  ctx.font = `800 56px ${DISPLAY}`;
+  ctx.font = `400 56px ${DISPLAY}`;
   ctx.fillStyle = g1;
   ctx.fillText(info.title, tx, 300);
   ctx.font = `600 28px ${BODY}`;
@@ -307,7 +307,7 @@ export async function drawSeasonCard(d: SeasonCardData): Promise<HTMLCanvasEleme
     const img = faces[i];
     if (img) ctx.drawImage(img, fx - 33, fy - 50, 66, 73);
     const name = card.shortName.toUpperCase();
-    ctx.font = `800 24px ${DISPLAY}`;
+    ctx.font = `400 24px ${DISPLAY}`;
     const label = `${card.ovr} ${name}`;
     const lw = Math.min(124, ctx.measureText(label).width + 18);
     ctx.fillStyle = card.tier === 'PRIME_ICON' ? '#f8fafc' : card.tier === 'RISING_WORLD' ? '#facc15' : card.tier === 'SECRET_DEV' ? '#a855f7' : 'rgba(0,0,0,.75)';

@@ -8,7 +8,8 @@
   width: 230px;
   height: 336px;
   border-radius: 13px;
-  font-family: 'Saira Extra Condensed', 'Inter', sans-serif;
+  font-family: 'Bangers', Impact, sans-serif;
+  letter-spacing: 0.03em;
   color: var(--ink);
   overflow: hidden;
   transform-origin: top left;
@@ -133,7 +134,7 @@
   justify-content: center;
   gap: 6px;
   margin-top: 9px;
-  font-family: 'Inter', sans-serif;
+  font-family: 'Archivo', sans-serif;
   font-size: 11px;
   font-weight: 600;
   color: #fff;

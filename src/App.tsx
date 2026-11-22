@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Wand2, Lock, Play, Sparkles, CalendarDays, Award, Check, Copy } from 'lucide-react';
+import { Wand2, Lock, Play, CalendarDays, Award, Check, Copy } from 'lucide-react';
 import { Header } from './components/Header';
 import { ManagerDraftModal } from './components/ManagerDraftModal';
 import { FormationPicker } from './components/FormationPicker';
@@ -12,7 +12,6 @@ import { PlayerCardUI } from './components/PlayerCardUI';
 import { ManagerObjectivePanel, PlayerInspectPanel } from './components/InspectPanels';
 import { StickerBookModal } from './components/StickerBookModal';
 import { TrophyCabinetModal } from './components/TrophyCabinetModal';
-import { Crest } from './components/Crest';
 import { checkTrophies, TROPHIES, unlockedTrophies, type Trophy } from './engine/achievements';
 import { dailyRng, dailyShareText, dailyStreak, dayNumber, formFromResults, loadDaily, markDailyStarted, saveDailyResult, todayKey, untilTomorrow, type DailyResult } from './engine/daily';
 import { discoverDuos, DUOS } from './data/duos';
@@ -417,7 +416,7 @@ export default function App() {
   }, []);
 
   return (
-    <div className="stadium-bg min-h-screen">
+    <div className={`${phase === 'draft' ? 'paper-bg' : 'stadium-bg'} min-h-screen`}>
       <Header phase={phase} packNumber={packNumber} picksMade={picksMade} vaultCount={vault.length} onOpenVault={() => setVaultOpen(true)} onOpenBook={() => setBookOpen(true)} onOpenCabinet={() => setCabinetOpen(true)} trophyCount={trophyCount} dailyNumber={dailyDay ? dayNumber(dailyDay) : null} onNewRun={newRun} />
       <main id="app-shell" className="pb-16">
         {phase === 'title' && (
@@ -475,7 +474,7 @@ export default function App() {
 
         {phase === 'draft' && manager && (
           <div className="mx-auto grid max-w-7xl grid-cols-1 gap-5 px-3 py-5 sm:px-4 lg:grid-cols-[1.35fr_1fr]">
-            <section className="rounded-3xl border border-white/10 bg-black/35 p-3 sm:p-5">
+            <section className="pack-panel rounded-[22px] p-3 sm:p-5">
               {!draftComplete ? (
                 <>
                   <PackOpener
@@ -494,6 +493,7 @@ export default function App() {
                       showTrophies(checkTrophies());
                     }}
                     newIds={newIds}
+                    wrapper={dailyDay ? 'daily' : undefined}
                     onReroll={reroll}
                   />
                   {selected && (
@@ -519,8 +519,8 @@ export default function App() {
                 <div className="flex items-center gap-2">
                   <span className="text-2xl">{manager.emoji}</span>
                   <div>
-                    <div className="font-display text-xl leading-none text-white">{manager.name}</div>
-                    <div className="text-[10px] font-bold uppercase tracking-widest text-white/50">{manager.inspiredBy}</div>
+                    <div className="font-display text-[34px] leading-none text-ink">{manager.name}</div>
+                    <div className="text-[11px] font-black uppercase tracking-widest text-ink/60">{manager.inspiredBy}</div>
                   </div>
                 </div>
                 <FormationPicker variant="inline" current={formationId} onChange={changeFormation} locked={formationLocked} preferred={manager.preferredFormations} />
@@ -673,86 +673,113 @@ function TitleScreen({
   const showcase = useMemo(() => {
     // One of each card style, fanned out with a Prime in the middle:
     // Squad (grey) · Elite (Cult Hero red) · Prime · Gold (Rising Star glow) · Elite (Legend bronze)
-    const ids = ['rooney_wayne_0203', 'ronaldo_cristiano_0304', 'henry_thierry_0304', 'owen_michael_9798', 'shearer_alan_0203'];
+    const ids = ['vardy_jamie_1920', 'grealish_jack_2021', 'henry_thierry_0304', 'schmeichel_peter_9596', 'ginola_david_9596'];
     const found = ids.map((id) => PLAYERS.find((p) => p.id === id)).filter(Boolean) as PlayerCard[];
     return found.length >= 3 ? found : PLAYERS.filter((p) => p.tier === 'PRIME_ICON').slice(0, 5);
   }, []);
+  const dailyToday = loadDaily()[todayKey()];
+  const streak = dailyStreak(loadDaily(), todayKey());
+  const primeCount = PLAYERS.filter((p) => p.tier === 'PRIME_ICON').length;
+  const fan = [showcase[1], showcase[3], showcase[2]].filter(Boolean);
   return (
-    <div className="mx-auto flex max-w-6xl flex-col items-center px-4 pb-10 pt-10 text-center sm:pt-14">
-      <div className="flex items-center gap-2 border-l-4 border-flare-500 bg-ink-800 px-3 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-white/80 sm:text-[11px] sm:tracking-[0.3em]">
-        <Sparkles className="h-3.5 w-3.5" /> 11 packs · {PLAYERS.filter((p) => p.tier !== 'SECRET_DEV').length} cards · 38 matchweeks
-      </div>
-      <div className="mt-5 flex flex-row items-center gap-3 sm:gap-5">
-        <Crest size={112} title="PackDraft 38" className="h-auto w-[76px] drop-shadow-[0_8px_24px_rgba(255,106,43,.25)] sm:w-[112px]" />
-        <h1 className="m-0 flex flex-col items-start leading-[0.85]">
-          <span className="font-display text-6xl italic text-white sm:text-8xl" style={{ fontWeight: 900 }}>
-            PACKDRAFT
-          </span>
-          <span className="mt-2 flex items-center gap-3">
-            <span className="bg-flare-500 px-3 pt-1 font-display text-3xl italic text-ink sm:px-4 sm:text-5xl" style={{ fontWeight: 900, clipPath: 'polygon(10px 0, 100% 0, calc(100% - 10px) 100%, 0 100%)' }}>
-              38
-            </span>
-            <span className="font-display text-sm tracking-[0.18em] text-white/60 sm:text-lg sm:tracking-[0.22em]">RIP · DRAFT · SURVIVE</span>
-          </span>
-        </h1>
-      </div>
-      <p className="mt-4 max-w-xl text-base text-white/70">
-        Rip 11 packs. Draft one legend from each across every era of the Premier League. Then survive a live 38-game season and chase the holy grail: <b className="text-yellow-300">38-0. Invincible.</b>
-      </p>
-
-      <div className="relative mt-8 flex h-[260px] w-full max-w-3xl items-center justify-center overflow-x-clip">
-        {showcase.map((c, i) => {
-          const mid = (showcase.length - 1) / 2;
-          const off = i - mid;
-          return (
-            <div
-              key={c.id}
-              className="absolute transition-transform hover:z-30"
-              style={{ transform: `translateX(calc(${off} * clamp(56px, 16vw, 110px))) translateY(${Math.abs(off) * 14}px) rotate(${off * 6}deg)`, zIndex: 10 - Math.abs(off) }}
-            >
-              <PlayerCardUI card={c} size="md" />
+    <div className="flex flex-col items-center pb-10 text-center">
+      {/* hero: kit-blue sunburst, logo and buttons left, a fanned hand of stickers right */}
+      <section className="title-rays relative w-full overflow-hidden border-b-4 border-ink">
+        <div className="relative mx-auto grid max-w-7xl grid-cols-1 items-center gap-6 px-5 pb-24 pt-10 text-left lg:grid-cols-[1.1fr_1fr] lg:pt-16">
+          <div className="flex flex-col items-start gap-6">
+            <div className="-rotate-3 border-[3px] border-ink bg-album-red px-4 pb-1 pt-2 font-chunky text-base text-white shadow-[4px_4px_0_#0b0e24] sm:text-xl">THE OFFICIAL-ISH 92–26 COLLECTION</div>
+            <h1 className="m-0 -rotate-3 font-display text-[92px] leading-[0.82] sm:text-[150px] lg:text-[168px]" style={{ color: '#ffd400', WebkitTextStroke: '4px #14183a', paintOrder: 'stroke fill', textShadow: '9px 9px 0 #14183a' }}>
+              PACK
+              <br />
+              DRAFT 38
+            </h1>
+            <p className="m-0 font-chunky text-xl leading-tight text-album-cream sm:text-[26px]" style={{ textShadow: '3px 3px 0 #14183a' }}>
+              Rip 11 packs. Pick 11 players.
+              <br />
+              Survive 38 games.
+            </p>
+            <div className="flex w-full max-w-[440px] flex-col gap-4">
+              <button onClick={onStart} className="btn-cut w-full bg-flare-500 py-4 text-[34px] text-ink transition hover:-translate-y-0.5" style={{ borderWidth: 5, boxShadow: '0 9px 0 #14183a', borderRadius: 16 }}>
+                START THE DRAFT!
+              </button>
+              <button
+                onClick={dailyToday ? () => document.getElementById('daily-card')?.scrollIntoView({ behavior: 'smooth' }) : onDaily}
+                className="btn-cut flex w-full items-center justify-between bg-album-red px-5 py-3 text-2xl text-white transition hover:-translate-y-0.5"
+                style={{ borderWidth: 5, boxShadow: '0 7px 0 #14183a', borderRadius: 16 }}
+              >
+                <span>{dailyToday ? "TODAY'S RESULT" : "TODAY'S DRAFT"}</span>
+                <span className="rounded-full border-[3px] border-ink bg-album-cream px-3 pt-1 text-lg text-ink">{streak > 0 ? `STREAK ${streak}` : `#${dayNumber(todayKey())}`}</span>
+              </button>
             </div>
-          );
-        })}
-      </div>
+          </div>
+          <div className="relative mx-auto h-[430px] w-[340px] sm:h-[460px] sm:w-[520px]" aria-hidden="true">
+            <div className="burst-clip absolute -top-4 right-0 z-30 flex h-[120px] w-[120px] rotate-12 items-center justify-center bg-flare-500 text-center font-chunky text-lg leading-none text-ink sm:h-[150px] sm:w-[150px] sm:text-2xl">
+              {primeCount} PRIME
+              <br />
+              ICONS!
+            </div>
+            {fan[0] && (
+              <div className="absolute left-0 top-[120px] -rotate-[11deg] sm:top-[110px]">
+                <PlayerCardUI card={fan[0]} size="lg" tilt={false} />
+              </div>
+            )}
+            {fan[1] && (
+              <div className="absolute right-0 top-[110px] rotate-[9deg] sm:right-4">
+                <PlayerCardUI card={fan[1]} size="lg" tilt={false} />
+              </div>
+            )}
+            {fan[2] && (
+              <div className="absolute left-1/2 top-4 z-20 -translate-x-1/2">
+                <PlayerCardUI card={fan[2]} size="lg" />
+              </div>
+            )}
+          </div>
+        </div>
+        <div className="absolute inset-x-0 bottom-0 overflow-hidden whitespace-nowrap border-t-[5px] border-ink bg-flare-500 py-3 text-ink">
+          <div className="flex w-max animate-ticker gap-10 px-6">
+            {[0, 1].map((k) => (
+              <span key={k} className="flex gap-10">
+                <span className="font-chunky text-xl">★ GOT, GOT, NEED!</span>
+                <span className="text-[15px] font-black">Daily draft resets at midnight</span>
+                <span className="font-chunky text-xl">★ HOLO SHINIES TO COLLECT</span>
+                <span className="text-[15px] font-black">Spares stack up in your album</span>
+                <span className="font-chunky text-xl">★ RIP · DRAFT · SURVIVE</span>
+                <span className="text-[15px] font-black">{PLAYERS.filter(inAlbum).length} stickers to find</span>
+              </span>
+            ))}
+          </div>
+        </div>
+      </section>
 
-      <button
-        onClick={onStart}
-        className="group relative mt-12 overflow-hidden btn-cut bg-flare-500 px-10 py-4 font-display text-4xl tracking-wider text-black shadow-2xl shadow-flare-500/30 transition hover:scale-105 active:scale-95"
-      >
-        <span className="relative z-10">START THE DRAFT</span>
-        <span className="absolute inset-0 -translate-x-full bg-white/50 transition duration-700 group-hover:translate-x-full" />
-      </button>
-
-      <div className="mt-6 grid w-full max-w-2xl grid-cols-1 gap-3 sm:grid-cols-[1.6fr_1fr]">
+      <div id="daily-card" className="mt-10 grid w-full max-w-2xl grid-cols-1 gap-3 px-4 sm:grid-cols-[1.6fr_1fr]">
         <DailyCard onPlay={onDaily} />
         <button
           onClick={onCabinet}
-          className="flex items-center gap-3 rounded-2xl border border-amber-500/40 bg-gradient-to-br from-amber-900/50 to-black/40 p-3 text-left transition hover:border-amber-300/70"
+          className="comic-paper flex items-center gap-3 rounded-2xl p-3 text-left transition hover:-translate-y-0.5"
         >
-          <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-gradient-to-b from-yellow-200 to-amber-500 text-black">
+          <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border-[3px] border-ink bg-flare-500 text-ink">
             <Award className="h-6 w-6" />
           </span>
           <span>
-            <span className="block font-display text-2xl leading-none text-white">TROPHY CABINET</span>
-            <span className="block text-xs font-bold text-amber-100/70">
+            <span className="block font-display text-2xl leading-none text-ink">TROPHY CABINET</span>
+            <span className="block text-xs font-bold text-ink/70">
               {trophyCount} / {TROPHIES.length} unlocked
             </span>
           </span>
         </button>
       </div>
 
-      <div className="mt-10 grid w-full max-w-4xl grid-cols-2 gap-3 text-left sm:grid-cols-4">
+      <div className="mt-10 grid w-full max-w-4xl grid-cols-2 gap-3 px-4 text-left sm:grid-cols-4">
         {[
           ['🎩', 'Mystery Manager', 'Pick 1 of 3 tactical philosophies with passive buffs.'],
           ['✂️', 'Rip 11 Packs', 'Rarity tells, walkout flares, 1 pick per pack.'],
           ['📺', 'Live Season', 'Table, ticker, leaderboards and touchline calls.'],
           ['👑', 'Grade F → S+', 'Go unbeaten and enter the 38-0 Trophy Vault.'],
         ].map(([e, t, d]) => (
-          <div key={t} className="rounded-2xl border border-white/10 bg-black/35 p-3">
+          <div key={t} className="comic-paper rounded-2xl p-3">
             <div className="text-2xl">{e}</div>
-            <div className="mt-1 font-display text-xl leading-none text-white">{t}</div>
-            <div className="mt-1 text-xs text-white/55">{d}</div>
+            <div className="mt-1 font-display text-xl leading-none">{t}</div>
+            <div className="mt-1 text-xs font-medium text-ink/70">{d}</div>
           </div>
         ))}
       </div>
@@ -785,7 +812,7 @@ function DailyCard({ onPlay }: { onPlay: () => void }) {
     window.setTimeout(() => setShared(null), 2000);
   };
   return (
-    <div className="flex flex-col gap-2 rounded-2xl border border-sky-300/40 bg-gradient-to-br from-sky-900/50 via-indigo-900/40 to-black/40 p-3 text-left">
+    <div className="flex flex-col gap-2 rounded-2xl border-[3px] border-ink bg-album-blue p-3 text-left shadow-[5px_5px_0_#0b0e24]">
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-2">
           <CalendarDays className="h-5 w-5 text-sky-300" />

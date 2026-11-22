@@ -90,7 +90,7 @@ export function TransferWindow({ formationId, lineup, managerId, position, point
 
         {stage === 'pack' && (
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1.35fr_1fr]">
-            <section className="rounded-3xl border border-white/10 bg-black/40 p-3 sm:p-5">
+            <section className="rounded-3xl comic-panel p-3 sm:p-5">
               <PackOpener
                 packNumber={8}
                 cards={pack}

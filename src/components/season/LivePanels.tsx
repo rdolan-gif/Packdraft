@@ -34,7 +34,7 @@ export function AroundTheGrounds({ sim, live, minute, flashes, before }: { sim: 
     .sort((a, b) => (finalDay ? Number(!!b.t) - Number(!!a.t) : 0));
 
   return (
-    <section className="rounded-3xl border border-white/10 bg-black/40 p-3">
+    <section className="rounded-3xl comic-panel p-3">
       <h3 className="mb-2 flex items-center justify-between font-display text-xl text-white">
         {finalDay ? 'FINAL DAY · EVERY GROUND' : 'AROUND THE GROUNDS'}
         {live && minute < live.end && <span className="flex items-center gap-1 text-[10px] font-black uppercase tracking-widest text-red-400"><span className="h-1.5 w-1.5 animate-pulse rounded-full bg-red-500" /> Live</span>}
@@ -81,7 +81,7 @@ export function LiveTable({ sim, rows, before, live }: { sim: SeasonSim; rows: T
     return Object.fromEntries(sorted.map((r, i) => [r.teamId, i + 1]));
   }, [before, sim]);
   return (
-    <section className="rounded-3xl border border-white/10 bg-black/40 p-2 sm:p-3">
+    <section className="rounded-3xl comic-panel p-2 sm:p-3">
       <h3 className="mb-1 flex items-center justify-between px-1 font-display text-xl text-white">
         <span>
           LEAGUE TABLE {live && <span className="ml-1 rounded bg-red-600 px-1.5 align-middle font-sans text-[10px] font-black tracking-widest text-white">AS IT STANDS</span>}
@@ -182,7 +182,7 @@ export const TitleRaceChart = memo(function TitleRaceChart({ sim, history, upto 
   });
   const hx = hover ?? mw;
   return (
-    <section className="rounded-3xl border border-white/10 bg-black/40 p-3">
+    <section className="rounded-3xl comic-panel p-3">
       <h3 className="mb-1 font-display text-xl text-white">TITLE RACE</h3>
       {mw === 0 ? (
         <div className="py-8 text-center text-xs text-white/50">The race starts at kick-off.</div>

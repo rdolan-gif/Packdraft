@@ -35,8 +35,8 @@ export function FormationPicker({ current, onChange, preferred = [], variant = '
     return (
       <div className="flex flex-wrap items-center gap-1.5">
         {locked && (
-          <span className="flex items-center gap-1 rounded-md bg-white/10 px-2 py-1 text-[11px] font-black text-white/80">
-            <Lock className="h-3 w-3" /> {current} locked
+          <span className="flex items-center gap-1 rounded-[10px] border-[3px] border-ink bg-white px-3 pb-0.5 pt-1.5 font-chunky text-sm text-ink shadow-[3px_3px_0_#14183a]">
+            <Lock className="-mt-1 h-3.5 w-3.5" /> {current} LOCKED
           </span>
         )}
         {!locked &&
@@ -47,12 +47,12 @@ export function FormationPicker({ current, onChange, preferred = [], variant = '
                 sfx.click();
                 onChange(id);
               }}
-              className={`rounded-md border px-2 py-1 text-[11px] font-black transition ${
-                id === current ? 'border-flare-400 bg-flare-400/20 text-flare-200' : 'border-white/15 bg-white/5 text-white/70 hover:bg-white/10'
+              className={`rounded-[8px] border-2 border-ink px-2 py-1 text-[11px] font-black text-ink transition ${
+                id === current ? 'bg-flare-500 shadow-[2px_2px_0_#14183a]' : 'bg-white hover:bg-album-cream'
               }`}
             >
               {id}
-              {preferred.includes(id) && <span className="ml-1 text-yellow-300">★</span>}
+              {preferred.includes(id) && <span className="ml-1 text-album-red">★</span>}
             </button>
           ))}
       </div>

@@ -48,10 +48,10 @@ export function Header({ phase, packNumber, picksMade, vaultCount, onOpenVault, 
   }, []);
 
   return (
-    <header className="sticky top-0 z-50 border-b-2 border-flare-500 bg-ink-800/95">
+    <header className="sticky top-0 z-50 border-b-4 border-flare-500 bg-ink">
       <div className="mx-auto flex max-w-7xl items-center gap-3 px-4 py-2">
         <button onClick={requestNewRun} className="flex items-center gap-2" aria-label="PackDraft 38 home">
-          <Crest size={30} variant="solid" />
+          <Crest size={34} variant="full" />
           <Wordmark className="hidden text-2xl sm:inline-flex" />
         </button>
         {dailyNumber !== null && phase !== 'title' && (
@@ -65,13 +65,13 @@ export function Header({ phase, packNumber, picksMade, vaultCount, onOpenVault, 
               {Array.from({ length: TOTAL_PACKS }).map((_, i) => (
                 <span
                   key={i}
-                  className={`h-2 flex-1 rounded-full transition-all ${
-                    i < picksMade ? 'bg-flare-400' : i === packNumber - 1 ? 'animate-pulse bg-yellow-300' : 'bg-white/15'
-                  } ${i === TOTAL_PACKS - 1 ? 'ring-1 ring-yellow-300/60' : ''}`}
+                  className={`h-4 max-w-[22px] flex-1 rounded-[3px] transition-all ${
+                    i < picksMade ? 'border-2 border-album-cream bg-flare-500' : i === packNumber - 1 ? 'animate-pulse border-2 border-album-cream bg-album-red' : 'border-2 border-dashed border-white/35'
+                  }`}
                 />
               ))}
             </div>
-            <span className="font-display text-lg text-white/80">{picksMade}/11</span>
+            <span className="font-display text-xl text-album-cream">{picksMade}/11</span>
           </div>
         )}
         {phase !== 'draft' && <div className="flex-1" />}
@@ -81,7 +81,7 @@ export function Header({ phase, packNumber, picksMade, vaultCount, onOpenVault, 
             sfx.click();
             onOpenBook();
           }}
-          className="flex items-center gap-1.5 rounded-lg border border-amber-200/40 bg-amber-200/10 px-3 py-1.5 text-xs font-black uppercase tracking-wider text-amber-100 transition hover:bg-amber-200/20"
+          className="hdr-btn flex"
           aria-label="Sticker book"
         >
           <BookOpen className="h-4 w-4" />
@@ -92,30 +92,30 @@ export function Header({ phase, packNumber, picksMade, vaultCount, onOpenVault, 
             sfx.click();
             onOpenCabinet();
           }}
-          className={`${phase === 'title' ? 'flex' : 'hidden sm:flex'} items-center gap-1.5 rounded-lg border border-amber-500/40 bg-amber-600/15 px-3 py-1.5 text-xs font-black uppercase tracking-wider text-amber-100 transition hover:bg-amber-600/25`}
+          className={`hdr-btn ${phase === 'title' ? 'flex' : 'hidden sm:flex'}`}
           aria-label="Trophy cabinet"
         >
           <Award className="h-4 w-4" />
           <span className="hidden lg:inline">Trophies</span>
-          <span className="rounded-full bg-amber-400 px-1.5 text-[10px] text-black">{trophyCount}</span>
+          <span className="rounded-full bg-album-red px-1.5 text-[11px] text-white">{trophyCount}</span>
         </button>
         <button
           onClick={() => {
             sfx.click();
             onOpenVault();
           }}
-          className={`relative ${phase === 'title' ? 'flex' : 'hidden sm:flex'} items-center gap-1.5 rounded-lg border border-yellow-400/40 bg-yellow-400/10 px-3 py-1.5 text-xs font-black uppercase tracking-wider text-yellow-200 transition hover:bg-yellow-400/20`}
+          className={`hdr-btn relative ${phase === 'title' ? 'flex' : 'hidden sm:flex'}`}
         >
           <Trophy className="h-4 w-4" />
           <span className="hidden sm:inline">Trophy Vault</span>
-          {vaultCount > 0 && <span className="rounded-full bg-yellow-400 px-1.5 text-[10px] text-black">{vaultCount}</span>}
+          {vaultCount > 0 && <span className="rounded-full bg-album-red px-1.5 text-[11px] text-white">{vaultCount}</span>}
         </button>
         <button
           onClick={() => {
             setLite(!lite);
             sfx.click();
           }}
-          className={`flex items-center gap-1 rounded-lg border p-2 text-xs font-black uppercase transition ${lite ? 'border-sky-400/50 bg-sky-500/15 text-sky-200' : 'border-white/15 bg-white/5 text-white/80 hover:bg-white/10'}`}
+          className={`hdr-btn hdr-icon flex ${lite ? '!bg-album-blue !text-white' : ''}`}
           aria-label={lite ? 'Lite effects on: tap for full effects' : 'Full effects on: tap for lite effects'}
           aria-pressed={lite}
           title={lite ? 'Lite effects (smoother on some phones)' : 'Full effects'}
@@ -128,7 +128,7 @@ export function Header({ phase, packNumber, picksMade, vaultCount, onOpenVault, 
             setMuted(!muted);
             if (muted) window.setTimeout(() => sfx.click(), 30);
           }}
-          className="rounded-lg border border-white/15 bg-white/5 p-2 text-white/80 transition hover:bg-white/10"
+          className="hdr-btn hdr-icon flex"
           aria-label={muted ? 'Unmute sound' : 'Mute sound'}
           title={muted ? 'Unmute' : 'Mute'}
         >
@@ -137,7 +137,7 @@ export function Header({ phase, packNumber, picksMade, vaultCount, onOpenVault, 
         {phase !== 'title' && (
           <button
             onClick={requestNewRun}
-            className={`flex items-center gap-1 rounded-lg border p-2 transition ${armed ? 'border-rose-400 bg-rose-500/20 text-rose-200' : 'border-white/15 bg-white/5 text-white/80 hover:bg-white/10'}`}
+            className={`hdr-btn hdr-icon flex ${armed ? '!bg-album-red !text-white' : ''}`}
             aria-label={armed ? 'Tap again to abandon this run' : 'New run'}
             title="New run"
           >

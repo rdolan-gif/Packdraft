@@ -538,7 +538,7 @@ export function SeasonBroadcast({ sim, onFinish, formationId, lineup, managerId,
         </div>
         <div className="min-w-0 lg:col-start-1 lg:row-start-3">
           {/* Leaderboards */}
-          <section className="rounded-2xl border border-white/10 bg-black/40 p-3">
+          <section className="rounded-2xl comic-panel p-3">
             <div className="mb-2 flex flex-wrap items-center gap-2">
               <h3 className="font-display text-xl text-white">LEAGUE LEADERS</h3>
               <div className="ml-auto flex gap-1">

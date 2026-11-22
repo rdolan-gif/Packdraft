@@ -8,14 +8,18 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        display: ['"Saira Extra Condensed"', '"Arial Narrow"', 'Impact', 'sans-serif'],
-        sans: ['Inter', 'system-ui', 'sans-serif'],
+        // Retro sticker-album brand: comic headlines, chunky buttons and names, sturdy body text.
+        display: ['Bangers', 'Impact', 'sans-serif'],
+        chunky: ['"Luckiest Guy"', 'Impact', 'sans-serif'],
+        sans: ['Archivo', 'system-ui', 'sans-serif'],
       },
       colors: {
         pitch: { 900: '#05110b', 800: '#0a1f14', 700: '#0f2e1d' },
-        // Brand: Flare (floodlight orange) on ink. Green stays for "good" states (natural fit, wins).
-        flare: { 50: '#fff4ed', 100: '#ffe4d2', 200: '#ffc6a5', 300: '#ffa06e', 400: '#ff8248', 500: '#ff6a2b', 600: '#eb5418', 700: '#c2410c', 800: '#9a3412', 900: '#7c2d12', 950: '#431407' },
-        ink: { DEFAULT: '#0b0e16', 950: '#07090f', 900: '#0b0e16', 800: '#151a26', 700: '#1e2433', 600: '#2a3244' },
+        // Brand: the retro sticker album. "flare" is now Sticker Yellow (the accent), "ink" Album Navy.
+        // Red, blue and cream are the other album colours. Green stays for "good" states (natural fit, wins).
+        flare: { 50: '#fffbe6', 100: '#fff4bf', 200: '#ffeb85', 300: '#ffe14d', 400: '#ffda1f', 500: '#ffd400', 600: '#e6bd00', 700: '#b38f00', 800: '#806600', 900: '#4d3d00', 950: '#2b2200' },
+        ink: { DEFAULT: '#14183a', 950: '#0b0e24', 900: '#14183a', 800: '#1c2150', 700: '#262c66', 600: '#323a7d' },
+        album: { red: '#e62e2d', blue: '#1e4fd8', cream: '#fff6e0', yellow: '#ffd400', navy: '#14183a' },
       },
       keyframes: {
         shake: {

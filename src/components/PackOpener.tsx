@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type PointerEvent as RPointerEvent } from 'react';
-import { RefreshCw, Scissors, Sparkles } from 'lucide-react';
+import { RefreshCw, Scissors } from 'lucide-react';
 import type { PlayerCard, Tier } from '../types/game';
 import { eraColour } from '../data/eraColours';
 import { Flag } from './Flag';
@@ -8,7 +8,7 @@ import { highestTier, TOTAL_PACKS, tierRates } from '../engine/packGenerator';
 import { sfx } from '../engine/soundEffects';
 import { burstAt, goldConfetti, rainbowConfetti, shakeScreen } from '../engine/fx';
 import { Crest } from './Crest';
-import { CardBack, PlayerCardUI, TIER_TEXT } from './PlayerCardUI';
+import { CardBack, PlayerCardUI } from './PlayerCardUI';
 
 type Stage = 'sealed' | 'dimming' | 'tell' | 'fanned' | 'revealed';
 
@@ -26,6 +26,8 @@ interface Props {
   subtitle?: string;
   /** Text on the foil pack's label. */
   packLabel?: string;
+  /** Wrapper design: Matchday (default), Final Whistle (last pack), Daily Draft, January Window. */
+  wrapper?: 'daily';
   /** Called when the pack is ripped (its cards go into the sticker book). */
   onRip?: () => void;
   /** Cards never pulled before get a NEW STICKER ribbon. */
@@ -47,7 +49,7 @@ const RAINBOW = ['#f472b6', '#fbbf24', '#22d3ee', '#a78bfa', '#ffffff'];
 const FW_GAP = 650; // between rockets
 const FW_FLIGHT = 450; // rocket climb
 const FW_TOTAL = 2 * FW_GAP + FW_FLIGHT + 1100; // last tile lands, then a beat to read them
-const TILE_Y = 0.24; // tiles sit this far down the screen
+const TILE_Y = 0.15; // tiles sit this far down the screen
 
 function flashColour(tier: Tier, best: PlayerCard | undefined) {
   if (tier !== 'ELITE' || !best) return FLASH[tier].color;
@@ -73,7 +75,7 @@ function raysFor(tier: Tier, accent?: string) {
   return `conic-gradient(from 0deg at 50% 50%, ${stops.join(', ')}, transparent 360deg)`;
 }
 
-export function PackOpener({ packNumber, cards, packKey, selectedId, onSelect, rerollAvailable, onReroll, onRevealed, title, subtitle, packLabel, onRip, newIds }: Props) {
+export function PackOpener({ packNumber, cards, packKey, selectedId, onSelect, rerollAvailable, onReroll, onRevealed, title, subtitle, packLabel, onRip, newIds, wrapper }: Props) {
   const [stage, setStage] = useState<Stage>('sealed');
   const [flipped, setFlipped] = useState<Set<number>>(new Set());
   const [tearProgress, setTearProgress] = useState(0);
@@ -94,6 +96,8 @@ export function PackOpener({ packNumber, cards, packKey, selectedId, onSelect, r
   const bestEra = best ? eraColour(best.era) : eraColour('SQUAD');
   // 86+ pulls: three fireworks, left to right, each bursting into a tile (position, club icon, flag).
   const [rockets, setRockets] = useState(0);
+  // Walkout flare: the sealed pack turns pearl holo and shakes for a moment before a Prime Icon or secret rare.
+  const [flareShake, setFlareShake] = useState(false);
   const [tiles, setTiles] = useState(0);
   const fireworksFor = !!best && (best.ovr >= 86 || best.tier === 'SECRET_DEV');
   const launchFireworks = (start: number) => {
@@ -112,6 +116,14 @@ export function PackOpener({ packNumber, cards, packKey, selectedId, onSelect, r
     });
   };
   const finale = packNumber >= TOTAL_PACKS;
+  // The wrapper: Matchday red, Final Whistle gold, Daily Draft blue, January Window navy.
+  const look = finale
+    ? { foil: 'foil-finale', crest: 'ink' as const, name: ['FINAL', 'WHISTLE'], title: '#fff6e0', small: '#14183a', chipBg: '#e62e2d', chipText: '#fff' }
+    : wrapper === 'daily'
+      ? { foil: 'foil-daily', crest: 'full' as const, name: ['DAILY', 'DRAFT'], title: '#ffd400', small: '#fff6e0', chipBg: '#14183a', chipText: '#fff6e0' }
+      : packLabel
+        ? { foil: 'foil-window', crest: 'full' as const, name: ['TRANSFER', 'WINDOW'], title: '#ffd400', small: '#fff6e0', chipBg: '#ffd400', chipText: '#14183a' }
+        : { foil: '', crest: 'solid' as const, name: ['MATCHDAY'], title: '#ffffff', small: '#fff6e0', chipBg: '#14183a', chipText: '#ffd400' };
 
   // Reset whenever a new pack arrives.
   useEffect(() => {
@@ -125,6 +137,7 @@ export function PackOpener({ packNumber, cards, packKey, selectedId, onSelect, r
     setFlash(null);
     setRockets(0);
     setTiles(0);
+    setFlareShake(false);
   }, [packKey]);
 
   useEffect(() => () => timers.current.forEach(clearTimeout), []);
@@ -175,7 +188,7 @@ export function PackOpener({ packNumber, cards, packKey, selectedId, onSelect, r
   };
 
   const rip = () => {
-    if (stage !== 'sealed') return;
+    if (stage !== 'sealed' || flareShake) return;
     onRip?.();
     sfx.unlock();
     sfx.rip();
@@ -186,7 +199,19 @@ export function PackOpener({ packNumber, cards, packKey, selectedId, onSelect, r
     setTearProgress(1);
 
     if (walkoutTier(top)) {
-      // THE WALKOUT FLARE
+      // THE WALKOUT FLARE: the pack shakes in pearl holo first ("SOMETHING'S SHAKING..."), then it all kicks off.
+      setFlareShake(true);
+      sfx.heartbeat();
+      shakeScreen('micro');
+      later(1500, () => walkout(cx, cy));
+      return;
+    }
+    normalReveal(cx, cy);
+  };
+
+  const walkout = (cx: number, cy: number) => {
+    {
+      setFlareShake(false);
       setStage('dimming');
       sfx.heartbeat();
       later(350, () => {
@@ -206,9 +231,10 @@ export function PackOpener({ packNumber, cards, packKey, selectedId, onSelect, r
         sfx.slide();
         startReveal(500);
       });
-      return;
     }
+  };
 
+  const normalReveal = (cx: number, cy: number) => {
     setStage('tell');
     setFlash({ key: Date.now(), tier: top });
     later(1400, () => setFlash(null));
@@ -350,20 +376,32 @@ export function PackOpener({ packNumber, cards, packKey, selectedId, onSelect, r
                   />
                 )}
                 {tiles > i && (
-                  <div className="absolute -translate-x-1/2 -translate-y-1/2">
-                    <div
-                      className="flex h-[92px] w-[92px] animate-pop flex-col items-center justify-center gap-1 rounded-2xl bg-zinc-950/95 sm:h-[110px] sm:w-[110px]"
-                      style={{ border: `3px solid ${ring}`, boxShadow: `0 0 28px 4px ${ring}88, inset 0 0 0 2px ${prime ? '#facc15' : '#facc15aa'}` }}
-                    >
-                      {i === 0 && <span className="font-display text-5xl leading-none text-white sm:text-6xl">{best.positions[0]}</span>}
-                      {i === 1 && <ClubIcon code={best.club} size={70} />}
-                      {i === 2 && (
-                        <>
-                          <Flag nation={best.nation} width={66} className="rounded-sm" />
-                          <span className="max-w-[86px] truncate text-[9px] font-black uppercase tracking-wider text-white/80">{best.nation}</span>
-                        </>
-                      )}
-                    </div>
+                  <div className="absolute -translate-x-1/2 -translate-y-1/2 animate-pop">
+                    {i < 2 ? (
+                      // POW! starburst for the position, then the club icon in a starburst
+                      <div className="relative h-[112px] w-[112px] sm:h-[132px] sm:w-[132px]">
+                        <div className="burst-clip absolute inset-0 translate-x-[6px] translate-y-[6px] bg-ink" />
+                        <div className="burst-clip absolute inset-0 flex flex-col items-center justify-center" style={{ background: i === 0 ? '#ffd400' : '#fff6e0' }}>
+                          {i === 0 ? (
+                            <>
+                              <span className="font-chunky text-sm leading-none text-album-red">POW!</span>
+                              <span className="font-display text-5xl leading-none text-ink sm:text-6xl">{best.positions[0]}</span>
+                            </>
+                          ) : (
+                            <ClubIcon code={best.club} size={64} />
+                          )}
+                        </div>
+                      </div>
+                    ) : (
+                      // the flag on a waving pennant
+                      <div className="pennant-wave relative flex items-start" style={{ filter: 'drop-shadow(5px 5px 0 #14183a)' }}>
+                        <span className="h-[128px] w-[6px] rounded-full border-2 border-ink bg-album-cream" />
+                        <div className="pennant flex h-[86px] w-[124px] flex-col items-start justify-center gap-1 bg-album-cream pl-3" style={{ border: '3px solid #14183a' }}>
+                          <Flag nation={best.nation} width={58} className="rounded-sm border-2 border-ink" />
+                          <span className="max-w-[80px] truncate font-chunky text-[11px] leading-none text-ink">{best.nation}</span>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
@@ -375,12 +413,8 @@ export function PackOpener({ packNumber, cards, packKey, selectedId, onSelect, r
       {/* header */}
       <div className="mb-3 flex w-full items-center justify-between gap-2">
         <div>
-          <div className="font-display text-3xl leading-none text-white sm:text-4xl">
-            {title ?? (
-              <>
-                PACK {packNumber} <span className="text-flare-400">/ {TOTAL_PACKS}</span>
-              </>
-            )}
+          <div className="font-display text-5xl leading-[0.9] sm:text-[64px]" style={{ color: '#ffd400', WebkitTextStroke: '3px #14183a', paintOrder: 'stroke fill', textShadow: '5px 5px 0 #14183a' }}>
+            {title ?? (finale ? 'LAST PACK!' : `PACK ${packNumber}!`)}
           </div>
           {subtitle ? (
             <div className="text-xs font-bold uppercase tracking-widest text-sky-300">{subtitle}</div>
@@ -394,11 +428,11 @@ export function PackOpener({ packNumber, cards, packKey, selectedId, onSelect, r
             <div className="text-xs font-bold uppercase tracking-widest text-white/50">5 cards · draft 1</div>
           )}
         </div>
-        <div className="hidden text-right text-[10px] leading-tight text-white/60 sm:block">
-          <div className={TIER_TEXT.PRIME_ICON}>Prime {rates.PRIME_ICON}%</div>
-          <div className={TIER_TEXT.RISING_WORLD}>World Class {rates.RISING_WORLD}%</div>
-          <div className={TIER_TEXT.ELITE}>Elite (81–85) {rates.ELITE}%</div>
-          <div className={TIER_TEXT.STANDARD}>Squad {rates.STANDARD}%</div>
+        <div className="hidden rounded-xl border-[3px] border-ink bg-album-cream px-3 py-2 text-right text-[13px] font-black leading-[1.5] text-ink sm:block">
+          <div>Prime {rates.PRIME_ICON}%</div>
+          <div>World Class {rates.RISING_WORLD}%</div>
+          <div>Elite {rates.ELITE}%</div>
+          <div>Squad {rates.STANDARD}%</div>
         </div>
       </div>
 
@@ -424,34 +458,47 @@ export function PackOpener({ packNumber, cards, packKey, selectedId, onSelect, r
                 </div>
               </div>
             )}
-            {/* top flap (tears away) */}
+            {stage === 'sealed' && !flareShake && (
+              <div className="burst-clip pointer-events-none absolute -right-12 top-12 z-30 flex h-[92px] w-[92px] rotate-[14deg] items-center justify-center bg-album-cream text-center font-chunky text-[15px] leading-none text-ink">
+                TEAR
+                <br />
+                HERE!
+              </div>
+            )}
+            {/* top flap: the crimped tear strip (tears away) */}
             <div
-              className={`foil ${finale ? 'foil-finale' : ''} absolute inset-x-0 top-0 h-[44px] rounded-t-md border-2 border-b-0 border-flare-300/40 transition-all duration-500`}
+              className="pack-crimp absolute inset-x-0 top-0 h-[44px] rounded-t-md border-[3px] border-b-0 border-ink transition-all duration-500"
               style={{
+                backgroundColor: finale ? '#14183a' : '#ffd400',
                 transform: stage !== 'sealed' ? 'translate(60px,-80px) rotate(28deg)' : 'none',
                 opacity: stage !== 'sealed' ? 0 : 1,
                 clipPath: `polygon(0 0, 100% 0, 100% 100%, ${tearProgress * 100}% 100%, ${tearProgress * 100}% 70%, 0 70%)`,
               }}
             />
-            {/* body */}
-            <div className={`foil ${finale ? 'foil-finale' : ''} absolute inset-x-0 bottom-0 top-[40px] overflow-hidden rounded-b-md border-2 border-t-0 border-flare-300/40 shadow-2xl shadow-flare-900/60 ${stage === 'tell' ? 'brightness-150' : ''}`}>
+            {/* body: the foil packet */}
+            <div
+              className={`foil ${flareShake ? 'foil-pearl animate-vibrate ring-[6px] ring-album-red' : look.foil} absolute inset-x-0 bottom-0 top-[40px] overflow-hidden rounded-b-md border-[3px] border-t-[3px] border-dashed border-ink shadow-[8px_8px_0_#0b0e24] ${stage === 'tell' ? 'brightness-150' : ''}`}
+              style={{ borderTopStyle: 'dashed', borderLeftStyle: 'solid', borderRightStyle: 'solid', borderBottomStyle: 'solid' }}
+            >
               <div className="absolute inset-0" style={{ background: `radial-gradient(circle at ${tilt.gx}% ${tilt.gy}%, rgba(255,255,255,.55), transparent 40%)`, mixBlendMode: 'overlay' }} />
-              <div className="relative flex h-full flex-col items-center justify-center gap-2 text-center">
-                {finale ? <Crest size={84} /> : <Crest size={84} variant="ink" />}
-                <div className={`font-display text-4xl italic leading-[0.9] ${finale ? 'text-white' : 'text-ink'}`} style={{ fontWeight: 900 }}>
-                  {finale ? 'FINAL' : 'MATCHDAY'}
-                  <br />
-                  PACK
+              <div className="relative flex h-full flex-col items-center justify-center gap-1.5 pb-4 text-center">
+                <div className="font-display text-lg tracking-[0.15em]" style={{ color: look.small }}>
+                  PACKDRAFT
                 </div>
-                <div className="bg-ink px-3 py-1 text-[10px] font-black uppercase tracking-widest text-flare-300">
-                  {packLabel ?? (finale ? "Captain's Finale" : `Pack ${packNumber} of ${TOTAL_PACKS}`)}
-                </div>
-                <div className="mt-2 flex gap-1">
-                  {Array.from({ length: 5 }).map((_, i) => (
-                    <span key={i} className={`h-2 w-6 ${finale ? 'bg-flare-500/50' : 'bg-ink/30'}`} />
+                <Crest size={92} variant={look.crest} />
+                <div className="font-display text-[42px] leading-[0.85]" style={{ color: look.title, WebkitTextStroke: '3px #14183a', paintOrder: 'stroke fill', textShadow: '3px 3px 0 #14183a' }}>
+                  {(flareShake ? ["SOMETHING'S", 'SHAKING...'] : look.name).map((l) => (
+                    <div key={l}>{l}</div>
                   ))}
                 </div>
+                <div className="mt-1 rounded-md border-2 border-ink px-3 pb-0.5 pt-1 font-chunky text-[13px]" style={{ background: flareShake ? '#14183a' : look.chipBg, color: flareShake ? '#fff6e0' : look.chipText }}>
+                  {flareShake ? 'HOLD ON TIGHT' : packLabel ?? (finale ? 'LAST PACK!' : wrapper === 'daily' ? `PACK ${packNumber} · SAME FOR EVERYONE` : `PACK ${packNumber} OF ${TOTAL_PACKS}`)}
+                </div>
+                <div className="mt-0.5 font-chunky text-[11px]" style={{ color: look.small }}>
+                  5 STICKERS INSIDE
+                </div>
               </div>
+              <div className="pack-crimp absolute inset-x-0 bottom-0 h-4 border-t-[3px] border-ink" style={{ backgroundColor: finale ? '#14183a' : '#ffd400' }} />
               {stage === 'tell' && (
                 <div
                   className="absolute inset-x-0 top-0 h-2"
@@ -471,9 +518,9 @@ export function PackOpener({ packNumber, cards, packKey, selectedId, onSelect, r
               aria-label="Tear strip: drag from left to right to open the pack"
             >
               <div className="perforation absolute left-4 right-4 top-1/2 h-[14px] -translate-y-1/2 rounded-full bg-black/25">
-                <div className="h-full rounded-full bg-gradient-to-r from-yellow-200 via-white to-yellow-200 shadow-[0_0_14px_rgba(255,255,255,.9)]" style={{ width: `${tearProgress * 100}%` }} />
+                <div className="h-full rounded-full border-r-[3px] border-dashed border-ink bg-album-cream" style={{ width: `${tearProgress * 100}%` }} />
               </div>
-              {stage === 'sealed' && tearProgress < 0.05 && !isDragging && (
+              {stage === 'sealed' && !flareShake && tearProgress < 0.05 && !isDragging && (
                 <div className="pointer-events-none absolute left-16 right-6 top-1/2 flex -translate-y-1/2 items-center justify-center gap-1 text-[11px] font-black uppercase tracking-widest text-white drop-shadow-[0_1px_2px_rgba(0,0,0,.9)]">
                   Slide to tear
                   <span className="flex">
@@ -485,9 +532,9 @@ export function PackOpener({ packNumber, cards, packKey, selectedId, onSelect, r
                   </span>
                 </div>
               )}
-              {stage === 'sealed' && (
+              {stage === 'sealed' && !flareShake && (
                 <div
-                  className={`pointer-events-none absolute top-1/2 flex h-11 w-11 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border-2 border-white bg-gradient-to-br from-yellow-200 to-amber-500 text-black shadow-[0_0_18px_rgba(250,204,21,.9)] ${tearProgress === 0 && !isDragging ? 'animate-pulse' : ''}`}
+                  className={`pointer-events-none absolute top-1/2 flex h-11 w-11 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border-[3px] border-ink bg-album-red text-white shadow-[3px_3px_0_#14183a] ${tearProgress === 0 && !isDragging ? 'animate-pulse' : ''}`}
                   style={{ left: `calc(16px + (100% - 32px) * ${tearProgress})` }}
                 >
                   <Scissors className="h-5 w-5" />
@@ -495,18 +542,18 @@ export function PackOpener({ packNumber, cards, packKey, selectedId, onSelect, r
               )}
             </div>
           </div>
-          {stage === 'sealed' && (
+          {stage === 'sealed' && !flareShake && (
             <div className="mt-5 flex flex-col items-center gap-2">
-              <div className="text-xs font-semibold text-white/60">Grab the ✂ handle and slide it right, or</div>
+              
               <button
                 onClick={rip}
-                className="group relative overflow-hidden btn-cut bg-flare-500 px-8 py-3 font-display text-2xl tracking-wider text-black shadow-lg shadow-flare-500/30 transition hover:scale-105 active:scale-95"
+                className="group relative overflow-hidden btn-cut bg-flare-500 px-10 py-3 text-[32px] text-ink transition hover:scale-105"
+                style={{ borderWidth: 5, boxShadow: '0 8px 0 #14183a', borderRadius: 16 }}
               >
-                <span className="relative z-10 flex items-center gap-2">
-                  <Sparkles className="h-5 w-5" /> RIP OPEN PACK
-                </span>
+                <span className="relative z-10 flex items-center gap-2">RIP IT OPEN!</span>
                 <span className="absolute inset-0 -translate-x-full bg-white/50 transition group-hover:translate-x-full" style={{ transitionDuration: '700ms' }} />
               </button>
+              <div className="mt-1 text-sm font-bold text-album-cream">or grab the yellow strip and drag it across</div>
             </div>
           )}
         </div>
