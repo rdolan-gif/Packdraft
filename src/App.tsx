@@ -447,9 +447,9 @@ export default function App() {
 
         {phase === 'formation' && manager && (
           <div className="mx-auto flex max-w-6xl flex-col items-center px-4 py-8">
-            <div className="text-xs font-black uppercase tracking-[0.4em] text-flare-400">Step 2 · The Shape</div>
-            <h1 className="mt-1 text-center font-display text-5xl leading-none text-white sm:text-6xl">CHOOSE YOUR FORMATION</h1>
-            <p className="mt-2 max-w-xl text-center text-sm text-white/60">
+            <div className="inline-block -rotate-2 border-[3px] border-ink bg-album-red px-3 pb-0.5 pt-1.5 font-chunky text-sm text-white shadow-[3px_3px_0_#0b0e24]">STEP 2 · THE SHAPE</div>
+            <h1 className="comic-title mt-3 text-center font-display text-5xl leading-none sm:text-7xl">CHOOSE YOUR FORMATION!</h1>
+            <p className="mt-3 max-w-xl text-center text-sm font-medium text-album-cream/85">
               {manager.emoji} <b className="text-white">{manager.name}</b> favours the starred shapes. Lock one in now, or keep it flexible: you can change it until your third pick, when it locks for good.
             </p>
             <div className="mt-6 w-full">
@@ -461,11 +461,11 @@ export default function App() {
                   setFormationLocked(true);
                   startDraft();
                 }}
-                className="flex items-center gap-2 btn-cut bg-flare-500 hover:bg-flare-400 px-6 py-3 font-display text-2xl tracking-wider text-black shadow-lg shadow-flare-500/30 transition hover:scale-105"
+                className="btn-cut flex items-center gap-2 bg-flare-500 px-6 py-3 text-2xl text-ink transition hover:scale-105"
               >
                 <Lock className="h-5 w-5" /> LOCK {formationId} & OPEN PACK 1
               </button>
-              <button onClick={startDraft} className="rounded-xl border-2 border-white/20 bg-white/5 px-6 py-3 font-display text-2xl tracking-wider text-white transition hover:bg-white/10">
+              <button onClick={startDraft} className="btn-cut bg-album-cream px-6 py-3 text-2xl text-ink transition hover:scale-105">
                 DECIDE AFTER PACK 3
               </button>
             </div>
@@ -504,7 +504,7 @@ export default function App() {
                       <button onClick={autoPlace} className="flex items-center gap-1 rounded-lg bg-flare-400 px-3 py-1.5 text-sm font-black text-black hover:bg-flare-300">
                         <Wand2 className="h-4 w-4" /> Auto-Place
                       </button>
-                      <button onClick={() => setSelected(null)} className="rounded-lg border border-white/20 px-3 py-1.5 text-sm font-bold text-white/70 hover:bg-white/10">
+                      <button onClick={() => setSelected(null)} className="rounded-lg border border-ink-950 px-3 py-1.5 text-sm font-bold text-white/70 hover:bg-ink-600">
                         Cancel
                       </button>
                     </div>
@@ -570,7 +570,7 @@ export default function App() {
       </main>
 
       {toast && (
-        <div className="fixed bottom-5 left-1/2 z-[99] -translate-x-1/2 animate-pop rounded-xl border border-white/20 bg-black/90 px-4 py-2 text-sm font-bold text-white shadow-2xl">{toast}</div>
+        <div className="fixed bottom-5 left-1/2 z-[99] -translate-x-1/2 animate-pop rounded-xl border border-ink-950 bg-ink/95 px-4 py-2 text-sm font-bold text-white shadow-[6px_6px_0_#0b0e24]">{toast}</div>
       )}
 
       {inspectSlot && lineup[inspectSlot] && (
@@ -612,43 +612,43 @@ function KickoffPanel({ teamName, setTeamName, lineup, rating, onKickOff }: { te
   const cards = (Object.values(lineup).filter(Boolean) as PlayerCard[]).sort((a, b) => b.ovr - a.ovr);
   return (
     <div className="flex flex-col items-center gap-4 py-4 text-center">
-      <div className="text-xs font-black uppercase tracking-[0.4em] text-flare-400">Draft complete</div>
-      <h2 className="font-display text-5xl leading-none text-white">YOUR XI IS SET</h2>
+      <div className="inline-block -rotate-2 border-[3px] border-ink bg-album-red px-3 pb-0.5 pt-1.5 font-chunky text-sm text-white shadow-[3px_3px_0_#0b0e24]">DRAFT COMPLETE!</div>
+      <h2 className="comic-title font-display text-6xl leading-none">YOUR XI IS SET</h2>
       <div className="flex flex-wrap justify-center gap-1.5">
         {cards.slice(0, 3).map((c) => (
           <PlayerCardUI key={c.id} card={c} size="sm" />
         ))}
       </div>
       <div className="grid w-full max-w-md grid-cols-3 gap-2">
-        <div className="rounded-xl bg-white/5 p-2">
-          <div className="text-[10px] font-black uppercase text-white/50">Rating</div>
-          <div className="font-display text-3xl text-yellow-300">{rating.overall.toFixed(1)}</div>
+        <div className="rounded-[14px] border-[3px] border-ink bg-flare-500 p-2 text-ink shadow-[4px_4px_0_#0b0e24]">
+          <div className="text-[11px] font-black uppercase tracking-widest">Rating</div>
+          <div className="font-display text-4xl leading-none">{rating.overall.toFixed(1)}</div>
         </div>
-        <div className="rounded-xl bg-white/5 p-2">
-          <div className="text-[10px] font-black uppercase text-white/50">Attack</div>
-          <div className="font-display text-3xl text-rose-300">{rating.attack.toFixed(1)}</div>
+        <div className="rounded-[14px] border-[3px] border-ink bg-album-cream p-2 text-ink shadow-[4px_4px_0_#0b0e24]">
+          <div className="text-[11px] font-black uppercase tracking-widest">Attack</div>
+          <div className="font-display text-4xl leading-none text-album-red">{rating.attack.toFixed(1)}</div>
         </div>
-        <div className="rounded-xl bg-white/5 p-2">
-          <div className="text-[10px] font-black uppercase text-white/50">Defence</div>
-          <div className="font-display text-3xl text-sky-300">{rating.defence.toFixed(1)}</div>
+        <div className="rounded-[14px] border-[3px] border-ink bg-album-cream p-2 text-ink shadow-[4px_4px_0_#0b0e24]">
+          <div className="text-[11px] font-black uppercase tracking-widest">Defence</div>
+          <div className="font-display text-4xl leading-none text-album-blue">{rating.defence.toFixed(1)}</div>
         </div>
       </div>
       <label className="flex w-full max-w-md flex-col gap-1 text-left">
-        <span className="text-[10px] font-black uppercase tracking-widest text-white/50">Club name</span>
+        <span className="font-chunky text-sm text-album-cream">CLUB NAME</span>
         <input
           value={teamName}
           maxLength={24}
           onChange={(e) => setTeamName(e.target.value)}
-          className="rounded-xl border border-white/20 bg-black/50 px-4 py-2.5 font-display text-2xl tracking-wide text-white outline-none focus:border-flare-400"
+          className="rounded-xl border-[3px] border-ink bg-white px-4 py-2.5 font-display text-3xl text-ink shadow-[4px_4px_0_#0b0e24] outline-none focus:bg-flare-100"
         />
       </label>
       <button
         onClick={onKickOff}
-        className="flex items-center gap-2 btn-cut bg-flare-500 hover:bg-flare-400 px-8 py-4 font-display text-3xl tracking-wider text-black shadow-xl shadow-flare-500/30 transition hover:scale-105 active:scale-95"
+        className="btn-cut flex items-center gap-2 bg-flare-500 px-8 py-4 text-3xl text-ink transition hover:scale-105"
       >
         <Play className="h-7 w-7" fill="currentColor" /> KICK OFF 38-GAME SEASON
       </button>
-      <div className="text-xs text-white/50">You can still swap players around on the pitch before kick-off.</div>
+      <div className="text-xs font-semibold text-album-cream/80">You can still swap players around on the pitch before kick-off.</div>
     </div>
   );
 }
@@ -823,7 +823,7 @@ function DailyCard({ onPlay }: { onPlay: () => void }) {
       {!today ? (
         <>
           <div className="text-xs text-white/65">Same managers, packs and league for everyone today. One attempt: leaving mid-run uses it.</div>
-          <button onClick={onPlay} className="rounded-xl bg-sky-400 px-4 py-2 font-display text-xl tracking-wider text-black transition hover:bg-sky-300">
+          <button onClick={onPlay} className="btn-cut bg-flare-500 px-4 py-2 text-xl text-ink hover:bg-flare-400">
             PLAY TODAY'S DRAFT
           </button>
         </>
@@ -833,7 +833,7 @@ function DailyCard({ onPlay }: { onPlay: () => void }) {
             {today.position === 1 ? '🏆' : '⚽'} {ordinal(today.position ?? 0)} · {today.points} pts · Grade {today.grade}
           </div>
           <div className="flex items-center gap-2">
-            <button onClick={share} className="flex items-center gap-1.5 rounded-xl bg-sky-400 px-3 py-1.5 font-display text-lg tracking-wider text-black hover:bg-sky-300">
+            <button onClick={share} className="flex items-center gap-1.5 btn-cut bg-flare-500 px-3 py-1.5 text-lg text-ink hover:bg-flare-400">
               {shared ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />} {shared ?? 'SHARE'}
             </button>
             <span className="text-xs text-white/55">Next draft in {untilTomorrow()}</span>

@@ -51,7 +51,7 @@ export function AroundTheGrounds({ sim, live, minute, flashes, before }: { sim: 
                 <span className="truncate">{h.name}</span>
                 <span className="h-3 w-3 shrink-0 rounded-sm" style={swatch(h.primary, h.secondary)} />
               </span>
-              <span className={`min-w-[44px] rounded px-1.5 text-center font-display text-base leading-tight tabular-nums ${hot ? 'bg-yellow-300 text-black' : 'bg-black/60 text-white'}`}>
+              <span className={`min-w-[44px] rounded px-1.5 text-center font-display text-base leading-tight tabular-nums ${hot ? 'bg-yellow-300 text-black' : 'bg-ink-950/80 text-white'}`}>
                 {score[0]}-{score[1]}
               </span>
               <span className="flex min-w-0 items-center gap-1.5 text-white/85">
@@ -118,7 +118,7 @@ export function LiveTable({ sim, rows, before, live }: { sim: SeasonSim; rows: T
             <div
               key={row.teamId}
               className={`row-move absolute inset-x-0 grid grid-cols-[24px_14px_1fr_22px_22px_22px_22px_32px_30px] items-center gap-1 rounded-md border-l-4 px-2 text-xs sm:grid-cols-[24px_14px_1fr_22px_22px_22px_22px_26px_26px_32px_30px_64px] ${zone} ${
-                team.isUser ? 'bg-gradient-to-r from-flare-500/35 via-flare-500/20 to-yellow-400/20 font-black text-white ring-1 ring-yellow-300/60' : idx % 2 ? 'bg-white/[0.03] text-white/85' : 'text-white/85'
+                team.isUser ? 'bg-flare-500/25 font-black text-white ring-1 ring-yellow-300/60' : idx % 2 ? 'bg-white/[0.03] text-white/85' : 'text-white/85'
               }`}
               style={{ transform: `translateY(${idx * ROW_H}px)`, height: ROW_H - 2 }}
             >
@@ -230,7 +230,7 @@ export const TitleRaceChart = memo(function TitleRaceChart({ sim, history, upto 
             {hover !== null && <line x1={x(hx)} x2={x(hx)} y1={P.t} y2={H - P.b} stroke="rgba(255,255,255,.35)" />}
           </svg>
           {hover !== null && (
-            <div className="pointer-events-none absolute top-1 rounded-lg border border-white/15 bg-black/90 px-2 py-1 text-[10px] text-white" style={{ left: `${Math.min(70, (x(hx) / W) * 100)}%` }}>
+            <div className="pointer-events-none absolute top-1 rounded-lg border border-ink-950 bg-ink/95 px-2 py-1 text-[10px] text-white" style={{ left: `${Math.min(70, (x(hx) / W) * 100)}%` }}>
               <div className="font-black">After MW{hx}</div>
               {ids
                 .map((id) => ({ id, v: history[id]?.[hx] ?? 0 }))

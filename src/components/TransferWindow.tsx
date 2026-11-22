@@ -47,10 +47,10 @@ export function TransferWindow({ formationId, lineup, managerId, position, point
   const delta = after ? after.overall - before.overall : 0;
 
   return (
-    <div className="fixed inset-0 z-[92] overflow-y-auto overscroll-contain bg-black/90" role="dialog" aria-label="January transfer window">
+    <div className="fixed inset-0 z-[92] overflow-y-auto overscroll-contain bg-ink/95" role="dialog" aria-label="January transfer window">
       <div className="mx-auto flex min-h-full max-w-6xl flex-col p-3 sm:p-5">
-        <div className="mb-3 overflow-hidden rounded-2xl border-2 border-sky-300/60 bg-gradient-to-r from-sky-950 via-black to-sky-950">
-          <div className="bg-sky-300 px-4 py-1.5 text-center text-[11px] font-black uppercase tracking-[0.35em] text-black">January Transfer Window</div>
+        <div className="mb-3 overflow-hidden rounded-2xl border-[4px] border-ink bg-album-blue shadow-[6px_6px_0_#0b0e24]">
+          <div className="border-b-[4px] border-ink bg-flare-500 px-4 py-1.5 text-center font-chunky text-sm text-ink">JANUARY TRANSFER WINDOW!</div>
           <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-3">
             <div>
               <div className="font-display text-3xl leading-none text-white sm:text-4xl">ONE PACK. ONE SIGNING.</div>
@@ -64,7 +64,7 @@ export function TransferWindow({ formationId, lineup, managerId, position, point
                 sfx.click();
                 onSkip();
               }}
-              className="flex items-center gap-1.5 rounded-xl border border-white/25 bg-white/5 px-4 py-2 text-sm font-black uppercase tracking-wider text-white/80 hover:bg-white/10"
+              className="flex items-center gap-1.5 rounded-xl border border-ink-950 bg-ink-700 px-4 py-2 text-sm font-black uppercase tracking-wider text-white/80 hover:bg-ink-600"
             >
               <X className="h-4 w-4" /> Keep my squad
             </button>
@@ -81,7 +81,7 @@ export function TransferWindow({ formationId, lineup, managerId, position, point
                 sfx.select();
                 setStage('pack');
               }}
-              className="rounded-2xl bg-gradient-to-r from-sky-300 via-cyan-300 to-sky-300 px-8 py-4 font-display text-3xl tracking-wider text-black shadow-xl shadow-sky-500/30 transition hover:scale-105"
+              className="btn-cut bg-flare-500 px-8 py-4 text-3xl text-ink transition hover:scale-105"
             >
               OPEN TRANSFER PACK
             </button>
@@ -143,13 +143,13 @@ export function TransferWindow({ formationId, lineup, managerId, position, point
                     {fit.penalty > 0 ? ` (−${fit.penalty} OVR)` : ''}
                   </div>
                   <div className="mt-2 grid grid-cols-2 gap-2 text-center">
-                    <div className="rounded-lg bg-black/40 p-2">
+                    <div className="rounded-lg bg-ink-950/80 p-2">
                       <div className="text-[10px] font-black uppercase text-white/50">Team rating</div>
                       <div className="font-display text-2xl text-white">
                         {before.overall.toFixed(1)} → <span className={delta >= 0 ? 'text-emerald-300' : 'text-rose-300'}>{after.overall.toFixed(1)}</span>
                       </div>
                     </div>
-                    <div className="rounded-lg bg-black/40 p-2">
+                    <div className="rounded-lg bg-ink-950/80 p-2">
                       <div className="text-[10px] font-black uppercase text-white/50">Chemistry</div>
                       <div className="font-display text-2xl text-white">
                         {before.chemistry} → <span className={after.chemistry >= before.chemistry ? 'text-emerald-300' : 'text-rose-300'}>{after.chemistry}</span>

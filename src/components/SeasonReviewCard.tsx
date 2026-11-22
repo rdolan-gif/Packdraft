@@ -13,13 +13,14 @@ import { shareText } from '../engine/share';
 import { SeasonCardDownload } from './SeasonCardDownload';
 
 export const GRADE_STYLE: Record<Grade, { stamp: string; text: string; glow: string }> = {
-  'S+': { stamp: 'bg-[conic-gradient(from_0deg,#facc15,#f472b6,#22d3ee,#a3e635,#facc15)] text-black border-yellow-100', text: 'text-yellow-200', glow: 'shadow-[0_0_60px_rgba(250,204,21,.8)]' },
-  S: { stamp: 'bg-gradient-to-br from-yellow-200 via-yellow-400 to-amber-600 text-black border-yellow-100', text: 'text-yellow-300', glow: 'shadow-[0_0_50px_rgba(250,204,21,.6)]' },
-  A: { stamp: 'bg-gradient-to-br from-flare-400 via-flare-600 to-yellow-500 text-white border-flare-200', text: 'text-flare-300', glow: 'shadow-[0_0_40px_rgba(16,185,129,.5)]' },
-  B: { stamp: 'bg-gradient-to-br from-sky-400 to-blue-700 text-white border-sky-200', text: 'text-sky-300', glow: 'shadow-[0_0_40px_rgba(56,189,248,.5)]' },
-  C: { stamp: 'bg-gradient-to-br from-slate-200 to-slate-500 text-black border-white', text: 'text-slate-200', glow: 'shadow-[0_0_30px_rgba(226,232,240,.35)]' },
-  D: { stamp: 'bg-gradient-to-br from-amber-400 to-orange-700 text-black border-amber-200', text: 'text-amber-300', glow: 'shadow-[0_0_30px_rgba(245,158,11,.45)]' },
-  F: { stamp: 'stamp-crack bg-gradient-to-br from-rose-600 to-red-950 text-white border-rose-300', text: 'text-rose-400', glow: 'shadow-[0_0_40px_rgba(225,29,72,.5)]' },
+  // Comic starburst stamps: flat colour, navy outline (from the burst-clip shape) and a hard shadow.
+  'S+': { stamp: 'foil-holo text-ink', text: 'text-flare-500', glow: '' },
+  S: { stamp: 'bg-flare-500 text-ink', text: 'text-flare-500', glow: '' },
+  A: { stamp: 'bg-album-red text-white', text: 'text-album-cream', glow: '' },
+  B: { stamp: 'bg-album-blue text-white', text: 'text-album-cream', glow: '' },
+  C: { stamp: 'bg-album-cream text-ink', text: 'text-album-cream', glow: '' },
+  D: { stamp: 'bg-[#ff8a1f] text-ink', text: 'text-album-cream', glow: '' },
+  F: { stamp: 'stamp-crack bg-[#6b7280] text-white', text: 'text-album-cream', glow: '' },
 };
 
 interface Props {
@@ -124,7 +125,7 @@ export function SeasonReviewCard({ summary, teamName, formationId, lineup, manag
   };
 
   const award = (icon: React.ReactNode, label: string, value: string, highlight?: boolean) => (
-    <div className={`flex items-center gap-2 rounded-xl border px-3 py-2 ${highlight ? 'border-yellow-300/70 bg-yellow-300/10' : 'border-white/10 bg-white/5'}`}>
+    <div className={`flex items-center gap-2 rounded-xl border px-3 py-2 ${highlight ? 'border-ink bg-flare-500/20' : 'border-ink-950 bg-ink-700'}`}>
       <div className={highlight ? 'text-yellow-300' : 'text-white/50'}>{icon}</div>
       <div className="min-w-0">
         <div className="text-[10px] font-black uppercase tracking-widest text-white/50">{label}</div>
@@ -135,37 +136,39 @@ export function SeasonReviewCard({ summary, teamName, formationId, lineup, manag
 
   return (
     <div className="mx-auto max-w-6xl px-3 py-6 sm:px-4">
-      <div data-shake-zone className={`relative overflow-hidden rounded-3xl border-2 bg-gradient-to-br from-zinc-900 via-black to-flare-950 p-4 sm:p-6 ${g === 'S+' ? 'border-yellow-300' : 'border-white/15'}`}>
-        {g === 'S+' && <div className="holo z-0 opacity-30" />}
+      <div data-shake-zone className={`title-rays relative overflow-hidden rounded-[22px] border-[5px] border-ink p-4 shadow-[10px_10px_0_#0b0e24] sm:p-6`}>
+        
         <div className="relative grid grid-cols-1 gap-6 lg:grid-cols-[1fr_1.1fr]">
           {/* left: grade + verdict */}
           <div className="flex flex-col">
-            <div className="text-[11px] font-black uppercase tracking-[0.35em] text-flare-400">Season Review · {teamName}</div>
-            <div className="mt-1 font-display text-4xl leading-none text-white sm:text-5xl">{info.subtitle.toUpperCase()}</div>
+            <div className="inline-block -rotate-2 self-start border-[3px] border-ink bg-album-red px-3 pb-0.5 pt-1.5 font-chunky text-sm text-white shadow-[3px_3px_0_#0b0e24]">SEASON REVIEW · {teamName.toUpperCase()}</div>
+            <div className="comic-title mt-3 font-display text-5xl leading-none sm:text-6xl">{info.subtitle.toUpperCase()}!</div>
 
             <div className="relative my-6 flex h-48 items-center justify-center">
               {!stamped && <div className="font-display text-2xl tracking-widest text-white/40 animate-pulse">THE PUNDITS ARE DELIBERATING…</div>}
               {stamped && (
-                <div className={`animate-stamp flex h-44 w-44 flex-col items-center justify-center rounded-full border-[6px] ${style.stamp} ${style.glow}`}>
+                <div className="animate-stamp" style={{ filter: 'drop-shadow(6px 6px 0 #0b0e24)' }}>
+                <div className={`burst-clip flex h-52 w-52 flex-col items-center justify-center ${style.stamp}`}>
                   {g === 'S+' && <Crown className="-mb-1 h-8 w-8" fill="currentColor" />}
                   <div className="font-display text-7xl leading-none">{g}</div>
-                  <div className="px-2 text-center text-[11px] font-black uppercase tracking-widest">{info.title}</div>
+                  <div className="px-2 text-center font-chunky text-xs">{info.title}</div>
+                </div>
                 </div>
               )}
             </div>
 
             <div className="grid grid-cols-3 gap-2 text-center">
-              <div className="rounded-xl bg-white/5 p-2">
-                <div className="text-[10px] font-black uppercase text-white/50">Finish</div>
-                <div className={`font-display text-3xl ${style.text}`}>{ordinal(summary.position)}</div>
+              <div className="rounded-[14px] border-[3px] border-ink bg-album-cream p-2 text-ink shadow-[4px_4px_0_#0b0e24]">
+                <div className="text-[11px] font-black uppercase tracking-widest">Finish</div>
+                <div className="font-display text-4xl text-album-red">{ordinal(summary.position)}</div>
               </div>
-              <div className="rounded-xl bg-white/5 p-2">
-                <div className="text-[10px] font-black uppercase text-white/50">Points</div>
-                <div className="font-display text-3xl text-white">{r.points}</div>
+              <div className="rounded-[14px] border-[3px] border-ink bg-album-cream p-2 text-ink shadow-[4px_4px_0_#0b0e24]">
+                <div className="text-[11px] font-black uppercase tracking-widest">Points</div>
+                <div className="font-display text-4xl">{r.points}</div>
               </div>
-              <div className="rounded-xl bg-white/5 p-2">
-                <div className="text-[10px] font-black uppercase text-white/50">Goal Diff</div>
-                <div className="font-display text-3xl text-white">
+              <div className="rounded-[14px] border-[3px] border-ink bg-album-cream p-2 text-ink shadow-[4px_4px_0_#0b0e24]">
+                <div className="text-[11px] font-black uppercase tracking-widest">Goal Diff</div>
+                <div className="font-display text-4xl">
                   {r.gf - r.ga >= 0 ? '+' : ''}
                   {r.gf - r.ga}
                 </div>
@@ -194,7 +197,7 @@ export function SeasonReviewCard({ summary, teamName, formationId, lineup, manag
 
           {/* right: pitch + highlights */}
           <div className="flex flex-col gap-4">
-            <div className="pitch relative mx-auto aspect-[4/5] w-full max-w-[440px] overflow-hidden rounded-2xl border-2 border-white/15">
+            <div className="pitch relative mx-auto aspect-[4/5] w-full max-w-[440px] overflow-hidden rounded-2xl border-2 border-ink-950">
               {f.slots.map((s) => {
                 const c = lineup[s.id];
                 return c ? (
@@ -215,11 +218,11 @@ export function SeasonReviewCard({ summary, teamName, formationId, lineup, manag
                     <div className="text-[10px] font-black uppercase tracking-widest text-sky-200">Daily Draft #{daily.number}</div>
                     <div className="font-display text-xl leading-none text-white">{daily.streak > 1 ? `🔥 ${daily.streak}-day streak` : 'Same packs for everyone today'}</div>
                   </div>
-                  <button onClick={shareDaily} className="flex shrink-0 items-center gap-1.5 rounded-xl bg-sky-400 px-3 py-2 font-display text-lg tracking-wider text-black hover:bg-sky-300">
+                  <button onClick={shareDaily} className="flex shrink-0 items-center gap-1.5 btn-cut bg-flare-500 px-3 py-2 text-lg text-ink hover:bg-flare-400">
                     {dailyShared ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />} {dailyShared ?? 'SHARE RESULT'}
                   </button>
                 </div>
-                <pre className="mt-2 whitespace-pre-wrap rounded-lg bg-black/40 p-2 font-sans text-xs leading-snug text-white/80">{daily.text}</pre>
+                <pre className="mt-2 whitespace-pre-wrap rounded-lg bg-ink-950/80 p-2 font-sans text-xs leading-snug text-white/80">{daily.text}</pre>
               </div>
             )}
 
@@ -241,7 +244,7 @@ export function SeasonReviewCard({ summary, teamName, formationId, lineup, manag
             </div>
 
             <div className="flex flex-wrap gap-2">
-              <button onClick={copy} className="flex flex-1 items-center justify-center gap-2 rounded-xl border-2 border-white/25 px-4 py-3 font-display text-xl tracking-wider text-white transition hover:bg-white/10">
+              <button onClick={copy} className="btn-cut flex flex-1 items-center justify-center gap-2 bg-album-cream px-4 py-3 text-xl text-ink">
                 {copied ? <Check className="h-5 w-5" /> : <Copy className="h-5 w-5" />} {copied ? 'COPIED!' : 'COPY SHARE GRID'}
               </button>
               <button onClick={onNewRun} className="flex flex-1 items-center justify-center gap-2 btn-cut bg-flare-500 hover:bg-flare-400 px-4 py-3 font-display text-xl tracking-wider text-black transition hover:scale-[1.02]">

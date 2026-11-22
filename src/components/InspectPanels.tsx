@@ -14,12 +14,12 @@ function Sheet({ onClose, children, label }: { onClose: () => void; children: Re
     return () => window.removeEventListener('keydown', onKey);
   }, [onClose]);
   return (
-    <div className="fixed inset-0 z-[96] flex items-end justify-center bg-black/85 sm:items-center sm:p-4" onClick={onClose} role="dialog" aria-label={label}>
+    <div className="fixed inset-0 z-[96] flex items-end justify-center bg-ink/95 sm:items-center sm:p-4" onClick={onClose} role="dialog" aria-label={label}>
       <div
-        className="relative max-h-[92vh] w-full max-w-2xl animate-pop overflow-y-auto rounded-t-3xl border border-white/15 bg-gradient-to-b from-zinc-900 to-black p-4 pb-[max(1rem,env(safe-area-inset-bottom))] shadow-2xl sm:rounded-3xl sm:p-6"
+        className="relative max-h-[92vh] w-full max-w-2xl animate-pop overflow-y-auto rounded-t-3xl border-[4px] border-ink bg-ink-800 p-4 pb-[max(1rem,env(safe-area-inset-bottom))] shadow-[6px_6px_0_#0b0e24] sm:rounded-3xl sm:p-6"
         onClick={(e) => e.stopPropagation()}
       >
-        <button onClick={onClose} className="absolute right-3 top-3 z-10 rounded-lg bg-white/10 p-2 text-white hover:bg-white/20" aria-label="Close">
+        <button onClick={onClose} className="absolute right-3 top-3 z-10 rounded-lg bg-ink-600 p-2 text-white hover:bg-ink-600" aria-label="Close">
           <X className="h-4 w-4" />
         </button>
         {children}
@@ -120,7 +120,7 @@ export function PlayerInspectPanel({
             {(isGK ? GK_STATS : STATS).map(([k, label]) => (
               <div key={k} className="grid grid-cols-[86px_1fr_28px] items-center gap-2 text-xs">
                 <span className="font-bold text-white/70">{label}</span>
-                <span className="h-2 overflow-hidden rounded-full bg-white/10">
+                <span className="h-2 overflow-hidden rounded-full bg-ink-600">
                   <span className={`block h-full rounded-full ${statColor(card.stats[k])}`} style={{ width: `${card.stats[k]}%` }} />
                 </span>
                 <span className="text-right font-black tabular-nums text-white">{card.stats[k]}</span>
@@ -131,7 +131,7 @@ export function PlayerInspectPanel({
       </div>
 
       {/* Chemistry */}
-      <div className="mt-5 rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+      <div className="mt-5 rounded-2xl border border-ink-950 bg-white/[0.03] p-4">
         <div className="flex items-center justify-between">
           <div className="text-[10px] font-black uppercase tracking-widest text-cyan-300">Chemistry at {slot.label}</div>
           <div className="font-display text-2xl leading-none text-white">
@@ -141,7 +141,7 @@ export function PlayerInspectPanel({
         </div>
         <div className="mt-2 flex gap-0.5">
           {Array.from({ length: 10 }).map((_, i) => (
-            <span key={i} className={`h-2 flex-1 rounded-sm ${i < total ? 'bg-cyan-400' : 'bg-white/10'}`} />
+            <span key={i} className={`h-2 flex-1 rounded-sm ${i < total ? 'bg-cyan-400' : 'bg-ink-600'}`} />
           ))}
         </div>
         <div className="mt-3 flex flex-col gap-1.5 text-sm">
@@ -151,9 +151,9 @@ export function PlayerInspectPanel({
             </span>
             <b>+{fitInfo.pts}</b>
           </div>
-          {links.length === 0 && <div className="rounded-lg bg-white/5 px-2.5 py-1.5 text-white/60">No links with neighbouring players yet.</div>}
+          {links.length === 0 && <div className="rounded-lg bg-ink-700 px-2.5 py-1.5 text-white/60">No links with neighbouring players yet.</div>}
           {links.map((l) => (
-            <div key={`${l.other.id}-${l.kinds[0]}`} className="flex items-center justify-between gap-2 rounded-lg bg-white/5 px-2.5 py-1.5 text-white/85">
+            <div key={`${l.other.id}-${l.kinds[0]}`} className="flex items-center justify-between gap-2 rounded-lg bg-ink-700 px-2.5 py-1.5 text-white/85">
               <span className="flex min-w-0 items-center gap-1.5">
                 <Link2 className="h-3.5 w-3.5 shrink-0 text-yellow-300" />
                 <span className="truncate">
@@ -170,7 +170,7 @@ export function PlayerInspectPanel({
 
       {/* Manager */}
       {manager && (
-        <div className="mt-3 rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+        <div className="mt-3 rounded-2xl border border-ink-950 bg-white/[0.03] p-4">
           <div className="text-[10px] font-black uppercase tracking-widest text-yellow-300">
             {manager.emoji} {manager.name}
           </div>
@@ -192,7 +192,7 @@ export function PlayerInspectPanel({
         <button onClick={onMove} className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-sky-500 px-4 py-2.5 font-display text-xl tracking-wider text-black hover:bg-sky-400">
           <ArrowLeftRight className="h-5 w-5" /> MOVE / SWAP
         </button>
-        <button onClick={onClose} className="flex-1 rounded-xl border border-white/20 px-4 py-2.5 font-display text-xl tracking-wider text-white hover:bg-white/10">
+        <button onClick={onClose} className="flex-1 rounded-xl border border-ink-950 px-4 py-2.5 font-display text-xl tracking-wider text-white hover:bg-ink-600">
           CLOSE
         </button>
       </div>
@@ -219,30 +219,30 @@ export function ManagerObjectivePanel({ managerId, rating, onClose }: { managerI
             {managerId === 'fergie_time' ? '⌚ Clutch' : `+${rating.managerBonus.toFixed(1)}`}
           </div>
         </div>
-        <span className={`rounded-full px-3 py-1 text-xs font-black uppercase tracking-wider ${rating.managerActive ? 'bg-yellow-300 text-black' : 'bg-white/10 text-white/60'}`}>
+        <span className={`rounded-full px-3 py-1 text-xs font-black uppercase tracking-wider ${rating.managerActive ? 'bg-yellow-300 text-black' : 'bg-ink-600 text-white/60'}`}>
           {rating.managerActive ? 'Active' : `${metCount}/${rating.managerChecks.length} met`}
         </span>
       </div>
 
-      <div className="mt-3 rounded-xl bg-white/5 p-3 text-sm text-white/80">{m.bonusText}</div>
+      <div className="mt-3 rounded-xl bg-ink-700 p-3 text-sm text-white/80">{m.bonusText}</div>
 
       <div className="mt-3 text-[10px] font-black uppercase tracking-widest text-white/50">Objective</div>
       <ul className="mt-2 flex flex-col gap-2">
         {rating.managerChecks.map((c) => (
-          <li key={c.label} className={`rounded-xl border p-3 ${c.done ? 'border-emerald-400/40 bg-emerald-500/10' : 'border-white/10 bg-white/[0.03]'}`}>
+          <li key={c.label} className={`rounded-xl border p-3 ${c.done ? 'border-emerald-400/40 bg-emerald-500/10' : 'border-ink-950 bg-white/[0.03]'}`}>
             <div className="flex items-start justify-between gap-3">
               <span className="flex items-start gap-2 text-sm font-semibold text-white">
                 <span className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[11px] font-black ${c.done ? 'bg-emerald-400 text-black' : 'border border-white/30 text-white/40'}`}>{c.done ? '✓' : ''}</span>
                 {c.label}
               </span>
-              <span className={`shrink-0 rounded-md px-2 py-0.5 text-xs font-black tabular-nums ${c.done ? 'bg-emerald-400/20 text-emerald-200' : 'bg-white/10 text-white/70'}`}>{c.progress}</span>
+              <span className={`shrink-0 rounded-md px-2 py-0.5 text-xs font-black tabular-nums ${c.done ? 'bg-emerald-400/20 text-emerald-200' : 'bg-ink-600 text-white/70'}`}>{c.progress}</span>
             </div>
             {c.who && <div className="mt-1.5 pl-7 text-xs text-white/55">{c.who}</div>}
           </li>
         ))}
       </ul>
       <div className="mt-4 text-xs text-white/45">Updates live as you draft and move players around the pitch.</div>
-      <button onClick={onClose} className="mt-4 w-full rounded-xl border border-white/20 px-4 py-2.5 font-display text-xl tracking-wider text-white hover:bg-white/10">
+      <button onClick={onClose} className="mt-4 w-full rounded-xl border border-ink-950 px-4 py-2.5 font-display text-xl tracking-wider text-white hover:bg-ink-600">
         CLOSE
       </button>
     </Sheet>

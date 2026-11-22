@@ -421,7 +421,7 @@ export function SeasonBroadcast({ sim, onFinish, formationId, lineup, managerId,
   return (
     <div className="mx-auto flex max-w-7xl flex-col gap-3 px-3 py-4 sm:px-4">
       {/* Broadcast header */}
-      <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-r from-flare-950 via-black to-flare-950">
+      <div className="relative overflow-hidden rounded-2xl border-[4px] border-ink bg-ink-800 shadow-[6px_6px_0_#0b0e24]">
         <div className="flex flex-wrap items-center gap-x-3 gap-y-2 px-4 py-3">
           <div className="flex items-center gap-2">
             <span className="flex items-center gap-1 rounded bg-red-600 px-2 py-0.5 text-[10px] font-black uppercase tracking-widest text-white">
@@ -432,7 +432,7 @@ export function SeasonBroadcast({ sim, onFinish, formationId, lineup, managerId,
             </span>
           </div>
           <div className="flex items-center gap-2 text-sm">
-            <span className="rounded-lg bg-white/10 px-2 py-1 font-black text-yellow-300">{userRow.played ? ordinal(userPos) : '–'}</span>
+            <span className="rounded-lg bg-ink-600 px-2 py-1 font-black text-yellow-300">{userRow.played ? ordinal(userPos) : '–'}</span>
             <span className="font-bold text-white/80">
               {userRow.won}W-{userRow.drawn}D-{userRow.lost}L · <span className="text-yellow-300">{userRow.points} pts</span>
             </span>
@@ -440,7 +440,7 @@ export function SeasonBroadcast({ sim, onFinish, formationId, lineup, managerId,
           {/* one line, fixed height: badges appearing mid-season never re-wrap the header */}
           <div className="no-scrollbar flex h-[26px] w-full items-center gap-1.5 overflow-x-auto whitespace-nowrap sm:w-auto">
             <ChaseBadges sim={sim} upto={completed} />
-            <span className="shrink-0 rounded-md border border-white/15 px-1.5 py-0.5 text-[10px] font-black uppercase tracking-wider text-white/60" title={sim.era.tagline}>
+            <span className="shrink-0 rounded-md border border-ink-950 px-1.5 py-0.5 text-[10px] font-black uppercase tracking-wider text-white/60" title={sim.era.tagline}>
               {sim.era.name} · {sim.era.years}
             </span>
           </div>
@@ -476,7 +476,7 @@ export function SeasonBroadcast({ sim, onFinish, formationId, lineup, managerId,
                     setPlaying(true);
                   }
                 }}
-                className={`rounded-lg border px-2 py-1.5 text-xs font-black transition ${speed === s ? 'border-yellow-300 bg-yellow-300/20 text-yellow-200' : 'border-white/15 bg-white/5 text-white/70 hover:bg-white/10'}`}
+                className={`rounded-lg border px-2 py-1.5 text-xs font-black transition ${speed === s ? 'border-yellow-300 bg-yellow-300/20 text-yellow-200' : 'border-ink-950 bg-ink-700 text-white/70 hover:bg-ink-600'}`}
               >
                 {s === 'instant' ? 'Instant Sim' : `${s}x`}
               </button>
@@ -489,7 +489,7 @@ export function SeasonBroadcast({ sim, onFinish, formationId, lineup, managerId,
                   setInstantRun(true);
                 }}
                 disabled={!!decision || transferOpen || awardsOpen}
-                className="flex items-center gap-1 rounded-lg border border-white/15 bg-white/5 px-2 py-1.5 text-xs font-black text-white/80 hover:bg-white/10 disabled:opacity-40"
+                className="flex items-center gap-1 rounded-lg border border-ink-950 bg-ink-700 px-2 py-1.5 text-xs font-black text-white/80 hover:bg-ink-600 disabled:opacity-40"
                 title="Simulate to the next big moment or the end"
               >
                 <FastForward className="h-3.5 w-3.5" />{' '}
@@ -499,14 +499,14 @@ export function SeasonBroadcast({ sim, onFinish, formationId, lineup, managerId,
           </div>
         </div>
         {/* Marquee ticker */}
-        <div className="relative overflow-hidden border-t border-white/10 bg-yellow-300 py-1 text-black">
+        <div className="relative overflow-hidden border-t border-ink-950 bg-yellow-300 py-1 text-black">
           <div className="flex w-max animate-ticker whitespace-nowrap text-xs font-black uppercase tracking-wider">
             <span className="px-6">{tickerText}</span>
             <span className="px-6">{tickerText}</span>
           </div>
         </div>
         {/* progress */}
-        <div className="h-1 w-full bg-white/10">
+        <div className="h-1 w-full bg-ink-600">
           <div className="h-full bg-gradient-to-r from-flare-400 to-yellow-300 transition-all duration-500" style={{ width: `${(completed / 38) * 100}%` }} />
         </div>
       </div>
@@ -523,7 +523,7 @@ export function SeasonBroadcast({ sim, onFinish, formationId, lineup, managerId,
                 resume();
               }}
               disabled={!!decision || transferOpen || awardsOpen}
-              className="animate-pop btn-cut bg-flare-500 hover:bg-flare-400 py-3 font-display text-3xl tracking-wider text-black shadow-xl shadow-flare-500/20 transition hover:scale-[1.01]"
+              className="animate-pop btn-cut bg-flare-500 hover:bg-flare-400 py-3 font-display text-3xl tracking-wider text-black shadow-[5px_5px_0_#0b0e24] transition hover:scale-[1.01]"
             >
               {sim.matchweek === 0 ? 'KICK OFF THE SEASON' : 'PLAY NEXT MATCHWEEK'}
             </button>
@@ -555,7 +555,7 @@ export function SeasonBroadcast({ sim, onFinish, formationId, lineup, managerId,
                       sfx.click();
                       setTab(k);
                     }}
-                    className={`flex items-center gap-1 rounded-lg border px-2 py-1 text-xs font-black ${tab === k ? 'border-yellow-300 bg-yellow-300/20 text-yellow-200' : 'border-white/10 bg-white/5 text-white/60'}`}
+                    className={`flex items-center gap-1 rounded-lg border px-2 py-1 text-xs font-black ${tab === k ? 'border-yellow-300 bg-yellow-300/20 text-yellow-200' : 'border-ink-950 bg-ink-700 text-white/60'}`}
                   >
                     <Icon className="h-3.5 w-3.5" /> {label}
                   </button>
@@ -568,7 +568,7 @@ export function SeasonBroadcast({ sim, onFinish, formationId, lineup, managerId,
       </div>
 
       {seasonOver && (
-        <div className="sticky bottom-3 z-40 mx-auto flex animate-pop flex-col items-center gap-2 rounded-2xl border border-yellow-300/60 bg-black/85 px-6 py-4 text-center shadow-2xl">
+        <div className="sticky bottom-3 z-40 mx-auto flex animate-pop flex-col items-center gap-2 rounded-2xl border border-yellow-300/60 bg-ink/95 px-6 py-4 text-center shadow-[6px_6px_0_#0b0e24]">
           <div className="font-display text-3xl text-yellow-300">FULL TIME · SEASON OVER</div>
           <div className="text-sm text-white/80">
             Finished <b>{ordinal(userPos)}</b> with <b>{userRow.points} pts</b> ({userRow.won}-{userRow.drawn}-{userRow.lost})
@@ -587,7 +587,7 @@ export function SeasonBroadcast({ sim, onFinish, formationId, lineup, managerId,
 
       {informReveal && (
         <div key={informReveal.key} className="pointer-events-none fixed left-1/2 top-20 z-[85] -translate-x-1/2 animate-pop">
-          <div className="flex flex-col items-center gap-2 rounded-2xl border-2 border-cyan-300/70 bg-black/90 px-5 py-3 shadow-[0_0_40px_rgba(34,211,238,.45)]">
+          <div className="flex flex-col items-center gap-2 rounded-2xl border-2 border-cyan-300/70 bg-ink/95 px-5 py-3 shadow-[4px_4px_0_#0b0e24]">
             <div className="font-display text-2xl tracking-wider text-cyan-200">TEAM OF THE WEEK!</div>
             <div className="flex gap-2">
               {informReveal.cards.map(({ card, boost }) => (
@@ -659,20 +659,20 @@ const Leaders = memo(function Leaders({ rows, kind, sim }: { rows: PlayerSeasonS
 function DecisionOverlay({ d, sim, onChoose }: { d: DecisionContext; sim: SeasonSim; onChoose: (s: TacticalShout) => void }) {
   const opp = sim.teamById[d.opponentId];
   const options: { id: TacticalShout; icon: typeof Flame; title: string; emoji: string; desc: string; cls: string }[] = [
-    { id: 'attack', icon: Swords, emoji: '🔥', title: 'All-Out Attack', desc: '+35% xG for you · +30% xG against', cls: 'from-rose-600 to-orange-500 border-rose-300' },
-    { id: 'balanced', icon: Scale, emoji: '⚖️', title: 'Stick to Gameplan', desc: 'Standard balanced simulation', cls: 'from-slate-600 to-slate-800 border-slate-300' },
-    { id: 'bus', icon: Shield, emoji: '🛡️', title: 'Park the Bus', desc: '−35% xG against · −25% xG for you', cls: 'from-sky-700 to-indigo-900 border-sky-300' },
+    { id: 'attack', icon: Swords, emoji: '🔥', title: 'All-Out Attack', desc: '+35% xG for you · +30% xG against', cls: 'bg-album-red text-white' },
+    { id: 'balanced', icon: Scale, emoji: '⚖️', title: 'Stick to Gameplan', desc: 'Standard balanced simulation', cls: 'bg-album-cream text-ink' },
+    { id: 'bus', icon: Shield, emoji: '🛡️', title: 'Park the Bus', desc: '−35% xG against · −25% xG for you', cls: 'bg-album-blue text-white' },
   ];
   return (
     // Scrollable so every choice stays reachable on short screens or with enlarged text.
-    <div className="fixed inset-0 z-[90] overflow-y-auto overscroll-contain bg-black/90">
+    <div className="fixed inset-0 z-[90] overflow-y-auto overscroll-contain bg-ink/95">
       <div className="flex min-h-full items-center justify-center p-3 sm:p-4">
-      <div className="w-full max-w-3xl animate-pop overflow-hidden rounded-3xl border-2 border-yellow-300/70 bg-gradient-to-b from-zinc-900 to-black shadow-[0_0_80px_rgba(250,204,21,.25)]">
-        <div className="bg-yellow-300 px-5 py-2 text-center text-xs font-black uppercase tracking-[0.35em] text-black">Touchline Tactical Decision</div>
+      <div className="w-full max-w-3xl animate-pop overflow-hidden rounded-3xl border-[5px] border-ink bg-ink-800 shadow-[10px_10px_0_#0b0e24]">
+        <div className="border-b-[4px] border-ink bg-flare-500 px-5 py-2 text-center font-chunky text-base text-ink">TOUCHLINE TACTICAL DECISION!</div>
         <div className="p-5 text-center sm:p-7">
           <div className="text-[11px] font-black uppercase tracking-widest text-flare-400">Matchweek {d.matchweek} · {d.title}</div>
           <div className="mt-3 flex flex-wrap items-center justify-center gap-x-4 gap-y-1">
-            <div className="min-w-0 break-words font-display text-2xl text-flare-300 sm:text-4xl">{sim.teamById[USER_TEAM_ID].name}</div>
+            <div className="comic-title min-w-0 break-words font-display text-3xl sm:text-5xl">{sim.teamById[USER_TEAM_ID].name}</div>
             <div className="font-display text-xl text-white/50 sm:text-2xl">{d.home ? 'vs' : '@'}</div>
             <div className="flex min-w-0 items-center gap-2 break-words font-display text-2xl text-white sm:text-4xl">
               <span className="h-5 w-5 rounded" style={{ background: `linear-gradient(135deg, ${opp.primary} 50%, ${opp.secondary} 50%)` }} />
@@ -681,7 +681,7 @@ function DecisionOverlay({ d, sim, onChoose }: { d: DecisionContext; sim: Season
           </div>
           <div className="mx-auto mt-4 flex max-w-xl flex-col gap-1">
             {d.stakes.map((s, i) => (
-              <div key={i} className="rounded-lg bg-white/5 px-3 py-1.5 text-sm font-semibold text-white/85">
+              <div key={i} className="rounded-lg bg-ink-700 px-3 py-1.5 text-sm font-semibold text-white/85">
                 {s}
               </div>
             ))}
@@ -692,12 +692,12 @@ function DecisionOverlay({ d, sim, onChoose }: { d: DecisionContext; sim: Season
                 key={o.id}
                 onClick={() => onChoose(o.id)}
                 onMouseEnter={() => sfx.hover()}
-                className={`group flex items-center gap-3 rounded-2xl border-2 bg-gradient-to-br ${o.cls} p-3 text-left transition hover:-translate-y-1 hover:shadow-xl active:scale-95 sm:block sm:p-4`}
+                className={`group flex items-center gap-3 rounded-2xl border-[4px] border-ink ${o.cls} p-3 text-left shadow-[5px_5px_0_#0b0e24] transition hover:-translate-y-1 active:translate-y-0.5 sm:block sm:p-4`}
               >
                 <div className="text-3xl">{o.emoji}</div>
                 <div>
-                  <div className="font-display text-2xl leading-none text-white sm:mt-1">{o.title}</div>
-                  <div className="mt-1 text-xs font-semibold text-white/80">{o.desc}</div>
+                  <div className="font-display text-3xl leading-none sm:mt-1">{o.title}</div>
+                  <div className="mt-1 text-xs font-bold opacity-85">{o.desc}</div>
                 </div>
               </button>
             ))}
@@ -712,7 +712,7 @@ function DecisionOverlay({ d, sim, onChoose }: { d: DecisionContext; sim: Season
 /** An in-form version of a card: boosted OVR inside a neon TOTW frame. */
 function InformCard({ card, boost, size = 'xs' }: { card: PlayerCard; boost: number; size?: 'xs' | 'sm' }) {
   return (
-    <div className="relative rounded-[16px] p-[3px] shadow-[0_0_18px_rgba(34,211,238,.6)]" style={{ background: 'conic-gradient(from 0deg, #22d3ee, #a855f7, #f43f5e, #facc15, #22d3ee)' }}>
+    <div className="relative rounded-[16px] p-[3px] shadow-[4px_4px_0_#0b0e24]" style={{ background: 'conic-gradient(from 0deg, #22d3ee, #a855f7, #f43f5e, #facc15, #22d3ee)' }}>
       <PlayerCardUI card={{ ...card, ovr: Math.min(99, card.ovr + boost) }} size={size} tilt={false} />
       <span className="absolute -top-2 left-1/2 z-20 -translate-x-1/2 whitespace-nowrap rounded-full bg-black px-1.5 text-[9px] font-black uppercase tracking-wider text-cyan-200 ring-1 ring-cyan-300">
         TOTW +{boost}
@@ -724,7 +724,7 @@ function InformCard({ card, boost, size = 'xs' }: { card: PlayerCard; boost: num
 const TotwPanel = memo(function TotwPanel({ sim, totw, informs }: { sim: SeasonSim; totw: { mw: number; players: TotwPick[] } | null; informs: ReturnType<SeasonSim['activeInforms']> }) {
   const userCards = new Map(sim.teamById[USER_TEAM_ID].players.map((p) => [p.id, p.card]));
   return (
-    <section className="grid grid-cols-1 gap-3 rounded-2xl border border-cyan-300/25 bg-black/40 p-3 lg:grid-cols-[1.4fr_1fr]">
+    <section className="grid grid-cols-1 gap-3 rounded-2xl border border-cyan-300/25 bg-ink-950/80 p-3 lg:grid-cols-[1.4fr_1fr]">
       <div className="min-w-0">
         <h3 className="mb-2 font-display text-xl text-white">
           TEAM OF THE WEEK {totw && <span className="text-cyan-300">· MW{totw.mw}</span>}

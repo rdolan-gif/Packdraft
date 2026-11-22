@@ -330,12 +330,12 @@ export function StickerBookModal({ onClose }: { onClose: () => void }) {
           )}
 
           {view > 0 && (
-            <button onClick={() => go(view - 1)} className="absolute left-0 top-1/2 z-30 -translate-y-1/2 rounded-full bg-black/60 p-2 text-amber-100 shadow-lg hover:bg-black/80" aria-label="Previous page">
+            <button onClick={() => go(view - 1)} className="absolute left-0 top-1/2 z-30 -translate-y-1/2 rounded-full bg-ink-950/80 p-2 text-amber-100 shadow-lg hover:bg-ink/95" aria-label="Previous page">
               <ChevronLeft className="h-6 w-6" />
             </button>
           )}
           {view < views.length - 1 && (
-            <button onClick={() => go(view + 1)} className="absolute right-0 top-1/2 z-30 -translate-y-1/2 rounded-full bg-black/60 p-2 text-amber-100 shadow-lg hover:bg-black/80" aria-label="Next page">
+            <button onClick={() => go(view + 1)} className="absolute right-0 top-1/2 z-30 -translate-y-1/2 rounded-full bg-ink-950/80 p-2 text-amber-100 shadow-lg hover:bg-ink/95" aria-label="Next page">
               <ChevronRight className="h-6 w-6" />
             </button>
           )}
@@ -551,7 +551,7 @@ function Cover({ got, total, book, height, onOpen }: { got: number; total: numbe
                 <div className="font-display text-3xl leading-none text-white">
                   {got} <span className="text-white/50">/ {total}</span>
                 </div>
-                <div className="mt-1 h-2.5 overflow-hidden rounded-full bg-black/40">
+                <div className="mt-1 h-2.5 overflow-hidden rounded-full bg-ink-950/80">
                   <div className="h-full rounded-full bg-gradient-to-r from-yellow-300 to-amber-400" style={{ width: `${pct(got, total)}%` }} />
                 </div>
                 <div className="mt-2 font-display text-lg tracking-wider text-yellow-300 group-hover:underline">OPEN ALBUM →</div>
@@ -699,7 +699,7 @@ function StickerProfile({ card, book, number, onClose }: { card: PlayerCard; boo
   return (
     <div className="fixed inset-0 z-[96] flex items-center justify-center overflow-y-auto bg-black/75 p-3" onClick={onClose} role="dialog" aria-label={`${card.name} card`}>
       <div className="relative flex w-full max-w-2xl animate-pop flex-col items-center gap-4 rounded-2xl border-2 p-4 sm:flex-row sm:items-start sm:p-5" style={{ background: PAPER, color: INK, borderColor: club.primary }} onClick={(e) => e.stopPropagation()}>
-        <button onClick={onClose} className="absolute right-2 top-2 rounded-lg bg-black/10 p-1.5 hover:bg-black/20" aria-label="Close card">
+        <button onClick={onClose} className="absolute right-2 top-2 rounded-lg bg-black/10 p-1.5 hover:bg-ink-950/50" aria-label="Close card">
           <X className="h-5 w-5" />
         </button>
         <div className="shrink-0">

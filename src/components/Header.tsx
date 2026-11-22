@@ -55,7 +55,7 @@ export function Header({ phase, packNumber, picksMade, vaultCount, onOpenVault, 
           <Wordmark className="hidden text-2xl sm:inline-flex" />
         </button>
         {dailyNumber !== null && phase !== 'title' && (
-          <span className="rounded-full bg-sky-400 px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-black">Daily #{dailyNumber}</span>
+          <span className="rounded-full border-2 border-album-cream bg-album-blue px-2 pb-0 pt-0.5 font-chunky text-[11px] text-white">DAILY #{dailyNumber}</span>
         )}
 
         {phase === 'draft' && (

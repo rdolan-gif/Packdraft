@@ -522,7 +522,7 @@ export function PackOpener({ packNumber, cards, packKey, selectedId, onSelect, r
               title="Drag the handle across to tear"
               aria-label="Tear strip: drag from left to right to open the pack"
             >
-              <div className="perforation absolute left-4 right-4 top-1/2 h-[14px] -translate-y-1/2 rounded-full bg-black/25">
+              <div className="perforation absolute left-4 right-4 top-1/2 h-[14px] -translate-y-1/2 rounded-full bg-ink-950/50">
                 <div className="h-full rounded-full border-r-[3px] border-dashed border-ink bg-album-cream" style={{ width: `${tearProgress * 100}%` }} />
               </div>
               {stage === 'sealed' && tearProgress < 0.05 && !isDragging && (

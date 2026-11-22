@@ -67,13 +67,13 @@ export function TrophyVaultModal({ vault, career, onClose, onDelete, onUpdate }:
   };
 
   return (
-    <div className="fixed inset-0 z-[95] flex items-start justify-center overflow-y-auto bg-black/85 p-3 sm:p-6" onClick={onClose}>
-      <div className="relative my-4 w-full max-w-5xl animate-pop overflow-hidden rounded-3xl border-2 border-yellow-300/60 bg-gradient-to-b from-zinc-900 to-black" onClick={(e) => e.stopPropagation()}>
+    <div className="fixed inset-0 z-[95] flex items-start justify-center overflow-y-auto bg-ink/95 p-3 sm:p-6" onClick={onClose}>
+      <div className="relative my-4 w-full max-w-5xl animate-pop overflow-hidden rounded-3xl border-[5px] border-ink bg-ink-800 shadow-[10px_10px_0_#0b0e24]" onClick={(e) => e.stopPropagation()}>
         <div className="relative overflow-hidden border-b border-yellow-300/30 bg-gradient-to-r from-amber-700/40 via-yellow-500/20 to-amber-700/40 px-5 py-4">
           <div className="holo z-0 opacity-20" />
           <div className="relative flex items-center gap-3">
             {open && (
-              <button onClick={() => (setOpen(null), setConfirmDelete(false))} className="rounded-lg bg-black/40 p-2 text-white hover:bg-black/60" aria-label="Back">
+              <button onClick={() => (setOpen(null), setConfirmDelete(false))} className="rounded-lg bg-ink-950/80 p-2 text-white hover:bg-ink-950/80" aria-label="Back">
                 <ArrowLeft className="h-4 w-4" />
               </button>
             )}
@@ -82,14 +82,14 @@ export function TrophyVaultModal({ vault, career, onClose, onDelete, onUpdate }:
               <div className="font-display text-3xl leading-none text-white">THE 38-0 TROPHY VAULT</div>
               <div className="text-xs font-bold uppercase tracking-widest text-yellow-200/80">Hall of Fame · Champions and unbeaten squads</div>
             </div>
-            <button onClick={onClose} className="ml-auto rounded-lg bg-black/40 p-2 text-white hover:bg-black/60" aria-label="Close vault">
+            <button onClick={onClose} className="ml-auto rounded-lg bg-ink-950/80 p-2 text-white hover:bg-ink-950/80" aria-label="Close vault">
               <X className="h-5 w-5" />
             </button>
           </div>
         </div>
 
         {/* career stats */}
-        <div className="grid grid-cols-3 gap-2 border-b border-white/10 p-4 sm:grid-cols-6">
+        <div className="grid grid-cols-3 gap-2 border-b border-ink-950 p-4 sm:grid-cols-6">
           {[
             ['Runs', career.runs],
             ['Titles', career.titles],
@@ -98,7 +98,7 @@ export function TrophyVaultModal({ vault, career, onClose, onDelete, onUpdate }:
             ['Best Pts', career.bestPoints],
             ['Best Grade', career.bestGrade ?? '—'],
           ].map(([k, v]) => (
-            <div key={k} className="rounded-xl bg-white/5 p-2 text-center">
+            <div key={k} className="rounded-xl bg-ink-700 p-2 text-center">
               <div className="text-[10px] font-black uppercase tracking-wider text-white/50">{k}</div>
               <div className="font-display text-2xl text-yellow-200">{v}</div>
             </div>
@@ -106,7 +106,7 @@ export function TrophyVaultModal({ vault, career, onClose, onDelete, onUpdate }:
         </div>
 
         {!open && (
-          <div className="flex gap-1 border-b border-white/10 px-4 pt-3" role="tablist">
+          <div className="flex gap-1 border-b border-ink-950 px-4 pt-3" role="tablist">
             {(
               [
                 ['champions', 'Champions', <Trophy key="t" className="h-4 w-4" />],
@@ -119,7 +119,7 @@ export function TrophyVaultModal({ vault, career, onClose, onDelete, onUpdate }:
                 role="tab"
                 aria-selected={tab === id}
                 onClick={() => (sfx.click(), setTab(id))}
-                className={`flex items-center gap-1.5 rounded-t-lg px-3 py-2 text-xs font-black uppercase tracking-wider transition ${tab === id ? 'bg-yellow-300 text-black' : 'text-white/60 hover:bg-white/10 hover:text-white'}`}
+                className={`flex items-center gap-1.5 rounded-t-lg px-3 py-2 text-xs font-black uppercase tracking-wider transition ${tab === id ? 'bg-yellow-300 text-black' : 'text-white/60 hover:bg-ink-600 hover:text-white'}`}
               >
                 {icon} {label}
               </button>
@@ -152,7 +152,7 @@ export function TrophyVaultModal({ vault, career, onClose, onDelete, onUpdate }:
                         setOpen(e);
                       }}
                       onMouseEnter={() => sfx.hover()}
-                      className={`card-base sweep group flex flex-col gap-2 border-2 p-3 text-left transition hover:-translate-y-1 ${e.invincible ? 'border-yellow-300 bg-gradient-to-br from-yellow-500/25 via-amber-900/30 to-black' : 'border-white/15 bg-white/5'}`}
+                      className={`card-base sweep group flex flex-col gap-2 border-2 p-3 text-left transition hover:-translate-y-1 ${e.invincible ? 'border-yellow-300 bg-gradient-to-br from-yellow-500/25 via-amber-900/30 to-black' : 'border-ink-950 bg-ink-700'}`}
                     >
                       {e.invincible && <div className="holo z-0 opacity-25" />}
                       <div className="relative flex items-center gap-3">
@@ -180,7 +180,7 @@ export function TrophyVaultModal({ vault, career, onClose, onDelete, onUpdate }:
 
         {current && (
           <div className="grid grid-cols-1 gap-4 p-4 md:grid-cols-[1.1fr_1fr]">
-            <div className="pitch relative mx-auto aspect-[4/5] w-full max-w-[420px] overflow-hidden rounded-2xl border-2 border-white/15">
+            <div className="pitch relative mx-auto aspect-[4/5] w-full max-w-[420px] overflow-hidden rounded-2xl border-2 border-ink-950">
               {FORMATIONS[current.formationId].slots.map((s) => {
                 const ref = current.lineup.find((l) => l.slotId === s.id);
                 const c = ref ? PLAYERS_BY_ID[ref.cardId] : undefined;
@@ -208,13 +208,13 @@ export function TrophyVaultModal({ vault, career, onClose, onDelete, onUpdate }:
                   ['Conceded', current.record.ga],
                   ['Rating', current.teamRating.toFixed(1)],
                 ].map(([k, v]) => (
-                  <div key={k} className="rounded-xl bg-white/5 p-2">
+                  <div key={k} className="rounded-xl bg-ink-700 p-2">
                     <div className="text-[10px] font-black uppercase text-white/50">{k}</div>
                     <div className="font-display text-2xl text-white">{v}</div>
                   </div>
                 ))}
               </div>
-              <div className="rounded-xl bg-white/5 p-3 text-sm text-white/80">
+              <div className="rounded-xl bg-ink-700 p-3 text-sm text-white/80">
                 <div>
                   {MANAGERS_BY_ID[current.managerId].emoji} <b>{MANAGERS_BY_ID[current.managerId].name}</b> · {current.formationId}
                 </div>
@@ -282,7 +282,7 @@ function RecordsTab({ history }: { history: ReturnType<typeof loadHistory> }) {
         {recs.map((r) => {
           const card = r.cardId ? PLAYERS_BY_ID[r.cardId] : undefined;
           return (
-            <div key={r.id} className="flex items-center gap-3 rounded-2xl border border-yellow-300/25 bg-gradient-to-br from-yellow-500/10 to-black/30 p-3">
+            <div key={r.id} className="flex items-center gap-3 rounded-2xl border-[3px] border-ink bg-ink-700 shadow-[4px_4px_0_#0b0e24] p-3">
               {card ? <PlayerCardUI card={card} size="xs" tilt={false} /> : <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-yellow-300/15 text-3xl">{r.emoji}</div>}
               <div className="min-w-0">
                 <div className="text-[10px] font-black uppercase tracking-widest text-yellow-200/80">{r.label}</div>
@@ -315,7 +315,7 @@ function BestXiTab({ history }: { history: ReturnType<typeof loadHistory> }) {
     );
   return (
     <div className="grid grid-cols-1 gap-4 p-4 md:grid-cols-[1.1fr_1fr]">
-      <div className="pitch relative mx-auto aspect-[4/5] w-full max-w-[420px] overflow-hidden rounded-2xl border-2 border-white/15">
+      <div className="pitch relative mx-auto aspect-[4/5] w-full max-w-[420px] overflow-hidden rounded-2xl border-2 border-ink-950">
         {FORMATIONS[BEST_XI_FORMATION].slots.map((s) => {
           const c = lineup[s.id];
           return c ? (
@@ -336,7 +336,7 @@ function BestXiTab({ history }: { history: ReturnType<typeof loadHistory> }) {
         </div>
         <div className="flex flex-col gap-1">
           {picks.map((p) => (
-            <div key={p.slotId} className="flex items-center justify-between gap-2 rounded-lg bg-white/5 px-2.5 py-1.5 text-sm">
+            <div key={p.slotId} className="flex items-center justify-between gap-2 rounded-lg bg-ink-700 px-2.5 py-1.5 text-sm">
               <span className="min-w-0 truncate text-white">
                 <b className="mr-1.5 inline-block w-8 text-xs text-white/50">{FORMATIONS[BEST_XI_FORMATION].slots.find((s) => s.id === p.slotId)?.label}</b>
                 {p.card.season} {p.card.shortName}
@@ -353,7 +353,7 @@ function BestXiTab({ history }: { history: ReturnType<typeof loadHistory> }) {
             run={(eraId) => replaySeason({ teamName: 'Best Ever XI', formationId: BEST_XI_FORMATION, lineup, managerId: null, eraId })}
           />
         ) : (
-          <div className="rounded-xl bg-white/5 p-3 text-xs text-white/55">{11 - picks.length} position{11 - picks.length === 1 ? '' : 's'} still empty. Keep drafting to fill your Best Ever XI, then play it in any era.</div>
+          <div className="rounded-xl bg-ink-700 p-3 text-xs text-white/55">{11 - picks.length} position{11 - picks.length === 1 ? '' : 's'} still empty. Keep drafting to fill your Best Ever XI, then play it in any era.</div>
         )}
       </div>
     </div>
@@ -379,7 +379,7 @@ function ReplayPanel({ run, original, saved, title = 'Replay in another era' }: 
     }, 30);
   };
   return (
-    <div className="rounded-xl border border-white/10 bg-white/5 p-3">
+    <div className="rounded-xl border border-ink-950 bg-ink-700 p-3">
       <div className="text-[10px] font-black uppercase tracking-widest text-flare-300">{title}</div>
       <div className="mt-0.5 text-xs text-white/50">A full 38-game season, simmed instantly. Every replay is a fresh season, so results vary.</div>
       <div className="mt-2 grid grid-cols-1 gap-1.5">

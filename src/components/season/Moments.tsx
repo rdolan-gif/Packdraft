@@ -7,8 +7,8 @@ import { PlayerCardUI } from '../PlayerCardUI';
 export function MilestonePop({ m }: { m: Milestone }) {
   if (m.size === 3) {
     return (
-      <div className="pointer-events-none fixed inset-0 z-[86] flex items-center justify-center bg-black/60 p-4">
-        <div className="relative animate-pop overflow-hidden rounded-3xl border-4 border-yellow-300 bg-gradient-to-b from-amber-500/30 via-black to-black px-8 py-6 text-center shadow-[0_0_90px_rgba(250,204,21,.55)]">
+      <div className="pointer-events-none fixed inset-0 z-[86] flex items-center justify-center bg-ink-950/80 p-4">
+        <div className="relative animate-pop overflow-hidden rounded-3xl border-[5px] border-ink bg-flare-500 text-ink shadow-[10px_10px_0_#0b0e24] px-8 py-6 text-center shadow-[4px_4px_0_#0b0e24]">
           <div className="absolute inset-0 animate-sweep bg-gradient-to-r from-transparent via-white/15 to-transparent" />
           <div className="relative text-6xl">{m.icon}</div>
           <div className="relative mt-1 animate-stamp font-display text-5xl leading-none tracking-wider text-yellow-300 sm:text-7xl" style={{ transform: 'rotate(-4deg)' }}>
@@ -23,7 +23,7 @@ export function MilestonePop({ m }: { m: Milestone }) {
   return (
     <div className="pointer-events-none fixed left-1/2 top-16 z-[86] w-[min(92vw,460px)] -translate-x-1/2 animate-pop">
       <div
-        className={`flex items-center gap-3 rounded-2xl border-2 px-4 py-2.5 shadow-2xl ${
+        className={`flex items-center gap-3 rounded-2xl border-2 px-4 py-2.5 shadow-[6px_6px_0_#0b0e24] ${
           sad ? 'border-slate-400/60 bg-slate-900/95' : m.size === 2 ? 'border-yellow-300 bg-gradient-to-r from-amber-600/90 to-yellow-500/90' : 'border-flare-300/70 bg-flare-950/95'
         }`}
       >
@@ -53,7 +53,7 @@ export function ChaseBadges({ sim, upto }: { sim: SeasonSim; upto: number }) {
         </span>
       ) : null}
       {s.win >= 3 && !s.perfect && <span className="rounded-lg bg-orange-500 px-2 py-0.5 font-display text-base leading-tight text-black">🔥 {s.win} WINS</span>}
-      <span className={`rounded-lg px-2 py-0.5 font-display text-base leading-tight ${s.pace >= 100 ? 'bg-fuchsia-500 text-white' : s.pace >= 90 ? 'bg-flare-400 text-black' : 'bg-white/10 text-white/80'}`} title="Points if you keep this up for 38 games">
+      <span className={`rounded-lg px-2 py-0.5 font-display text-base leading-tight ${s.pace >= 100 ? 'bg-fuchsia-500 text-white' : s.pace >= 90 ? 'bg-flare-400 text-black' : 'bg-ink-600 text-white/80'}`} title="Points if you keep this up for 38 games">
         PACE {s.pace} PTS
       </span>
     </div>
@@ -85,10 +85,10 @@ export function MidSeasonAwards({ sim, onContinue }: { sim: SeasonSim; onContinu
   ].filter(Boolean) as { title: string; card?: import('../../types/game').PlayerCard; line: string }[];
 
   return (
-    <div className="fixed inset-0 z-[91] overflow-y-auto overscroll-contain bg-black/90" role="dialog" aria-label="Mid-season awards">
+    <div className="fixed inset-0 z-[91] overflow-y-auto overscroll-contain bg-ink/95" role="dialog" aria-label="Mid-season awards">
       <div className="flex min-h-full items-center justify-center p-3 sm:p-5">
-        <div className="w-full max-w-3xl animate-pop overflow-hidden rounded-3xl border-2 border-yellow-300/70 bg-gradient-to-b from-zinc-900 to-black">
-          <div className="bg-yellow-300 px-5 py-2 text-center text-xs font-black uppercase tracking-[0.35em] text-black">Mid-Season Awards</div>
+        <div className="w-full max-w-3xl animate-pop overflow-hidden rounded-3xl border-[5px] border-ink bg-ink-800 shadow-[10px_10px_0_#0b0e24]">
+          <div className="border-b-[4px] border-ink bg-flare-500 px-5 py-2 text-center font-chunky text-base text-ink">MID-SEASON AWARDS!</div>
           <div className="p-4 text-center sm:p-6">
             <div className="font-display text-4xl leading-none text-white sm:text-5xl">HALFWAY THERE</div>
             <div className="mt-1 text-sm text-white/70">
@@ -96,7 +96,7 @@ export function MidSeasonAwards({ sim, onContinue }: { sim: SeasonSim; onContinu
             </div>
             <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-3">
               {awards.map((a, i) => (
-                <div key={a.title} className="flex animate-pop flex-col items-center gap-2 rounded-2xl border border-white/10 bg-white/[0.04] p-3" style={{ animationDelay: `${0.35 + i * 0.45}s` }}>
+                <div key={a.title} className="flex animate-pop flex-col items-center gap-2 rounded-2xl border border-ink-950 bg-white/[0.04] p-3" style={{ animationDelay: `${0.35 + i * 0.45}s` }}>
                   <div className="text-[10px] font-black uppercase tracking-widest text-yellow-300">🏅 {a.title}</div>
                   {a.card ? <PlayerCardUI card={a.card} size="sm" tilt={false} /> : <div className="flex h-[150px] items-center justify-center text-6xl">👟</div>}
                   <div className="text-xs font-bold text-white/85">{a.line}</div>
@@ -105,7 +105,7 @@ export function MidSeasonAwards({ sim, onContinue }: { sim: SeasonSim; onContinu
             </div>
             <button
               onClick={onContinue}
-              className="mt-5 animate-pop rounded-2xl bg-gradient-to-r from-sky-300 via-cyan-300 to-sky-300 px-6 py-3 font-display text-2xl tracking-wider text-black transition hover:scale-105"
+              className="mt-5 animate-pop btn-cut bg-flare-500 px-6 py-3 text-2xl text-ink transition hover:scale-105"
               style={{ animationDelay: '1.7s' }}
             >
               OPEN THE JANUARY WINDOW

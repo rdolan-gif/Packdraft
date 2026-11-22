@@ -654,3 +654,11 @@ html.lite .pack-rumble { animation: none; }
 .comic-glitch::after { color: #3aa0ff; animation: glitchx 0.3s steps(2) infinite reverse; }
 @keyframes glitchx { 0% { transform: translate(-5px, 2px); } 50% { transform: translate(5px, -3px); } 100% { transform: translate(-3px, -1px); } }
 html.lite .comic-rays, html.lite .comic-glitch::before, html.lite .comic-glitch::after { animation: none; }
+
+/* Big comic headline: yellow fill, navy outline and hard shadow. */
+.comic-title {
+  color: #ffd400;
+  -webkit-text-stroke: 3px #14183a;
+  paint-order: stroke fill;
+  text-shadow: 5px 5px 0 #0b0e24;
+}

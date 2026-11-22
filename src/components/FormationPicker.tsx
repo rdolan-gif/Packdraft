@@ -9,14 +9,14 @@ function MiniPitch({ id, size = 92 }: { id: FormationId; size?: number }) {
   const f = FORMATIONS[id];
   return (
     <svg viewBox="0 0 100 125" width={size} height={size * 1.25} className="rounded-md">
-      <rect width="100" height="125" fill="#14532d" />
-      <g stroke="rgba(255,255,255,.35)" fill="none" strokeWidth="1">
+      <rect width="100" height="125" fill="#2fa84f" />
+      <g stroke="rgba(255,255,255,.7)" fill="none" strokeWidth="1.2">
         <rect x="3" y="3" width="94" height="119" />
         <line x1="3" y1="62.5" x2="97" y2="62.5" />
         <circle cx="50" cy="62.5" r="9" />
       </g>
       {f.slots.map((s) => (
-        <circle key={s.id} cx={s.x} cy={s.y * 1.25} r="5.5" fill={DOT[positionGroup(s.label)]} stroke="#000" strokeWidth="1" />
+        <circle key={s.id} cx={s.x} cy={s.y * 1.25} r="5.5" fill={DOT[positionGroup(s.label)]} stroke="#14183a" strokeWidth="1.6" />
       ))}
     </svg>
   );
@@ -72,17 +72,17 @@ export function FormationPicker({ current, onChange, preferred = [], variant = '
               onChange(id);
             }}
             onMouseEnter={() => sfx.hover()}
-            className={`group relative flex flex-col items-center gap-2 rounded-2xl border-2 p-3 text-center transition hover:-translate-y-1 ${
-              active ? 'border-flare-400 bg-flare-400/10 shadow-lg shadow-flare-500/20' : 'border-white/10 bg-black/30 hover:border-white/30'
+            className={`group relative flex flex-col items-center gap-2 rounded-2xl border-[4px] border-ink p-3 text-center text-ink transition hover:-translate-y-1 ${
+              active ? 'bg-flare-500 shadow-[6px_6px_0_#0b0e24]' : 'bg-album-cream shadow-[5px_5px_0_#0b0e24]'
             }`}
           >
             {preferred.includes(id) && (
-              <span className="absolute right-2 top-2 rounded-full bg-yellow-300 px-1.5 text-[9px] font-black uppercase text-black">Manager ★</span>
+              <span className="absolute -right-2 -top-3 z-10 rotate-6 rounded-full border-2 border-ink bg-album-red px-2 pt-0.5 font-chunky text-[10px] text-white">MANAGER ★</span>
             )}
             <MiniPitch id={id} />
-            <div className="font-display text-2xl leading-none text-white">{id}</div>
-            <div className="text-[11px] font-bold text-flare-300">{f.name}</div>
-            <div className="text-[11px] leading-snug text-white/55">{f.description}</div>
+            <div className="font-display text-3xl leading-none">{id}</div>
+            <div className="font-chunky text-xs text-album-red">{f.name}</div>
+            <div className="text-[11px] font-medium leading-snug text-ink/70">{f.description}</div>
           </button>
         );
       })}

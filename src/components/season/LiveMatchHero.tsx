@@ -40,7 +40,7 @@ const TONE: Record<FeedItem['tone'], string> = {
   concede: 'bg-rose-500/20 text-rose-100 ring-1 ring-rose-400/40',
   chance: 'bg-amber-300/10 text-amber-100',
   info: 'bg-white/[0.04] text-white/75',
-  whistle: 'bg-white/10 text-white font-black',
+  whistle: 'bg-ink-600 text-white font-black',
   news: 'bg-sky-400/10 text-sky-100',
 };
 const ICON: Record<FeedItem['tone'], string> = { goal: '⚽', concede: '⚽', chance: '😱', info: '•', whistle: '📣', news: '📡' };
@@ -55,7 +55,7 @@ export function LiveMatchHero({ sim, live, minute, momentum, feed, celebration, 
     const oppRow = opp ? sim.table[opp.id] : null;
     const oppPos = opp ? sim.sortedTable().findIndex((x) => x.teamId === opp.id) + 1 : 0;
     return (
-      <section data-shake-zone className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-flare-950 via-black to-black p-4 sm:p-5">
+      <section data-shake-zone className="relative overflow-hidden rounded-3xl border-[4px] border-ink bg-ink-800 shadow-[8px_8px_0_#0b0e24] p-4 sm:p-5">
         {sim.matchweek === 0 ? (
           <div className="text-center">
             <div className="text-[10px] font-black uppercase tracking-[0.3em] text-flare-300">This season's league</div>
@@ -65,7 +65,7 @@ export function LiveMatchHero({ sim, live, minute, momentum, feed, celebration, 
           </div>
         ) : null}
         {opp && (
-          <div className={`${sim.matchweek === 0 ? 'mt-4 border-t border-white/10 pt-4' : ''} text-center`}>
+          <div className={`${sim.matchweek === 0 ? 'mt-4 border-t border-ink-950 pt-4' : ''} text-center`}>
             <div className="text-[10px] font-black uppercase tracking-[0.3em] text-white/50">
               Next up · Matchweek {sim.matchweek + 1}
               {sim.matchweek + 1 === 19 && <span className="ml-1 text-yellow-300">· Derby Day</span>}
@@ -119,7 +119,7 @@ export function LiveMatchHero({ sim, live, minute, momentum, feed, celebration, 
     <section
       data-shake-zone
       className={`relative overflow-hidden rounded-3xl border-2 p-3 transition-colors duration-500 sm:p-4 ${
-        outcome === 'W' ? 'border-emerald-400 bg-emerald-950' : outcome === 'L' ? 'border-rose-500/80 bg-rose-950/60' : outcome === 'D' ? 'border-slate-400/60 bg-slate-900' : 'border-white/15 bg-gradient-to-b from-[#0b2416] to-black'
+        outcome === 'W' ? 'border-emerald-400 bg-emerald-950' : outcome === 'L' ? 'border-rose-500/80 bg-rose-950/60' : outcome === 'D' ? 'border-slate-400/60 bg-slate-900' : 'border-ink-950 bg-gradient-to-b from-[#0b2416] to-black'
       }`}
     >
       {/* pitch stripes */}
@@ -131,7 +131,7 @@ export function LiveMatchHero({ sim, live, minute, momentum, feed, celebration, 
           {r.shout && <span className="rounded bg-yellow-300 px-1 text-black">{r.shout === 'attack' ? '🔥 All-out attack' : r.shout === 'bus' ? '🛡️ Park the bus' : '⚖️ Gameplan'}</span>}
         </span>
         {!isFT && (
-          <button onClick={onSkip} className="flex items-center gap-1 rounded-md border border-white/20 bg-black/40 px-2 py-1 text-white/80 hover:bg-white/10">
+          <button onClick={onSkip} className="flex items-center gap-1 rounded-md border border-ink-950 bg-ink-950/80 px-2 py-1 text-white/80 hover:bg-ink-600">
             <FastForward className="h-3 w-3" /> Skip to FT
           </button>
         )}
@@ -143,7 +143,7 @@ export function LiveMatchHero({ sim, live, minute, momentum, feed, celebration, 
         <div className="flex flex-col items-center">
           <div
             className={`flex items-center gap-1 rounded-2xl px-3 py-1 font-display text-5xl leading-none tabular-nums sm:text-7xl ${
-              outcome === 'W' ? 'bg-emerald-400 text-black' : outcome === 'L' ? 'bg-rose-600 text-white' : outcome === 'D' ? 'bg-slate-500 text-white' : 'bg-black/70 text-white ring-1 ring-white/20'
+              outcome === 'W' ? 'bg-emerald-400 text-black' : outcome === 'L' ? 'bg-rose-600 text-white' : outcome === 'D' ? 'bg-slate-500 text-white' : 'bg-ink-950/80 text-white ring-1 ring-white/20'
             }`}
           >
             <span key={`h${hg}`} className="animate-pop">{hg}</span>
@@ -166,7 +166,7 @@ export function LiveMatchHero({ sim, live, minute, momentum, feed, celebration, 
 
       {/* timeline + momentum */}
       <div className="relative mt-3">
-        <div className="relative h-2 rounded-full bg-white/10">
+        <div className="relative h-2 rounded-full bg-ink-600">
           <div className="absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-flare-500/60 to-yellow-300/70" style={{ width: `${Math.min(100, (clock / end) * 100)}%` }} />
           <div className="absolute inset-y-0 left-1/2 w-px bg-white/40" title="Half-time" />
           {markers.map((k, i) => (
@@ -179,7 +179,7 @@ export function LiveMatchHero({ sim, live, minute, momentum, feed, celebration, 
         </div>
         <div className="mt-2 flex items-center gap-2 text-[9px] font-black uppercase tracking-wider text-white/50">
           <span className="w-16 truncate text-right">{home.short}</span>
-          <div className="relative h-2.5 flex-1 overflow-hidden rounded-full bg-white/10" aria-label="Momentum">
+          <div className="relative h-2.5 flex-1 overflow-hidden rounded-full bg-ink-600" aria-label="Momentum">
             <div
               className="absolute inset-y-0 transition-all duration-300"
               style={{
@@ -207,7 +207,7 @@ export function LiveMatchHero({ sim, live, minute, momentum, feed, celebration, 
       </div>
 
       {/* the next fixture is always shown (fixed height) so the panel never changes size */}
-      <div className="relative mt-2 h-[26px] truncate border-t border-white/10 pt-2 text-center text-[11px] text-white/60">
+      <div className="relative mt-2 h-[26px] truncate border-t border-ink-950 pt-2 text-center text-[11px] text-white/60">
         {next && (<>
           Next: {sim.matchweek + 1 === 19 ? <b className="text-white/90">your closest title rival · DERBY DAY</b> : <><b className="text-white/90">{next.home ? 'vs' : '@'} {sim.teamById[next.opponentId].name}</b>{sim.matchweek + 1 === 38 && <span className="ml-1 font-black text-yellow-300">· FINAL DAY</span>}</>}
         </>)}

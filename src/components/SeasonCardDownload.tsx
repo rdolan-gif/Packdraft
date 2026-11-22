@@ -57,19 +57,19 @@ export function SeasonCardDownload(props: SeasonCardData) {
       <button
         onClick={make}
         disabled={busy}
-        className="flex items-center justify-center gap-2 rounded-xl border-2 border-flare-400/70 bg-flare-500/10 px-4 py-2.5 font-display text-xl tracking-wider text-flare-100 transition hover:bg-flare-500/20 disabled:opacity-60"
+        className="btn-cut flex items-center justify-center gap-2 bg-album-blue px-4 py-2.5 text-xl text-white disabled:opacity-60"
       >
         {busy ? <Loader2 className="h-5 w-5 animate-spin" /> : <ImageIcon className="h-5 w-5" />} {busy ? 'DRAWING YOUR CARD…' : 'DOWNLOAD SEASON CARD'}
       </button>
       {error && <div className="text-center text-xs text-rose-300">{error}</div>}
 
       {preview && (
-        <div className="fixed inset-0 z-[96] flex items-center justify-center bg-black/85 p-3" onClick={() => setPreview(null)} role="dialog" aria-label="Season card preview">
+        <div className="fixed inset-0 z-[96] flex items-center justify-center bg-ink/95 p-3" onClick={() => setPreview(null)} role="dialog" aria-label="Season card preview">
           <div className="relative flex max-h-full w-full max-w-md animate-pop flex-col gap-3" onClick={(e) => e.stopPropagation()}>
-            <button onClick={() => setPreview(null)} className="absolute -right-1 -top-1 z-10 rounded-full bg-black/80 p-2 text-white hover:bg-black" aria-label="Close preview">
+            <button onClick={() => setPreview(null)} className="absolute -right-1 -top-1 z-10 rounded-full bg-ink/95 p-2 text-white hover:bg-black" aria-label="Close preview">
               <X className="h-5 w-5" />
             </button>
-            <img src={preview.url} alt="Your season card" className="max-h-[72vh] w-full rounded-2xl object-contain shadow-2xl" />
+            <img src={preview.url} alt="Your season card" className="max-h-[72vh] w-full rounded-2xl object-contain shadow-[6px_6px_0_#0b0e24]" />
             <div className="flex gap-2">
               <button onClick={download} className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-flare-500 px-4 py-3 font-display text-xl tracking-wider text-black hover:bg-flare-400">
                 <Download className="h-5 w-5" /> SAVE IMAGE
