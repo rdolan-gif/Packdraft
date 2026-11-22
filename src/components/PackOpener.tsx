@@ -396,7 +396,7 @@ export function PackOpener({ packNumber, cards, packKey, selectedId, onSelect, r
                       </div>
                     ) : (
                       // the whole flag as a waving pennant
-                      <div className="pennant-wave relative flex items-start" style={{ filter: 'drop-shadow(5px 5px 0 #14183a)' }}>
+                      <div className="pennant-wave relative flex items-start" style={{ filter: 'drop-shadow(5px 0 0 #14183a)' }}>
                         <span className="relative z-10 h-[132px] w-[7px] rounded-full border-2 border-ink bg-album-cream" />
                         <div className="pennant relative -ml-0.5 mt-1 h-[92px] w-[138px] bg-ink">
                           <div className="pennant absolute left-[3px] top-[5px] h-[82px] w-[124px] overflow-hidden">
