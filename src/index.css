@@ -612,3 +612,45 @@ html.lite .comic-pop, html.lite .comic-lines { animation: none; }
   82% { transform: translate(-1px, 0) rotate(-0.5deg); }
 }
 html.lite .pack-rumble { animation: none; }
+
+/* ────────── Comic-book rarity tells (ComicTell) ────────── */
+.comic-word { animation: comicpop 0.55s cubic-bezier(0.2, 1.6, 0.4, 1) both; }
+.comic-rays { transform: translate(-50%, -50%); animation: comicspin 6s linear infinite; }
+@keyframes comicspin { to { transform: translate(-50%, -50%) rotate(360deg); } }
+.comic-fade { animation: comicfade 1.5s ease-out both; }
+@keyframes comicfade { 0% { opacity: 0; } 12% { opacity: 1; } 70% { opacity: 1; } 100% { opacity: 0; } }
+.comic-panel-flash { animation: panelflash 0.35s steps(2, end) both; }
+@keyframes panelflash { 0% { opacity: 1; } 100% { opacity: 0; } }
+.comic-star { animation: comicstar 1s cubic-bezier(0.15, 0.8, 0.3, 1) both; }
+@keyframes comicstar {
+  0% { transform: translate(-50%, -50%) scale(0.2) rotate(0); opacity: 1; }
+  80% { opacity: 1; }
+  100% { transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(1) rotate(var(--spin)); opacity: 0; }
+}
+.comic-halftone {
+  transform: translate(-50%, -50%);
+  background: radial-gradient(var(--dot) 28%, transparent 31%) 0 0 / 16px 16px;
+  -webkit-mask: radial-gradient(circle, #000 30%, transparent 70%);
+  mask: radial-gradient(circle, #000 30%, transparent 70%);
+  animation: halftonepop 1.2s ease-out both;
+}
+@keyframes halftonepop {
+  0% { transform: translate(-50%, -50%) scale(0.2); opacity: 0; }
+  25% { opacity: 1; }
+  100% { transform: translate(-50%, -50%) scale(1.2); opacity: 0; }
+}
+.comic-halftone-full { background: radial-gradient(rgba(20, 24, 58, 0.18) 26%, transparent 30%) 0 0 / 14px 14px; }
+.comic-glitch::before,
+.comic-glitch::after {
+  content: attr(data-text);
+  position: absolute;
+  inset: 0;
+  -webkit-text-stroke: 0;
+  text-shadow: none;
+  opacity: 0.8;
+  mix-blend-mode: screen;
+}
+.comic-glitch::before { color: #ff4d6d; animation: glitchx 0.25s steps(2) infinite; }
+.comic-glitch::after { color: #3aa0ff; animation: glitchx 0.3s steps(2) infinite reverse; }
+@keyframes glitchx { 0% { transform: translate(-5px, 2px); } 50% { transform: translate(5px, -3px); } 100% { transform: translate(-3px, -1px); } }
+html.lite .comic-rays, html.lite .comic-glitch::before, html.lite .comic-glitch::after { animation: none; }

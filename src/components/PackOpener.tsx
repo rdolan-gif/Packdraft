@@ -9,6 +9,10 @@ import { sfx } from '../engine/soundEffects';
 import { burstAt, goldConfetti, rainbowConfetti, shakeScreen } from '../engine/fx';
 import { Crest } from './Crest';
 import { CardBack, PlayerCardUI } from './PlayerCardUI';
+import { ComicTell } from './ComicTell';
+
+/** Comic-book rarity tells (flat, outlined, a sound-effect word) instead of the old glowing flashes. */
+export const COMIC_FX = false; // switched on once the comic tells are approved
 
 type Stage = 'sealed' | 'dimming' | 'tell' | 'fanned' | 'revealed';
 
@@ -110,7 +114,7 @@ export function PackOpener({ packNumber, cards, packKey, selectedId, onSelect, r
         setTiles(i + 1);
         sfx.fireworkPop();
         shakeScreen('micro');
-        burstAt(window.innerWidth * x, window.innerHeight * TILE_Y, colors, 30);
+        if (!COMIC_FX) burstAt(window.innerWidth * x, window.innerHeight * TILE_Y, colors, 30);
       });
     });
   };
@@ -154,6 +158,7 @@ export function PackOpener({ packNumber, cards, packKey, selectedId, onSelect, r
     sfx.roar();
     setFlipped((s) => new Set(s).add(idx));
     shakeScreen('heavy');
+    if (COMIC_FX) return;
     if (secret) rainbowConfetti();
     else goldConfetti(0.9);
   };
@@ -196,7 +201,7 @@ export function PackOpener({ packNumber, cards, packKey, selectedId, onSelect, r
     const rect = packRef.current?.getBoundingClientRect();
     const cx = rect ? rect.left + rect.width / 2 : window.innerWidth / 2;
     const cy = rect ? rect.top + 30 : window.innerHeight / 3;
-    burstAt(cx, cy, ['#e5e7eb', '#a7f3d0', '#ffffff'], 30);
+    if (!COMIC_FX) burstAt(cx, cy, ['#e5e7eb', '#a7f3d0', '#ffffff'], 30);
     setTearProgress(1);
 
     if (walkoutTier(top)) {
@@ -217,9 +222,11 @@ export function PackOpener({ packNumber, cards, packKey, selectedId, onSelect, r
         later(1700, () => setFlash(null));
         sfx.stinger(top);
         shakeScreen('heavy');
-        if (secret) rainbowConfetti();
-        else goldConfetti(0.7);
-        burstAt(cx, cy + 120, secret ? RAINBOW : ['#ffffff', '#e0f2fe', '#f472b6', '#22d3ee', '#fde68a'], 60);
+        if (!COMIC_FX) {
+          if (secret) rainbowConfetti();
+          else goldConfetti(0.7);
+        }
+        if (!COMIC_FX) burstAt(cx, cy + 120, secret ? RAINBOW : ['#ffffff', '#e0f2fe', '#f472b6', '#22d3ee', '#fde68a'], 60);
       });
       // BOOM settles, then the three fireworks, then the cards fan out.
       launchFireworks(350 + 900);
@@ -238,9 +245,9 @@ export function PackOpener({ packNumber, cards, packKey, selectedId, onSelect, r
     sfx.stinger(top);
     if (top === 'RISING_WORLD') {
       shakeScreen('micro');
-      burstAt(cx, cy + 100, ['#facc15', '#fde68a', bestEra.mid, bestEra.light], 70);
+      if (!COMIC_FX) burstAt(cx, cy + 100, ['#facc15', '#fde68a', bestEra.mid, bestEra.light], 70);
     } else if (top === 'ELITE') {
-      burstAt(cx, cy + 100, [bestEra.light, '#e5e7eb', bestEra.mid], 45);
+      if (!COMIC_FX) burstAt(cx, cy + 100, [bestEra.light, '#e5e7eb', bestEra.mid], 45);
     }
     if (fireworksFor) launchFireworks(500);
     later(fireworksFor ? 500 + FW_TOTAL : 1400, () => {
@@ -310,8 +317,13 @@ export function PackOpener({ packNumber, cards, packKey, selectedId, onSelect, r
   return (
     <div className="relative flex min-h-[420px] w-full flex-col items-center">
       {/* Fullscreen tells */}
-      {stage === 'dimming' && <div className="pointer-events-none fixed inset-0 z-[80] bg-black/95 transition-opacity" />}
-      {flash && (
+      {stage === 'dimming' && <div className="pointer-events-none fixed inset-0 z-[80] bg-ink/95 transition-opacity" />}
+      {flash && COMIC_FX && (
+        <div key={flash.key} className="pointer-events-none fixed inset-0 z-[81]">
+          <ComicTell tier={flash.tier} best={best} />
+        </div>
+      )}
+      {flash && !COMIC_FX && (
         <div key={flash.key} className="pointer-events-none fixed inset-0 z-[81]">
           <div
             className="absolute inset-0 animate-flash"
@@ -442,7 +454,7 @@ export function PackOpener({ packNumber, cards, packKey, selectedId, onSelect, r
             style={{ transform: `perspective(900px) rotateX(${tilt.rx}deg) rotateY(${tilt.ry}deg)`, transformStyle: 'preserve-3d' }}
           >
             {/* 81–85 pulls: name the card type above the pack, in its colour (smaller than BOOM!) */}
-            {stage === 'tell' && top === 'ELITE' && best && (
+            {!COMIC_FX && stage === 'tell' && top === 'ELITE' && best && (
               <div className="pointer-events-none absolute -top-16 left-1/2 z-30 -translate-x-1/2 whitespace-nowrap">
                 <div
                   className="animate-pop font-display text-4xl leading-none tracking-wider sm:text-5xl"
