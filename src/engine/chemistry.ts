@@ -17,6 +17,8 @@ import type {
 
 export function fitFor(card: PlayerCard, slot: Position): Omit<SlotFit, 'slotId' | 'effectiveOvr'> {
   const [primary, ...secondary] = card.positions;
+  // Secret rares are jokers: a natural fit anywhere, keeper included.
+  if (card.tier === 'SECRET_DEV') return { fit: 'natural', penalty: 0 };
   if (slot === 'GK' || primary === 'GK') {
     return primary === slot ? { fit: 'natural', penalty: 0 } : { fit: 'oop', penalty: 35 };
   }

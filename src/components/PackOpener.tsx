@@ -12,7 +12,7 @@ import { CardBack, PlayerCardUI } from './PlayerCardUI';
 import { ComicTell } from './ComicTell';
 
 /** Comic-book rarity tells (flat, outlined, a sound-effect word) instead of the old glowing flashes. */
-export const COMIC_FX = false; // switched on once the comic tells are approved
+export const COMIC_FX = true;
 
 type Stage = 'sealed' | 'dimming' | 'tell' | 'fanned' | 'revealed';
 
@@ -387,7 +387,7 @@ export function PackOpener({ packNumber, cards, packKey, selectedId, onSelect, r
                           {i === 0 ? (
                             <>
                               <span className="font-chunky text-sm leading-none text-album-red">POW!</span>
-                              <span className="font-display text-5xl leading-none text-ink sm:text-6xl">{best.positions[0]}</span>
+                              <span className="font-display text-5xl leading-none text-ink sm:text-6xl">{best.tier === 'SECRET_DEV' ? 'ANY' : best.positions[0]}</span>
                             </>
                           ) : (
                             <ClubIcon code={best.club} size={84} bare />

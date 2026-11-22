@@ -54,6 +54,7 @@ export function emptySlots(formationId: FormationId | null, lineup: Lineup): Emp
 }
 
 export function cardFitsSlot(card: PlayerCard, slotLabel: Position): boolean {
+  if (card.tier === 'SECRET_DEV') return true; // jokers fit anywhere
   const ok = slotAccepts(slotLabel);
   return card.positions.some((p) => ok.includes(p));
 }

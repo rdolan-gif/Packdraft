@@ -3503,19 +3503,19 @@ export const PLAYERS: PlayerCard[] = [
       ['99-00', 'CULT HERO', 81, 'ST', 'EVE', 'Target Man', [76, 82, 64, 74, 34, 86]],
     ]),
 
-  // ── Secret dev team (hidden easter egg; placeholders, edit in the Dev Team tab) ──
+  // ── Secret dev team (hidden easter egg): 96 everywhere, and a joker that plays any position ──
   ...player('brockley_louis', 'Louis Brockley', 'Brockley', 'England',
     { skinTone: 'light', hairStyle: 'short', hairColor: 'brown', facialHair: 'stubble', headShape: 'oval', expression: 'grin', accessory: 'none' },
-    [['25-26', 'DEV', 90, 'CM', 'DEV', 'Box-to-Box', [84, 82, 90, 86, 78, 85]]]),
+    [['25-26', 'DEV', 96, 'CM', 'DEV', 'Box-to-Box', [96, 96, 96, 96, 96, 96]]]),
   ...player('truman_paul', 'Paul Truman', 'Truman', 'England',
     { skinTone: 'light', hairStyle: 'buzz', hairColor: 'darkbrown', facialHair: 'none', headShape: 'square', expression: 'smirk', accessory: 'none' },
-    [['25-26', 'DEV', 90, 'ST', 'DEV', 'Complete Forward', [86, 92, 82, 87, 45, 86]]]),
+    [['25-26', 'DEV', 96, 'ST', 'DEV', 'Complete Forward', [96, 96, 96, 96, 96, 96]]]),
   ...player('salisbury_ashley', 'Ashley Salisbury', 'Salisbury', 'England',
     { skinTone: 'pale', hairStyle: 'sidepart', hairColor: 'brown', facialHair: 'beard', headShape: 'round', expression: 'cool', accessory: 'none' },
-    [['25-26', 'DEV', 90, 'CB', 'DEV', 'Ball-Playing CB', [80, 60, 84, 74, 92, 90]]]),
+    [['25-26', 'DEV', 96, 'CB', 'DEV', 'Ball-Playing CB', [96, 96, 96, 96, 96, 96]]]),
   ...player('dolan_ryan', 'Ryan Dolan', 'Dolan', 'England',
     { skinTone: 'light', hairStyle: 'fringe', hairColor: 'darkbrown', facialHair: 'stubble', headShape: 'oval', expression: 'determined', accessory: 'none' },
-    [['25-26', 'DEV', 90, 'CAM', 'DEV', 'Advanced Playmaker', [85, 86, 92, 91, 55, 78]]]),
+    [['25-26', 'DEV', 96, 'CAM', 'DEV', 'Advanced Playmaker', [96, 96, 96, 96, 96, 96]]]),
 ];
 
 export const PLAYERS_BY_ID: Record<string, PlayerCard> = Object.fromEntries(PLAYERS.map((p) => [p.id, p]));

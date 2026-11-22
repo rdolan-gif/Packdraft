@@ -174,7 +174,7 @@ export function PlayerCardUI({ card, size = 'md', onClick, selected, dimmed, sho
             </div>
             <div className="tc-star">
               <b>{card.ovr}</b>
-              <span>{card.positions[0]}</span>
+              <span>{secret ? 'ANY' : card.positions[0]}</span>
             </div>
             <div className="tc-side">{theme ? theme.banner : `${card.season} · ${secret ? 'Secret rare' : card.era}`}</div>
             <div className="tc-badge">

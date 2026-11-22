@@ -22,7 +22,7 @@ const TIER_ODDS: Record<Tier, string> = { PRIME_ICON: '2% of pack cards', RISING
 const ALBUM = ALBUM_CARDS;
 const SECRETS = PLAYERS.filter((p) => p.tier === 'SECRET_DEV');
 // Showcase switch: while true, every dev card shows in the Secret Files as if pulled. Set to false to hide them again.
-const SHOW_ALL_SECRETS = true;
+const SHOW_ALL_SECRETS = false;
 
 const PAPER = '#fff6e0';
 const INK = '#14183a';
