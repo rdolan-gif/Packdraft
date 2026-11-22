@@ -414,7 +414,9 @@ export function computeTeamRating(
     chemPoints[b] += l.strength;
   }
 
-  // Hidden famous duos: both in the XI (anywhere) = a special link worth DUO_BONUS each.
+  // Hidden famous duos: both in the XI on linked positions (neighbours on the pitch) = a special link worth
+  // DUO_BONUS each. A left-back and a right winger never link, duo or not.
+  const linked = new Set(neighbours(formation).map(([x, y]) => (x < y ? `${x}|${y}` : `${y}|${x}`)));
   const slotOfBase: Record<string, string> = {};
   for (const slot of formation.slots) {
     const c = lineup[slot.id];
@@ -423,7 +425,7 @@ export function computeTeamRating(
   for (const d of DUOS) {
     const sa = slotOfBase[d.a];
     const sb = slotOfBase[d.b];
-    if (!sa || !sb) continue;
+    if (!sa || !sb || !linked.has(sa < sb ? `${sa}|${sb}` : `${sb}|${sa}`)) continue;
     links.push({ a: sa, b: sb, kind: 'duo', strength: DUO_BONUS, duo: { id: d.id, name: d.name } });
     chemPoints[sa] += DUO_BONUS;
     chemPoints[sb] += DUO_BONUS;

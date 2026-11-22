@@ -1,4 +1,4 @@
-// Hidden famous duos: put both players in your XI (any cards of them, anywhere on the pitch) and they
+// Hidden famous duos: put both players in your XI on linked positions (any cards of them) and they
 // form a special link worth +3 chemistry each. Never listed in the game: players find them by accident.
 
 export interface Duo {

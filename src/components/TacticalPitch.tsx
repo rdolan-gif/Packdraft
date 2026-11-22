@@ -111,9 +111,7 @@ export function TacticalPitch({ formationId, lineup, rating, managerId, pendingC
               else strength[k] = Math.max(strength[k] ?? 0, l.strength);
             });
             const pairs = neighbours(formation).map(([a, b]) => key(a, b));
-            const pairSet = new Set(pairs);
-            const all = [...pairs, ...[...duo].filter((k) => !pairSet.has(k))]; // a duo can link players who aren't neighbours
-            return all.map((k) => {
+            return pairs.map((k) => {
               const [ia, ib] = k.split('|');
               const a = slotById[ia];
               const b = slotById[ib];
