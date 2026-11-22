@@ -35,6 +35,9 @@ def cuts(n, size, axis):
         r = max(4, size * 6 // 100)
         lo, hi = e - r, e + r
         best = lo + int(np.argmax(cover[lo:hi]))
+        if cover[best] < 0.6:  # no border line drawn (just a magenta gap): split evenly
+            out.append((e, e))
+            continue
         # widen to the whole dark line
         s, t = best, best
         while s > lo and cover[s - 1] > 0.5 * cover[best]:
