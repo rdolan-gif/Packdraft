@@ -41,9 +41,10 @@ def cuts(n, size, axis):
             continue
         # widen to the whole dark line
         s, t = best, best
-        while s > lo and cover[s - 1] > 0.5 * cover[best]:
+        # widen to the whole line, but only through near-solid rows: dark shirts beside a line are not the line
+        while s > lo and cover[s - 1] > max(0.85, 0.9 * cover[best]):
             s -= 1
-        while t < hi - 1 and cover[t + 1] > 0.5 * cover[best]:
+        while t < hi - 1 and cover[t + 1] > max(0.85, 0.9 * cover[best]):
             t += 1
         out.append((s, t))
     out.append(size)

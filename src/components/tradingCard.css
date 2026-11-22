@@ -79,8 +79,8 @@
   top: 4px;
   left: 4px;
   z-index: 2;
-  width: 62px;
-  height: 62px;
+  width: 66px;
+  height: 66px;
   background: #ffd23f;
   clip-path: polygon(50% 0, 61% 18%, 82% 10%, 80% 32%, 100% 40%, 85% 56%, 96% 76%, 74% 78%, 68% 100%, 50% 88%, 32% 100%, 26% 78%, 4% 76%, 15% 56%, 0 40%, 20% 32%, 18% 10%, 39% 18%);
   display: flex;
@@ -89,8 +89,18 @@
   justify-content: center;
   line-height: 0.8;
 }
-.tc-star b { font-size: 27px; font-weight: 800; }
-.tc-star span { font-size: 11px; font-weight: 800; }
+.tc-star b { font-size: 27px; font-weight: 400; margin-top: 3px; }
+/* position: a navy tag under the rating so it reads at every size */
+.tc-star span {
+  margin-top: 1px;
+  background: var(--ink);
+  color: #fff;
+  font-size: 13px;
+  line-height: 1;
+  padding: 2px 4px 0;
+  border-radius: 3px;
+  letter-spacing: 0.04em;
+}
 .tc-tiny .tc-star { transform: scale(1.35); transform-origin: top left; }
 .tc-side {
   position: absolute;
