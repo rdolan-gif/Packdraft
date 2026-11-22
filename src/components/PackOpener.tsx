@@ -50,6 +50,9 @@ const RAINBOW = ['#f472b6', '#fbbf24', '#22d3ee', '#a78bfa', '#ffffff'];
 /** Flash fill: Elite pulls glow in the best card's era-label colour. */
 const FW_GAP = 600; // between the comic bursts
 const FW_TOTAL = 2 * FW_GAP + 1300; // last burst lands, then a beat to read them
+// Crimped ends of the Prime Icon pack: the same pearl holo as the packet.
+const PEARL_CRIMP =
+  'repeating-linear-gradient(90deg, rgba(20,24,58,.22) 0 3px, transparent 3px 7px), linear-gradient(115deg, #ffd6e8, #d4f1ff 25%, #fff8d1 45%, #e1d7ff 65%, #c9fff0 85%, #ffd9c2)';
 const TILE_Y = 0.15; // tiles sit this far down the screen
 
 function flashColour(tier: Tier, best: PlayerCard | undefined) {
@@ -461,6 +464,7 @@ export function PackOpener({ packNumber, cards, packKey, selectedId, onSelect, r
               className="pack-crimp absolute inset-x-0 top-0 h-[44px] rounded-t-md border-[3px] border-b-0 border-ink transition-all duration-500"
               style={{
                 backgroundColor: finale ? '#14183a' : '#ffd400',
+                ...(flarePack ? { background: PEARL_CRIMP } : {}),
                 transform: stage !== 'sealed' ? 'translate(60px,-80px) rotate(28deg)' : 'none',
                 opacity: stage !== 'sealed' ? 0 : 1,
                 clipPath: `polygon(0 0, 100% 0, 100% 100%, ${tearProgress * 100}% 100%, ${tearProgress * 100}% 70%, 0 70%)`,
@@ -468,7 +472,7 @@ export function PackOpener({ packNumber, cards, packKey, selectedId, onSelect, r
             />
             {/* body: the foil packet */}
             <div
-              className={`foil ${flarePack ? `foil-pearl ring-[6px] ring-album-red ${flareShake ? 'pack-rumble' : ''}` : look.foil} absolute inset-x-0 bottom-0 top-[40px] overflow-hidden rounded-b-md border-[3px] border-t-[3px] border-dashed border-ink shadow-[8px_8px_0_#0b0e24] ${stage === 'tell' ? 'brightness-150' : ''}`}
+              className={`foil ${flarePack ? `foil-pearl ${flareShake ? 'pack-rumble' : ''}` : look.foil} absolute inset-x-0 bottom-0 top-[40px] overflow-hidden rounded-b-md border-[3px] border-t-[3px] border-dashed border-ink shadow-[8px_8px_0_#0b0e24] ${stage === 'tell' ? 'brightness-150' : ''}`}
               style={{ borderTopStyle: 'dashed', borderLeftStyle: 'solid', borderRightStyle: 'solid', borderBottomStyle: 'solid' }}
             >
               <div className="absolute inset-0" style={{ background: `radial-gradient(circle at ${tilt.gx}% ${tilt.gy}%, rgba(255,255,255,.55), transparent 40%)`, mixBlendMode: 'overlay' }} />
@@ -489,7 +493,7 @@ export function PackOpener({ packNumber, cards, packKey, selectedId, onSelect, r
                   5 STICKERS INSIDE
                 </div>
               </div>
-              <div className="pack-crimp absolute inset-x-0 bottom-0 h-4 border-t-[3px] border-ink" style={{ backgroundColor: finale ? '#14183a' : '#ffd400' }} />
+              <div className="pack-crimp absolute inset-x-0 bottom-0 h-4 border-t-[3px] border-ink" style={flarePack ? { background: PEARL_CRIMP } : { backgroundColor: finale ? '#14183a' : '#ffd400' }} />
               {stage === 'tell' && (
                 <div
                   className="absolute inset-x-0 top-0 h-2"
