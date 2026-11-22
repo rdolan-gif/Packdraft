@@ -600,3 +600,15 @@ html.lite .pennant-wave, html.lite .foil.foil-pearl { animation: none; }
   100% { transform: translate(-50%, -50%) scale(1.25); opacity: 0; }
 }
 html.lite .comic-pop, html.lite .comic-lines { animation: none; }
+
+/* A Prime Icon pack rumbles every couple of seconds until you rip it. */
+.pack-rumble { animation: packrumble 2.2s ease-in-out infinite; }
+@keyframes packrumble {
+  0%, 62%, 100% { transform: translate(0, 0) rotate(0); }
+  66% { transform: translate(-3px, 1px) rotate(-1.5deg); }
+  70% { transform: translate(3px, -1px) rotate(1.5deg); }
+  74% { transform: translate(-3px, -1px) rotate(-1deg); }
+  78% { transform: translate(3px, 1px) rotate(1deg); }
+  82% { transform: translate(-1px, 0) rotate(-0.5deg); }
+}
+html.lite .pack-rumble { animation: none; }

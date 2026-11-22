@@ -96,8 +96,6 @@ export function PackOpener({ packNumber, cards, packKey, selectedId, onSelect, r
   const secret = top === 'SECRET_DEV';
   const bestEra = best ? eraColour(best.era) : eraColour('SQUAD');
   // 86+ pulls: three fireworks, left to right, each bursting into a tile (position, club icon, flag).
-  // Walkout flare: the sealed pack turns pearl holo and shakes for a moment before a Prime Icon or secret rare.
-  const [flareShake, setFlareShake] = useState(false);
   const [tiles, setTiles] = useState(0);
   const fireworksFor = !!best && (best.ovr >= 86 || best.tier === 'SECRET_DEV');
   const launchFireworks = (start: number) => {
@@ -114,6 +112,10 @@ export function PackOpener({ packNumber, cards, packKey, selectedId, onSelect, r
     });
   };
   const finale = packNumber >= TOTAL_PACKS;
+  // The cards are dealt before the pack is shown, so a Prime Icon or secret rare pack comes in the
+  // walkout wrapper from the start: pearl holo, shaking, "Something's shaking...".
+  const flareShake = walkoutTier(top) && stage === 'sealed';
+  const flarePack = walkoutTier(top);
   // The wrapper: Matchday red, Final Whistle gold, Daily Draft blue, January Window navy.
   const look = finale
     ? { foil: 'foil-finale', crest: 'ink' as const, name: ['FINAL', 'WHISTLE'], title: '#fff6e0', small: '#14183a', chipBg: '#e62e2d', chipText: '#fff' }
@@ -134,7 +136,6 @@ export function PackOpener({ packNumber, cards, packKey, selectedId, onSelect, r
     primeShown.current = false;
     setFlash(null);
     setTiles(0);
-    setFlareShake(false);
   }, [packKey]);
 
   useEffect(() => () => timers.current.forEach(clearTimeout), []);
@@ -185,7 +186,7 @@ export function PackOpener({ packNumber, cards, packKey, selectedId, onSelect, r
   };
 
   const rip = () => {
-    if (stage !== 'sealed' || flareShake) return;
+    if (stage !== 'sealed') return;
     onRip?.();
     sfx.unlock();
     sfx.rip();
@@ -196,11 +197,8 @@ export function PackOpener({ packNumber, cards, packKey, selectedId, onSelect, r
     setTearProgress(1);
 
     if (walkoutTier(top)) {
-      // THE WALKOUT FLARE: the pack shakes in pearl holo first ("SOMETHING'S SHAKING..."), then it all kicks off.
-      setFlareShake(true);
-      sfx.heartbeat();
-      shakeScreen('micro');
-      later(1500, () => walkout(cx, cy));
+      // THE WALKOUT FLARE (the pack was already wrapped in pearl holo, shaking, before the rip)
+      walkout(cx, cy);
       return;
     }
     normalReveal(cx, cy);
@@ -208,7 +206,6 @@ export function PackOpener({ packNumber, cards, packKey, selectedId, onSelect, r
 
   const walkout = (cx: number, cy: number) => {
     {
-      setFlareShake(false);
       setStage('dimming');
       sfx.heartbeat();
       later(350, () => {
@@ -452,7 +449,7 @@ export function PackOpener({ packNumber, cards, packKey, selectedId, onSelect, r
                 </div>
               </div>
             )}
-            {stage === 'sealed' && !flareShake && (
+            {stage === 'sealed' && (
               <div className="burst-clip pointer-events-none absolute -right-12 top-12 z-30 flex h-[92px] w-[92px] rotate-[14deg] items-center justify-center bg-album-cream text-center font-chunky text-[15px] leading-none text-ink">
                 TEAR
                 <br />
@@ -471,24 +468,24 @@ export function PackOpener({ packNumber, cards, packKey, selectedId, onSelect, r
             />
             {/* body: the foil packet */}
             <div
-              className={`foil ${flareShake ? 'foil-pearl animate-vibrate ring-[6px] ring-album-red' : look.foil} absolute inset-x-0 bottom-0 top-[40px] overflow-hidden rounded-b-md border-[3px] border-t-[3px] border-dashed border-ink shadow-[8px_8px_0_#0b0e24] ${stage === 'tell' ? 'brightness-150' : ''}`}
+              className={`foil ${flarePack ? `foil-pearl ring-[6px] ring-album-red ${flareShake ? 'pack-rumble' : ''}` : look.foil} absolute inset-x-0 bottom-0 top-[40px] overflow-hidden rounded-b-md border-[3px] border-t-[3px] border-dashed border-ink shadow-[8px_8px_0_#0b0e24] ${stage === 'tell' ? 'brightness-150' : ''}`}
               style={{ borderTopStyle: 'dashed', borderLeftStyle: 'solid', borderRightStyle: 'solid', borderBottomStyle: 'solid' }}
             >
               <div className="absolute inset-0" style={{ background: `radial-gradient(circle at ${tilt.gx}% ${tilt.gy}%, rgba(255,255,255,.55), transparent 40%)`, mixBlendMode: 'overlay' }} />
               <div className="relative flex h-full flex-col items-center justify-center gap-1.5 pb-4 text-center">
-                <div className="font-display text-lg tracking-[0.15em]" style={{ color: look.small }}>
+                <div className="font-display text-lg tracking-[0.15em]" style={{ color: flarePack ? '#14183a' : look.small }}>
                   PACKDRAFT
                 </div>
                 <Crest size={92} variant={look.crest} />
                 <div className="font-display text-[42px] leading-[0.85]" style={{ color: look.title, WebkitTextStroke: '3px #14183a', paintOrder: 'stroke fill', textShadow: '3px 3px 0 #14183a' }}>
-                  {(flareShake ? ["SOMETHING'S", 'SHAKING...'] : look.name).map((l) => (
+                  {(flarePack ? ["SOMETHING'S", 'SHAKING...'] : look.name).map((l) => (
                     <div key={l}>{l}</div>
                   ))}
                 </div>
-                <div className="mt-1 rounded-md border-2 border-ink px-3 pb-0.5 pt-1 font-chunky text-[13px]" style={{ background: flareShake ? '#14183a' : look.chipBg, color: flareShake ? '#fff6e0' : look.chipText }}>
-                  {flareShake ? 'HOLD ON TIGHT' : packLabel ?? (finale ? 'LAST PACK!' : wrapper === 'daily' ? `PACK ${packNumber} · SAME FOR EVERYONE` : `PACK ${packNumber} OF ${TOTAL_PACKS}`)}
+                <div className="mt-1 rounded-md border-2 border-ink px-3 pb-0.5 pt-1 font-chunky text-[13px]" style={{ background: flarePack ? '#14183a' : look.chipBg, color: flarePack ? '#fff6e0' : look.chipText }}>
+                  {flarePack ? 'HOLD ON TIGHT' : packLabel ?? (finale ? 'LAST PACK!' : wrapper === 'daily' ? `PACK ${packNumber} · SAME FOR EVERYONE` : `PACK ${packNumber} OF ${TOTAL_PACKS}`)}
                 </div>
-                <div className="mt-0.5 font-chunky text-[11px]" style={{ color: look.small }}>
+                <div className="mt-0.5 font-chunky text-[11px]" style={{ color: flarePack ? '#14183a' : look.small }}>
                   5 STICKERS INSIDE
                 </div>
               </div>
@@ -514,7 +511,7 @@ export function PackOpener({ packNumber, cards, packKey, selectedId, onSelect, r
               <div className="perforation absolute left-4 right-4 top-1/2 h-[14px] -translate-y-1/2 rounded-full bg-black/25">
                 <div className="h-full rounded-full border-r-[3px] border-dashed border-ink bg-album-cream" style={{ width: `${tearProgress * 100}%` }} />
               </div>
-              {stage === 'sealed' && !flareShake && tearProgress < 0.05 && !isDragging && (
+              {stage === 'sealed' && tearProgress < 0.05 && !isDragging && (
                 <div className="pointer-events-none absolute left-16 right-6 top-1/2 flex -translate-y-1/2 items-center justify-center gap-1 text-[11px] font-black uppercase tracking-widest text-white drop-shadow-[0_1px_2px_rgba(0,0,0,.9)]">
                   Slide to tear
                   <span className="flex">
@@ -526,7 +523,7 @@ export function PackOpener({ packNumber, cards, packKey, selectedId, onSelect, r
                   </span>
                 </div>
               )}
-              {stage === 'sealed' && !flareShake && (
+              {stage === 'sealed' && (
                 <div
                   className={`pointer-events-none absolute top-1/2 flex h-11 w-11 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border-[3px] border-ink bg-album-red text-white shadow-[3px_3px_0_#14183a] ${tearProgress === 0 && !isDragging ? 'animate-pulse' : ''}`}
                   style={{ left: `calc(16px + (100% - 32px) * ${tearProgress})` }}
@@ -536,7 +533,7 @@ export function PackOpener({ packNumber, cards, packKey, selectedId, onSelect, r
               )}
             </div>
           </div>
-          {stage === 'sealed' && !flareShake && (
+          {stage === 'sealed' && (
             <div className="mt-5 flex flex-col items-center gap-2">
               
               <button
