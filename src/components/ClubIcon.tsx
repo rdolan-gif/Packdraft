@@ -8,9 +8,15 @@ export function clubIconUrl(code: string): string | undefined {
   return ICONS[`../assets/club-icons/${code}.png`];
 }
 
-export function ClubIcon({ code, size = 40, className }: { code: string; size?: number; className?: string }) {
+export function ClubIcon({ code, size = 40, className, bare }: { code: string; size?: number; className?: string; /** Just the drawing, no roundel. */ bare?: boolean }) {
   const url = clubIconUrl(code);
   const club = getClub(code);
+  if (bare)
+    return url ? (
+      <img src={url} alt={club.name} className={className} style={{ width: size, height: size, objectFit: 'contain', maxWidth: 'none' }} />
+    ) : (
+      <Crest size={size * 0.8} className={className} />
+    );
   return (
     <span
       className={className}

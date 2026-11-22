@@ -48,9 +48,8 @@ const walkoutTier = (t: Tier) => t === 'PRIME_ICON' || t === 'SECRET_DEV';
 const RAINBOW = ['#f472b6', '#fbbf24', '#22d3ee', '#a78bfa', '#ffffff'];
 
 /** Flash fill: Elite pulls glow in the best card's era-label colour. */
-const FW_GAP = 650; // between rockets
-const FW_FLIGHT = 450; // rocket climb
-const FW_TOTAL = 2 * FW_GAP + FW_FLIGHT + 1100; // last tile lands, then a beat to read them
+const FW_GAP = 600; // between the comic bursts
+const FW_TOTAL = 2 * FW_GAP + 1300; // last burst lands, then a beat to read them
 const TILE_Y = 0.15; // tiles sit this far down the screen
 
 function flashColour(tier: Tier, best: PlayerCard | undefined) {
@@ -97,7 +96,6 @@ export function PackOpener({ packNumber, cards, packKey, selectedId, onSelect, r
   const secret = top === 'SECRET_DEV';
   const bestEra = best ? eraColour(best.era) : eraColour('SQUAD');
   // 86+ pulls: three fireworks, left to right, each bursting into a tile (position, club icon, flag).
-  const [rockets, setRockets] = useState(0);
   // Walkout flare: the sealed pack turns pearl holo and shakes for a moment before a Prime Icon or secret rare.
   const [flareShake, setFlareShake] = useState(false);
   const [tiles, setTiles] = useState(0);
@@ -106,14 +104,12 @@ export function PackOpener({ packNumber, cards, packKey, selectedId, onSelect, r
     const xs = [0.2, 0.5, 0.8];
     const colors = best!.tier === 'SECRET_DEV' ? RAINBOW : best!.tier === 'PRIME_ICON' ? ['#ffffff', '#e0f2fe', '#f9a8d4', '#fde68a'] : ['#facc15', '#fde68a', bestEra.mid, bestEra.light];
     xs.forEach((x, i) => {
+      // Each one explodes onto the screen like a comic-book POW!, no rocket.
       later(start + i * FW_GAP, () => {
-        setRockets(i + 1);
-        sfx.fireworkLaunch();
-      });
-      later(start + i * FW_GAP + FW_FLIGHT, () => {
         setTiles(i + 1);
         sfx.fireworkPop();
-        burstAt(window.innerWidth * x, window.innerHeight * TILE_Y, colors, 45);
+        shakeScreen('micro');
+        burstAt(window.innerWidth * x, window.innerHeight * TILE_Y, colors, 30);
       });
     });
   };
@@ -137,7 +133,6 @@ export function PackOpener({ packNumber, cards, packKey, selectedId, onSelect, r
     tearRef.current = 0;
     primeShown.current = false;
     setFlash(null);
-    setRockets(0);
     setTiles(0);
     setFlareShake(false);
   }, [packKey]);
@@ -363,22 +358,17 @@ export function PackOpener({ packNumber, cards, packKey, selectedId, onSelect, r
         </div>
       )}
 
-      {fireworksFor && best && (stage === 'tell' || stage === 'dimming') && rockets > 0 && (
+      {fireworksFor && best && (stage === 'tell' || stage === 'dimming') && tiles > 0 && (
         <div className="pointer-events-none fixed inset-0 z-[83]" aria-live="polite">
           {[0, 1, 2].map((i) => {
             const left = `${[20, 50, 80][i]}%`;
-            const prime = walkoutTier(best.tier);
-            const ring = best.tier === 'SECRET_DEV' ? RAINBOW[i] : prime ? '#ffffff' : bestEra.mid;
             return (
               <div key={i} className="absolute" style={{ left, top: `${TILE_Y * 100}%` }}>
-                {rockets > i && tiles <= i && (
-                  <span
-                    className="absolute block h-3 w-3 rounded-full"
-                    style={{ background: prime ? '#fff' : '#fde68a', boxShadow: `0 0 14px 5px ${ring}, 0 18px 18px -4px ${ring}`, animation: `rocket ${FW_FLIGHT}ms ease-out forwards` }}
-                  />
-                )}
                 {tiles > i && (
-                  <div className="absolute -translate-x-1/2 -translate-y-1/2 animate-pop">
+                  <div className="absolute -translate-x-1/2 -translate-y-1/2">
+                    <div className="comic-pop" style={{ ['--tilt' as string]: `${[-8, 5, -4][i]}deg` }}>
+                    {/* speed lines behind the burst */}
+                    <div className="comic-lines pointer-events-none absolute left-1/2 top-1/2 h-[230px] w-[230px] -translate-x-1/2 -translate-y-1/2" />
                     {i < 2 ? (
                       // POW! starburst for the position, then the club icon in a starburst
                       <div className="relative h-[112px] w-[112px] sm:h-[132px] sm:w-[132px]">
@@ -390,20 +380,22 @@ export function PackOpener({ packNumber, cards, packKey, selectedId, onSelect, r
                               <span className="font-display text-5xl leading-none text-ink sm:text-6xl">{best.positions[0]}</span>
                             </>
                           ) : (
-                            <ClubIcon code={best.club} size={64} />
+                            <ClubIcon code={best.club} size={84} bare />
                           )}
                         </div>
                       </div>
                     ) : (
-                      // the flag on a waving pennant
+                      // the whole flag as a waving pennant
                       <div className="pennant-wave relative flex items-start" style={{ filter: 'drop-shadow(5px 5px 0 #14183a)' }}>
-                        <span className="h-[128px] w-[6px] rounded-full border-2 border-ink bg-album-cream" />
-                        <div className="pennant flex h-[86px] w-[124px] flex-col items-start justify-center gap-1 bg-album-cream pl-3" style={{ border: '3px solid #14183a' }}>
-                          <Flag nation={best.nation} width={58} className="rounded-sm border-2 border-ink" />
-                          <span className="max-w-[80px] truncate font-chunky text-[11px] leading-none text-ink">{best.nation}</span>
+                        <span className="relative z-10 h-[132px] w-[7px] rounded-full border-2 border-ink bg-album-cream" />
+                        <div className="pennant relative -ml-0.5 mt-1 h-[92px] w-[138px] bg-ink">
+                          <div className="pennant absolute left-[3px] top-[5px] h-[82px] w-[124px] overflow-hidden">
+                            <Flag nation={best.nation} width={124} className="block" />
+                          </div>
                         </div>
                       </div>
                     )}
+                    </div>
                   </div>
                 )}
               </div>
