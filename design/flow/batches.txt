@@ -9,3 +9,4 @@
 140.jpg degea_david_1718,stam_jaap_9899,alexanderarnold_trent_1920,ozil_mesut_1516,silva_david_1112,kane_harry_1718,mane_sadio_1920,cantona_eric_9596
 152.jpg _skip1,kompany_vincent_1112,dias_ruben_2021,_skip2,_skip3,giggs_ryan_9899,_skip4,mahrez_riyad_1516
 153.jpg ederson_ederson_2021,_skip5,_skip6,saliba_william_2324,carvalho_ricardo_0405,_skip7,fowler_robbie_9596,_skip8
+154.jpg cech_petr_0910,_s1,_s2,_s3,_s4,_s5,_s6,_s7
