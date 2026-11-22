@@ -1,7 +1,7 @@
 import { AlertTriangle, ArrowLeftRight, Hand, Info, Link2, MousePointerClick, RefreshCw } from 'lucide-react';
 import { FORMATIONS, pitchY } from '../data/formations';
 import { MANAGERS_BY_ID } from '../data/managers';
-import { fitFor } from '../engine/chemistry';
+import { fitFor, neighbours } from '../engine/chemistry';
 import type { FormationId, Lineup, ManagerId, PlayerCard, TeamRating } from '../types/game';
 import { PlayerCardUI } from './PlayerCardUI';
 import { Pressable, useFinePointer } from './Pressable';
@@ -22,8 +22,12 @@ interface Props {
   compact?: boolean;
 }
 
-// Sticker-album colours: yellow club, blue nation, red decade, cream famous duo (dashed). Every link has a navy outline.
-const LINK_COLOR = { club: '#ffd400', nation: '#3d7bff', decade: '#e62e2d', duo: '#fff6e0' } as const;
+// Link lines: every possible link is drawn in faint grey; once two players link it fills with a colour
+// for how much chemistry it gives: weak (1) white, medium (2) orange, strong (3–4) green. Famous duos are striped.
+const STRENGTH_COLOR = ['', '#fff6e0', '#ff8a1f', '#2fd16a', '#2fd16a'] as const;
+const STRENGTH_LABEL = ['', 'Weak', 'Medium', 'Strong', 'Strong'] as const;
+const LINK_EMPTY = 'rgba(255,255,255,0.28)';
+const DUO_STRIPE = '#ffd400';
 const LINK_INK = '#14183a';
 const FIT_STYLE = {
   natural: 'border-emerald-400 bg-emerald-400/20 text-emerald-200',
@@ -96,26 +100,37 @@ export function TacticalPitch({ formationId, lineup, rating, managerId, pendingC
 
         {/* chemistry lines */}
         <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="pointer-events-none absolute inset-0 h-full w-full">
-          {rating.links.map((l) => {
-            const a = slotById[l.a];
-            const b = slotById[l.b];
-            if (!a || !b) return null;
-            const w = 3 + l.strength * 1.1; // px, thicker for stronger links
-            const pts = { x1: a.x, y1: pitchY(a.y), x2: b.x, y2: pitchY(b.y) };
-            return (
-              <g key={`${l.a}-${l.b}-${l.kind}`}>
-                <line {...pts} stroke={LINK_INK} strokeWidth={w + 4} strokeLinecap="round" vectorEffect="non-scaling-stroke" />
-                <line
-                  {...pts}
-                  stroke={LINK_COLOR[l.kind]}
-                  strokeWidth={w}
-                  strokeLinecap="round"
-                  strokeDasharray={l.kind === 'duo' ? '8 7' : undefined}
-                  vectorEffect="non-scaling-stroke"
-                />
-              </g>
-            );
-          })}
+          {(() => {
+            // total strength per neighbouring pair (all reasons added), and which pairs a famous duo covers
+            const key = (x: string, y: string) => (x < y ? `${x}|${y}` : `${y}|${x}`);
+            const strength: Record<string, number> = {};
+            const duo = new Set<string>();
+            rating.links.forEach((l) => {
+              const k = key(l.a, l.b);
+              if (l.kind === 'duo') duo.add(k);
+              else strength[k] = Math.max(strength[k] ?? 0, l.strength);
+            });
+            const pairs = neighbours(formation).map(([a, b]) => key(a, b));
+            const pairSet = new Set(pairs);
+            const all = [...pairs, ...[...duo].filter((k) => !pairSet.has(k))]; // a duo can link players who aren't neighbours
+            return all.map((k) => {
+              const [ia, ib] = k.split('|');
+              const a = slotById[ia];
+              const b = slotById[ib];
+              if (!a || !b) return null;
+              const isDuo = duo.has(k);
+              const lvl = Math.min(4, (strength[k] ?? 0) + (isDuo ? 3 : 0));
+              const pts = { x1: a.x, y1: pitchY(a.y), x2: b.x, y2: pitchY(b.y) };
+              if (!lvl) return <line key={k} {...pts} stroke={LINK_EMPTY} strokeWidth={4} strokeLinecap="round" vectorEffect="non-scaling-stroke" />;
+              return (
+                <g key={k}>
+                  <line {...pts} stroke={LINK_INK} strokeWidth={11} strokeLinecap="round" vectorEffect="non-scaling-stroke" />
+                  <line {...pts} stroke={STRENGTH_COLOR[lvl]} strokeWidth={7} strokeLinecap="round" vectorEffect="non-scaling-stroke" />
+                  {isDuo && <line {...pts} stroke={DUO_STRIPE} strokeWidth={7} strokeDasharray="6 6" vectorEffect="non-scaling-stroke" />}
+                </g>
+              );
+            });
+          })()}
         </svg>
 
         {formation.slots.map((slot) => {
@@ -167,11 +182,18 @@ export function TacticalPitch({ formationId, lineup, rating, managerId, pendingC
       {!compact && (
         <div className="flex flex-col gap-1.5 text-[11px]">
           <div className="flex flex-wrap items-center justify-center gap-3 font-bold text-ink/75">
-            <span className="flex items-center gap-1"><Link2 className="h-3 w-3" style={{ color: LINK_COLOR.club }} /> Club</span>
-            <span className="flex items-center gap-1"><Link2 className="h-3 w-3" style={{ color: LINK_COLOR.nation }} /> Nation</span>
-            <span className="flex items-center gap-1"><Link2 className="h-3 w-3" style={{ color: LINK_COLOR.decade }} /> Decade</span>
+            {[1, 2, 3].map((n) => (
+              <span key={n} className="flex items-center gap-1">
+                <span className="inline-block h-2 w-5 rounded-full border-2 border-ink" style={{ background: STRENGTH_COLOR[n] }} /> {STRENGTH_LABEL[n]}
+              </span>
+            ))}
+            <span className="flex items-center gap-1" title="Links add up: same club 2 (3 in the same decade), same nation +1, same decade +1, up to 4">
+              <Link2 className="h-3 w-3" /> club › nation › decade
+            </span>
             {rating.links.some((l) => l.kind === 'duo') && (
-              <span className="flex items-center gap-1 font-bold text-album-red"><Link2 className="h-3 w-3" style={{ color: LINK_COLOR.duo }} /> Famous duo</span>
+              <span className="flex items-center gap-1 font-bold text-album-red">
+                <span className="inline-block h-2 w-5 rounded-full border-2 border-ink" style={{ background: `repeating-linear-gradient(90deg, ${STRENGTH_COLOR[4]} 0 4px, ${DUO_STRIPE} 4px 8px)` }} /> Famous duo
+              </span>
             )}
             {fine ? (
               <span className="flex items-center gap-1"><MousePointerClick className="h-3 w-3" /> Click a player for stats &amp; Move</span>
