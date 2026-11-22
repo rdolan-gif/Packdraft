@@ -64,7 +64,7 @@ for y0, y1 in ys:
             idx = range(len(m) - 1, -1, -1) if rev else range(len(m))
             n = 0
             for i in idx:
-                if m[i] > 0.3:
+                if m[i] > 0.3 and n < 10:  # border lines are thin; never eat into a dark shirt
                     n += 1
                 else:
                     break
