@@ -1,7 +1,7 @@
 import { MANAGERS } from '../data/managers';
 import { PLAYERS } from '../data/players';
 import { DUOS, loadDuos } from '../data/duos';
-import { loadBook } from './stickerBook';
+import { ALBUM_CARDS, albumSection, loadBook } from './stickerBook';
 import { loadCareer } from './vault';
 import { dailyStreak, loadDaily } from './daily';
 import type { CareerStats, FormationId, Grade, ManagerId, PlayerCard, TableRow } from '../types/game';
@@ -44,7 +44,7 @@ export interface Progress {
   career: CareerStats;
   stickers: number;
   stickerTotal: number;
-  clubsComplete: number;
+  sectionsComplete: number;
   secretFound: boolean;
   duos: number;
   duoTotal: number;
@@ -80,7 +80,7 @@ const maxFromOneClub = (cards: PlayerCard[]) => {
   return Math.max(0, ...Object.values(n));
 };
 
-export const ALBUM_CARDS = PLAYERS.filter((p) => p.tier !== 'SECRET_DEV');
+export { ALBUM_CARDS };
 
 export const TROPHIES: Trophy[] = [
   // ── season
@@ -131,7 +131,7 @@ export const TROPHIES: Trophy[] = [
     test: (p) => p.stickers >= n, progress: (p) => [Math.min(p.stickers, n), n],
   })),
   { id: 'stickers_all', category: 'collection', emoji: '📕', title: 'Complete Album', desc: 'Collect every sticker in the album.', test: (p) => p.stickers >= p.stickerTotal, progress: (p) => [p.stickers, p.stickerTotal] },
-  { id: 'club_complete', category: 'collection', emoji: '🧩', title: 'Full Set', desc: "Complete a club's pages in the album.", test: (p) => p.clubsComplete >= 1 },
+  { id: 'club_complete', category: 'collection', emoji: '🧩', title: 'Full Set', desc: 'Complete a section of the album.', test: (p) => p.sectionsComplete >= 1 },
   { id: 'secret_rare', category: 'collection', emoji: '🌈', title: 'Classified', desc: 'Find a secret rare.', secret: true, test: (p) => p.secretFound },
 
   // ── duos
@@ -179,9 +179,9 @@ export const unlockedTrophies = () => load().unlocked;
 export function readProgress(store = load()): Progress {
   const book = loadBook();
   const stickers = ALBUM_CARDS.filter((c) => book.pulled[c.id]).length;
-  const byClub: Record<string, { have: number; total: number }> = {};
+  const bySection: Record<string, { have: number; total: number }> = {};
   ALBUM_CARDS.forEach((c) => {
-    const e = (byClub[c.club] ??= { have: 0, total: 0 });
+    const e = (bySection[albumSection(c)] ??= { have: 0, total: 0 });
     e.total++;
     if (book.pulled[c.id]) e.have++;
   });
@@ -191,7 +191,7 @@ export function readProgress(store = load()): Progress {
     career: loadCareer(),
     stickers,
     stickerTotal: ALBUM_CARDS.length,
-    clubsComplete: Object.values(byClub).filter((c) => c.have === c.total).length,
+    sectionsComplete: Object.values(bySection).filter((c) => c.have === c.total).length,
     secretFound: PLAYERS.some((c) => c.tier === 'SECRET_DEV' && book.pulled[c.id]),
     duos: Object.keys(loadDuos()).length,
     duoTotal: DUOS.length,

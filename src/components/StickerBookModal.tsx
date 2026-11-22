@@ -1,34 +1,30 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { ChevronLeft, ChevronRight, X } from 'lucide-react';
 import { PLAYERS, PLAYERS_BY_ID } from '../data/players';
-import { CLUBS, getClub } from '../data/clubs';
+import { getClub } from '../data/clubs';
 import { eraColour } from '../data/eraColours';
 import { BORN, ageInSeason } from '../data/births';
 import { TIER_RANK } from '../engine/packGenerator';
-import { loadBook } from '../engine/stickerBook';
+import { ALBUM_CARDS, ALBUM_SECTIONS, albumSection, loadBook, type AlbumSection } from '../engine/stickerBook';
 import { sfx } from '../engine/soundEffects';
-import type { Club, PlayerCard, Position, Tier } from '../types/game';
+import type { PlayerCard, Tier } from '../types/game';
 import { PlayerCaricature } from './PlayerCaricature';
 import { PlayerCardUI } from './PlayerCardUI';
 import { Flag } from './Flag';
 import { collarForSeason, kitForCard } from '../data/kits';
 import { devTheme } from '../data/devThemes';
 import { DevScene } from './DevScene';
+import { portraitUrl } from '../data/portraits';
 
-// A retro football sticker album that always fits the screen. Each club runs across as many pages as
-// it needs: its first (left-hand) page carries the club banner and 3 rows of stickers, every page after
-// that holds 4 rows. Stickers are ordered by position, then rarity. Tap a sticker for its card profile.
+// A retro football sticker album that always fits the screen. It holds rare pulls only (Elite, gold and
+// Prime Icons), in themed sections: Holo Heroes, Golden Greats by decade, then the Elite labels. Each
+// section's first (left-hand) page carries its banner; stickers run best first. Tap one for its card.
 
-const POSITION_ORDER: Position[] = ['GK', 'RB', 'CB', 'LB', 'CDM', 'CM', 'CAM', 'RM', 'LM', 'RW', 'LW', 'ST'];
-const GROUP_NAME: Record<Position, string> = {
-  GK: 'Goalkeepers', RB: 'Right-backs', CB: 'Centre-backs', LB: 'Left-backs', CDM: 'Holding mids', CM: 'Central mids',
-  CAM: 'Playmakers', RM: 'Right mids', LM: 'Left mids', RW: 'Right wing', LW: 'Left wing', ST: 'Strikers',
-};
-const TIERS: Tier[] = ['PRIME_ICON', 'RISING_WORLD', 'ELITE', 'STANDARD'];
+const TIERS: Tier[] = ['PRIME_ICON', 'RISING_WORLD', 'ELITE'];
 const TIER_NAME: Record<Tier, string> = { PRIME_ICON: 'Prime holo', RISING_WORLD: 'Gold foil', ELITE: 'Elite colour', STANDARD: 'Squad', SECRET_DEV: 'Secret rare' };
 const TIER_ODDS: Record<Tier, string> = { PRIME_ICON: '2% of pack cards', RISING_WORLD: '8.5% of pack cards', ELITE: '26% of pack cards', STANDARD: '63.5% of pack cards', SECRET_DEV: 'Classified' };
 // Secret dev cards are an easter egg: they're kept out of every count and page until you've pulled one.
-const ALBUM = PLAYERS.filter((p) => p.tier !== 'SECRET_DEV');
+const ALBUM = ALBUM_CARDS;
 const SECRETS = PLAYERS.filter((p) => p.tier === 'SECRET_DEV');
 // Showcase switch: while true, every dev card shows in the Secret Files as if pulled. Set to false to hide them again.
 const SHOW_ALL_SECRETS = true;
@@ -43,10 +39,10 @@ const pct = (a: number, b: number) => (b ? Math.floor((a / b) * 100) : 0);
 const hash = (s: string) => [...s].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) | 0, 7);
 const tilt = (id: string) => ((Math.abs(hash(id)) % 50) - 25) / 10; // -2.5..2.5 deg
 
-type Cell = { kind: 'label'; pos: Position } | { kind: 'card'; card: PlayerCard } | { kind: 'honour'; card: PlayerCard; count: number } | { kind: 'secret'; card: PlayerCard } | { kind: 'gap' };
+type Cell = { kind: 'card'; card: PlayerCard } | { kind: 'honour'; card: PlayerCard; count: number } | { kind: 'secret'; card: PlayerCard } | { kind: 'gap' };
 type Page =
   | { kind: 'contents'; part: 0 | 1 }
-  | { kind: 'club'; code: string; part: number; parts: number; cells: Cell[] }
+  | { kind: 'section'; id: string; part: number; parts: number; cells: Cell[] }
   | { kind: 'honours'; part: number; parts: number; cells: Cell[] }
   | { kind: 'secret'; part: number; parts: number; cells: Cell[] }
   | { kind: 'blank'; label: string };
@@ -112,22 +108,6 @@ function paginate(cells: Cell[], cols: number, bannerRows: number, rows: number)
   return out;
 }
 
-/**
- * A club's cells, row by row: every position group starts at the left of a new row with its printed
- * label, and the rest of its last row is left blank. Rows are always full, so pages break between rows.
- */
-function clubCells(cards: PlayerCard[], cols: number): Cell[] {
-  const cells: Cell[] = [];
-  POSITION_ORDER.forEach((pos) => {
-    const group = cards.filter((c) => c.positions[0] === pos);
-    if (!group.length) return;
-    cells.push({ kind: 'label', pos });
-    group.forEach((card) => cells.push({ kind: 'card', card }));
-    while (cells.length % cols) cells.push({ kind: 'gap' });
-  });
-  return cells;
-}
-
 // ───────────────────────────── the album ─────────────────────────────
 
 export function StickerBookModal({ onClose }: { onClose: () => void }) {
@@ -136,24 +116,19 @@ export function StickerBookModal({ onClose }: { onClose: () => void }) {
   const layout = useLayout();
   const [profile, setProfile] = useState<PlayerCard | null>(null);
 
-  // club -> its cards, ordered by position, then rarity (best first), then OVR; numbered through the album
-  const { clubs, byClub, numberOf } = useMemo(() => {
+  // section -> its cards, best first; numbered through the album in section order
+  const { sections, bySection, numberOf } = useMemo(() => {
     const m = new Map<string, PlayerCard[]>();
-    ALBUM.forEach((p) => m.set(p.club, [...(m.get(p.club) ?? []), p]));
-    m.forEach((cards) =>
-      cards.sort(
-        (a, b) =>
-          POSITION_ORDER.indexOf(a.positions[0]) - POSITION_ORDER.indexOf(b.positions[0]) ||
-          TIER_RANK[b.tier] - TIER_RANK[a.tier] ||
-          b.ovr - a.ovr ||
-          a.season.localeCompare(b.season),
-      ),
-    );
-    const list = Object.values(CLUBS).filter((c) => m.has(c.code)).sort((a, b) => a.name.localeCompare(b.name));
+    ALBUM.forEach((p) => {
+      const k = albumSection(p);
+      m.set(k, [...(m.get(k) ?? []), p]);
+    });
+    m.forEach((cards) => cards.sort((a, b) => b.ovr - a.ovr || TIER_RANK[b.tier] - TIER_RANK[a.tier] || a.shortName.localeCompare(b.shortName) || a.season.localeCompare(b.season)));
+    const list = ALBUM_SECTIONS.filter((x) => m.has(x.id));
     const num: Record<string, number> = {};
     let n = 0;
-    list.forEach((c) => m.get(c.code)!.forEach((p) => (num[p.id] = ++n)));
-    return { clubs: list, byClub: m, numberOf: num };
+    list.forEach((x) => m.get(x.id)!.forEach((p) => (num[p.id] = ++n)));
+    return { sections: list, bySection: m, numberOf: num };
   }, []);
 
   const totw = useMemo(
@@ -173,11 +148,12 @@ export function StickerBookModal({ onClose }: { onClose: () => void }) {
     const startLeft = (label: string) => {
       if (layout.twoUp && pages.length % 2 === 1) pages.push({ kind: 'blank', label });
     };
-    clubs.forEach((c) => {
+    sections.forEach((x) => {
       startLeft('AUTOGRAPHS');
-      firstPageOf[c.code] = pages.length;
-      const parts = paginate(clubCells(byClub.get(c.code)!, layout.cols), layout.cols, layout.bannerRows, layout.rows);
-      parts.forEach((cells, part) => pages.push({ kind: 'club', code: c.code, part, parts: parts.length, cells }));
+      firstPageOf[x.id] = pages.length;
+      const cells = bySection.get(x.id)!.map((card) => ({ kind: 'card' as const, card }));
+      const parts = paginate(cells, layout.cols, layout.bannerRows, layout.rows);
+      parts.forEach((part, i) => pages.push({ kind: 'section', id: x.id, part: i, parts: parts.length, cells: part }));
     });
     startLeft('AUTOGRAPHS');
     firstPageOf['__honours'] = pages.length;
@@ -200,7 +176,7 @@ export function StickerBookModal({ onClose }: { onClose: () => void }) {
     const views: number[][] = [[-1]]; // -1 = the cover
     for (let i = 0; i < pages.length; i += layout.twoUp ? 2 : 1) views.push(layout.twoUp ? [i, i + 1] : [i]);
     return { pages, views, firstPageOf };
-  }, [clubs, byClub, totw, book, layout.twoUp, layout.cols, layout.rows, layout.bannerRows]);
+  }, [sections, bySection, totw, book, layout.twoUp, layout.cols, layout.rows, layout.bannerRows]);
 
   const [view, setView] = useState(0);
   const anchor = useRef<number>(-1); // first page on screen, so a resize keeps your place
@@ -241,7 +217,7 @@ export function StickerBookModal({ onClose }: { onClose: () => void }) {
   const got = ALBUM.filter(has).length;
   const shown = views[view] ?? [-1];
   const firstShown = shown[0] >= 0 ? pages[shown[0]] : null;
-  const currentClub = firstShown?.kind === 'club' ? firstShown.code : '';
+  const currentSection = firstShown?.kind === 'section' ? firstShown.id : '';
 
   const openProfile = (c: PlayerCard) => {
     sfx.select();
@@ -252,37 +228,37 @@ export function StickerBookModal({ onClose }: { onClose: () => void }) {
     const p = pages[i];
     const pageNo = i + 2;
     if (!p) return <PaperPage key={`x${i}`} side={side} layout={layout} />;
-    if (p.kind === 'contents') return <ContentsPage key={i} part={p.part} side={side} layout={layout} pageNo={pageNo} clubs={clubs} byClub={byClub} has={has} got={got} total={total} firstPageOf={firstPageOf} goPage={goPage} />;
+    if (p.kind === 'contents') return <ContentsPage key={i} part={p.part} side={side} layout={layout} pageNo={pageNo} sections={sections} bySection={bySection} has={has} got={got} total={total} firstPageOf={firstPageOf} goPage={goPage} />;
     if (p.kind === 'blank')
       return (
         <PaperPage key={i} side={side} layout={layout} pageNo={pageNo}>
           <div className="flex h-full items-center justify-center font-display text-3xl text-[#c9bb98]">{p.label}</div>
         </PaperPage>
       );
-    if (p.kind === 'club') {
-      const club = getClub(p.code);
-      const cards = byClub.get(p.code)!;
+    if (p.kind === 'section') {
+      const sec = sections.find((x) => x.id === p.id)!;
+      const cards = bySection.get(p.id)!;
       return (
         <PaperPage key={i} side={side} layout={layout} pageNo={pageNo}>
-          {p.part === 0 ? <ClubBanner club={club} got={cards.filter(has).length} total={cards.length} /> : <RunningHeader club={club} part={p.part} parts={p.parts} />}
-          <Grid layout={layout} cells={p.cells} club={club} has={has} drafted={book.drafted} numberOf={numberOf} onOpen={openProfile} />
+          {p.part === 0 ? <SectionBanner section={sec} got={cards.filter(has).length} total={cards.length} /> : <RunningHeader title={sec.title} colour={sec.colour} part={p.part} parts={p.parts} />}
+          <Grid layout={layout} cells={p.cells} has={has} drafted={book.drafted} numberOf={numberOf} onOpen={openProfile} />
         </PaperPage>
       );
     }
     if (p.kind === 'secret')
       return (
         <PaperPage key={i} side={side} layout={layout} pageNo={pageNo}>
-          {p.part === 0 ? <SecretBanner count={p.cells.length} /> : <RunningHeader club={null} part={p.part} parts={p.parts} />}
-          <Grid layout={layout} cells={p.cells} club={null} has={has} drafted={book.drafted} numberOf={numberOf} onOpen={openProfile} />
+          {p.part === 0 ? <SecretBanner count={p.cells.length} /> : <RunningHeader title="SECRET FILES" colour="#111827" part={p.part} parts={p.parts} />}
+          <Grid layout={layout} cells={p.cells} has={has} drafted={book.drafted} numberOf={numberOf} onOpen={openProfile} />
         </PaperPage>
       );
     return (
       <PaperPage key={i} side={side} layout={layout} pageNo={pageNo}>
-        {p.part === 0 ? <HonoursBanner count={totw.length} /> : <RunningHeader club={null} part={p.part} parts={p.parts} />}
+        {p.part === 0 ? <HonoursBanner count={totw.length} /> : <RunningHeader title="HALL OF FAME" colour="#111827" part={p.part} parts={p.parts} />}
         {p.cells.length === 0 ? (
           <div className="mt-10 px-6 text-center text-sm text-[#6b5b45]">Every time one of your players makes a Team of the Week, he earns a foil sticker here. They're a bonus: they don't count towards completing the album.</div>
         ) : (
-          <Grid layout={layout} cells={p.cells} club={null} has={has} drafted={book.drafted} numberOf={numberOf} onOpen={openProfile} />
+          <Grid layout={layout} cells={p.cells} has={has} drafted={book.drafted} numberOf={numberOf} onOpen={openProfile} />
         )}
       </PaperPage>
     );
@@ -304,17 +280,17 @@ export function StickerBookModal({ onClose }: { onClose: () => void }) {
             Contents
           </button>
           <select
-            value={currentClub}
+            value={currentSection}
             onChange={(e) => goPage(firstPageOf[e.target.value])}
             className="min-w-0 max-w-[34vw] rounded-lg border-0 bg-black/40 px-2 py-1.5 text-xs font-bold text-amber-100 sm:max-w-none"
-            aria-label="Jump to club"
+            aria-label="Jump to section"
           >
             <option value="" disabled>
-              Jump to club…
+              Jump to section…
             </option>
-            {clubs.map((c) => (
-              <option key={c.code} value={c.code}>
-                {c.name}
+            {sections.map((x) => (
+              <option key={x.id} value={x.id}>
+                {x.title}
               </option>
             ))}
           </select>
@@ -418,18 +394,17 @@ function PaperPage({ children, side, pageNo, layout }: { children?: ReactNode; s
   );
 }
 
-function ClubBanner({ club, got, total }: { club: Club; got: number; total: number }) {
+function SectionBanner({ section, got, total }: { section: AlbumSection; got: number; total: number }) {
   return (
-    <div className="relative mb-2 shrink-0 overflow-hidden rounded-md px-3 py-2 text-white" style={{ background: club.primary }}>
-      <div className="pointer-events-none absolute inset-0 opacity-30" style={{ background: `repeating-linear-gradient(115deg, ${club.secondary} 0 10px, transparent 10px 26px)` }} />
+    <div className="relative mb-2 shrink-0 overflow-hidden rounded-md px-3 py-2 text-white" style={{ background: section.colour }}>
+      {section.finish && <div className={`${section.finish === 'holo' ? 'foil-holo' : 'foil-gold'} pointer-events-none absolute inset-0 opacity-45`} />}
+      <div className="pointer-events-none absolute inset-0 opacity-25" style={{ background: 'repeating-conic-gradient(from 0deg at 85% 50%, rgba(255,255,255,.5) 0 8deg, transparent 8deg 16deg)' }} />
       <div className="pointer-events-none absolute inset-0 opacity-25" style={{ background: 'radial-gradient(rgba(0,0,0,.6) 1.2px, transparent 1.5px) 0 0/5px 5px' }} />
-      <div className="relative flex items-center gap-3">
-        <ClubFoil club={club} />
-        <div className="min-w-0">
-          <div className="truncate font-display text-3xl leading-[0.9] drop-shadow-[0_2px_0_rgba(0,0,0,.45)] sm:text-4xl">{club.name.toUpperCase()}</div>
-          <div className="mt-1 inline-block rounded bg-black/45 px-1.5 text-[11px] font-black tracking-wider">
-            {got} / {total} STICKERS {got === total && '· COMPLETE ★'}
-          </div>
+      <div className="relative min-w-0">
+        <div className="truncate font-display text-3xl leading-[0.9] drop-shadow-[0_2px_0_rgba(0,0,0,.45)] sm:text-4xl">{section.title}</div>
+        <div className="mt-1 text-[11px] font-bold text-white/90">{section.blurb}</div>
+        <div className="mt-1 inline-block rounded bg-black/45 px-1.5 text-[11px] font-black tracking-wider">
+          {got} / {total} STICKERS {got === total && '· COMPLETE ★'}
         </div>
       </div>
     </div>
@@ -460,26 +435,25 @@ function SecretBanner({ count }: { count: number }) {
   );
 }
 
-/** Small header on a club's follow-on pages, like a real album's running head. */
-function RunningHeader({ club, part, parts }: { club: Club | null; part: number; parts: number }) {
+/** Small header on a section's follow-on pages, like a real album's running head. */
+function RunningHeader({ title, colour, part, parts }: { title: string; colour: string; part: number; parts: number }) {
   return (
-    <div className="mb-2 flex h-[26px] shrink-0 items-center gap-2 border-b-2 pb-1" style={{ borderColor: club?.primary ?? '#111827' }}>
-      <span className="h-3.5 w-3.5 rounded-sm border border-black/30" style={{ background: club ? `linear-gradient(135deg, ${club.primary} 50%, ${club.secondary} 50%)` : '#111827' }} />
-      <span className="font-display text-lg leading-none">{club ? club.name.toUpperCase() : 'HALL OF FAME'}</span>
-      <span className="ml-auto text-[10px] font-bold uppercase tracking-widest text-[#8a7a60]">
+    <div className="mb-2 flex h-[26px] shrink-0 items-center gap-2 border-b-2 pb-1" style={{ borderColor: colour }}>
+      <span className="h-3.5 w-3.5 rounded-sm border border-black/30" style={{ background: colour }} />
+      <span className="truncate font-display text-lg leading-none">{title}</span>
+      <span className="ml-auto shrink-0 text-[10px] font-bold uppercase tracking-widest text-[#8a7a60]">
         Page {part + 1} of {parts}
       </span>
     </div>
   );
 }
 
-function Grid({ layout, cells, club, has, drafted, numberOf, onOpen }: { layout: Layout; cells: Cell[]; club: Club | null; has: (c: PlayerCard) => boolean; drafted: Record<string, number>; numberOf: Record<string, number>; onOpen: (c: PlayerCard) => void }) {
+function Grid({ layout, cells, has, drafted, numberOf, onOpen }: { layout: Layout; cells: Cell[]; has: (c: PlayerCard) => boolean; drafted: Record<string, number>; numberOf: Record<string, number>; onOpen: (c: PlayerCard) => void }) {
   const w = BASE_W * layout.scale;
   return (
     <div className="grid content-start justify-center" style={{ gridTemplateColumns: `repeat(${layout.cols}, ${w}px)`, columnGap: GAP, rowGap: GAP }}>
       {cells.map((cell, i) => {
         if (cell.kind === 'gap') return <div key={`g${i}`} style={{ width: w }} aria-hidden="true" />;
-        if (cell.kind === 'label') return <PositionLabel key={`l${cell.pos}${i}`} pos={cell.pos} scale={layout.scale} colour={club?.primary ?? INK} />;
         if (cell.kind === 'secret')
           return (
             <Scaled key={cell.card.id} scale={layout.scale} label={undefined}>
@@ -515,19 +489,6 @@ function Scaled({ scale, children, label }: { scale: number; children: ReactNode
   );
 }
 
-/** A printed box introducing each position group. */
-function PositionLabel({ pos, scale, colour }: { pos: Position; scale: number; colour: string }) {
-  return (
-    <div style={{ width: BASE_W * scale, height: BASE_H * scale }} className="flex flex-col items-center justify-center rounded-[4px] border-2 border-dashed text-center" aria-label={GROUP_NAME[pos]}>
-      <div className="font-display leading-none" style={{ fontSize: 30 * scale, color: colour }}>
-        {pos}
-      </div>
-      <div className="font-black uppercase leading-tight text-[#6b5b45]" style={{ fontSize: Math.max(7, 9 * scale) }}>
-        {GROUP_NAME[pos]}
-      </div>
-    </div>
-  );
-}
 
 function Cover({ got, total, book, height, onOpen }: { got: number; total: number; book: ReturnType<typeof loadBook>; height: number; onOpen: () => void }) {
   const best = PLAYERS.filter((p) => book.pulled[p.id])
@@ -589,13 +550,13 @@ function Cover({ got, total, book, height, onOpen }: { got: number; total: numbe
 }
 
 function ContentsPage({
-  part, side, layout, pageNo, clubs, byClub, has, got, total, firstPageOf, goPage,
+  part, side, layout, pageNo, sections, bySection, has, got, total, firstPageOf, goPage,
 }: {
-  part: 0 | 1; side: 'left' | 'right'; layout: Layout; pageNo: number; clubs: Club[]; byClub: Map<string, PlayerCard[]>; has: (c: PlayerCard) => boolean;
+  part: 0 | 1; side: 'left' | 'right'; layout: Layout; pageNo: number; sections: AlbumSection[]; bySection: Map<string, PlayerCard[]>; has: (c: PlayerCard) => boolean;
   got: number; total: number; firstPageOf: Record<string, number>; goPage: (p: number) => void;
 }) {
-  const half = Math.ceil(clubs.length / 2);
-  const list = part === 0 ? clubs.slice(0, half) : clubs.slice(half);
+  const half = Math.ceil(sections.length / 2);
+  const list = part === 0 ? sections.slice(0, half) : sections.slice(half);
   const tierCount = (t: Tier) => {
     const all = PLAYERS.filter((p) => p.tier === t);
     return `${all.filter(has).length}/${all.length}`;
@@ -605,25 +566,25 @@ function ContentsPage({
       {part === 0 ? (
         <div className="mb-1 shrink-0">
           <div className="font-display text-4xl leading-none">CONTENTS</div>
-          <div className="text-xs text-[#6b5b45]">Every club, in order. Tap one to turn to its page.</div>
+          <div className="text-xs text-[#6b5b45]">Rare pulls only: Elite, gold and holo. Tap a section to turn to it.</div>
         </div>
       ) : (
         <div className="mb-1 h-[52px] shrink-0" />
       )}
       {/* rows share the page height evenly so the list always fits */}
       <div className="flex min-h-0 flex-1 flex-col">
-        {list.map((c) => {
-          const cards = byClub.get(c.code)!;
+        {list.map((x) => {
+          const cards = bySection.get(x.id)!;
           const h = cards.filter(has).length;
           return (
-            <button key={c.code} onClick={() => goPage(firstPageOf[c.code])} className="flex min-h-0 flex-1 items-center gap-2 border-b border-dotted border-[#b9a988] text-left text-[13px] leading-none hover:bg-[#e8dcbf]">
-              <span className="h-3 w-3 shrink-0 rounded-sm border border-black/30" style={{ background: `linear-gradient(135deg, ${c.primary} 50%, ${c.secondary} 50%)` }} />
-              <span className="min-w-0 flex-1 truncate font-bold">{c.name}</span>
+            <button key={x.id} onClick={() => goPage(firstPageOf[x.id])} className="flex min-h-0 max-h-12 flex-1 items-center gap-2 border-b border-dotted border-[#b9a988] text-left text-[13px] leading-none hover:bg-[#e8dcbf]">
+              <span className={`h-3 w-3 shrink-0 rounded-sm border border-black/30 ${x.finish === 'holo' ? 'foil-holo' : x.finish === 'gold' ? 'foil-gold' : ''}`} style={x.finish ? undefined : { background: x.colour }} />
+              <span className="min-w-0 flex-1 truncate font-bold">{x.title}</span>
               {h === cards.length && <span className="rounded bg-[#2b2118] px-1 text-[9px] font-black text-yellow-300">COMPLETE</span>}
               <span className="tabular-nums text-xs text-[#6b5b45]">
                 {h}/{cards.length}
               </span>
-              <span className="w-7 text-right font-display text-base">{firstPageOf[c.code] + 2}</span>
+              <span className="w-7 text-right font-display text-base">{firstPageOf[x.id] + 2}</span>
             </button>
           );
         })}
@@ -634,7 +595,7 @@ function ContentsPage({
           <div className="mt-1 grid grid-cols-2 gap-x-4 gap-y-0.5 text-[11px]">
             {TIERS.map((t) => (
               <div key={t} className="flex items-center gap-2">
-                <span className={`h-3.5 w-2.5 rounded-[2px] ${t === 'PRIME_ICON' ? 'foil-holo' : t === 'RISING_WORLD' ? 'foil-gold' : ''}`} style={t === 'ELITE' ? { background: '#3b82f6' } : t === 'STANDARD' ? { background: '#94a3b8' } : undefined} />
+                <span className={`h-3.5 w-2.5 rounded-[2px] ${t === 'PRIME_ICON' ? 'foil-holo' : t === 'RISING_WORLD' ? 'foil-gold' : ''}`} style={t === 'ELITE' ? { background: '#3b82f6' } : undefined} />
                 <span className="font-bold">{TIER_NAME[t]}</span>
                 <span className="ml-auto tabular-nums text-[#6b5b45]">{tierCount(t)}</span>
               </div>
@@ -651,19 +612,6 @@ function ContentsPage({
 
 // ───────────────────────────── stickers ─────────────────────────────
 
-function ClubFoil({ club }: { club: Club }) {
-  return (
-    <div className="foil-silver relative flex h-14 w-12 shrink-0 items-center justify-center rounded-[3px] border-2 border-white shadow-md" title="Club foil">
-      <svg viewBox="0 0 40 46" className="h-11 w-10 drop-shadow">
-        <path d="M20 2 L37 8 V22 C37 33 29 40 20 44 C11 40 3 33 3 22 V8 Z" fill={club.primary} stroke={club.accent} strokeWidth="2.5" />
-        <path d="M20 2 L37 8 V22 C37 33 29 40 20 44 Z" fill={club.secondary} opacity=".35" />
-        <text x="20" y="28" textAnchor="middle" fontSize="11" fontWeight="900" fill={club.secondary} style={{ fontFamily: "'Saira Extra Condensed', Impact, sans-serif" }}>
-          {club.short}
-        </text>
-      </svg>
-    </div>
-  );
-}
 
 /** A collected sticker: white border, portrait on a club-colour panel, name strip, finish by rarity. */
 function Sticker({ card, drafted, totw, onClick }: { card: PlayerCard; drafted?: number; totw?: number; onClick?: () => void }) {
@@ -690,9 +638,13 @@ function Sticker({ card, drafted, totw, onClick }: { card: PlayerCard; drafted?:
             <div className="absolute inset-0" style={{ background: `linear-gradient(180deg, ${club.primary} 0%, ${club.primary} 62%, ${club.secondary} 62%)` }} />
           )}
           <div className="absolute inset-0 opacity-25" style={{ background: 'radial-gradient(rgba(255,255,255,.6) 1px, transparent 1.3px) 0 0/4px 4px' }} />
+          {portraitUrl(card.id) ? (
+            <img src={portraitUrl(card.id)} alt="" draggable={false} className="absolute bottom-3 left-1/2 w-[64px] max-w-none -translate-x-1/2" />
+          ) : (
           <div className="absolute left-1/2 top-2 -translate-x-1/2">
             <PlayerCaricature traits={card.traits} kitPrimaryColor={club.primary} kitSecondaryColor={club.secondary} kitSleeveColor={club.sleeve} kitCollarColor={club.collar} collarStyle={collarForSeason(card.season)} kit={kitForCard(card, theme?.fanClub)} seed={card.id} size={60} />
           </div>
+          )}
           <div className="absolute left-0.5 top-0.5 rounded-sm bg-black/60 px-0.5 text-[7px] font-black leading-tight text-white">{theme ? theme.emoji : card.season}</div>
           <div className="absolute right-0.5 top-0.5 rounded-sm bg-white/85 px-0.5 font-display text-[10px] leading-tight text-black">{card.ovr}</div>
           <div className="absolute inset-x-0 bottom-0 bg-white px-0.5 py-[1px] text-center">

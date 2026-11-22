@@ -19,7 +19,7 @@ import { discoverDuos, DUOS } from './data/duos';
 import { positionHistory } from './engine/scoutVerdict';
 import { shareText } from './engine/share';
 import { recordHistory, type RunPlayer } from './engine/history';
-import { isPulled, recordDrafted, recordPulled } from './engine/stickerBook';
+import { inAlbum, isPulled, recordDrafted, recordPulled } from './engine/stickerBook';
 import { MANAGERS, MANAGERS_BY_ID } from './data/managers';
 import { FORMATIONS } from './data/formations';
 import { PLAYERS, PLAYERS_BY_ID } from './data/players';
@@ -124,7 +124,7 @@ export default function App() {
   const dealPack = useCallback(
     (num: number, lu: Lineup, draftedIds: Set<string>, f: FormationId, rng: () => number = Math.random) => {
       const cards = generatePack({ packNumber: num, pool: PLAYERS, draftedBaseIds: draftedIds, formationId: f, lineup: lu, rng });
-      setNewIds(new Set(cards.filter((c) => !isPulled(c.id)).map((c) => c.id)));
+      setNewIds(new Set(cards.filter((c) => inAlbum(c) && !isPulled(c.id)).map((c) => c.id)));
       setPackCards(cards);
       setPackKey((k) => k + 1);
       setSelected(null);

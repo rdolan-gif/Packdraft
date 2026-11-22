@@ -3,6 +3,9 @@
 // - "drafted": you picked it into your XI (earns a gold star on the sticker)
 // - "totw": Team of the Week honours (a separate bonus page, not part of completion)
 
+import type { PlayerCard } from '../types/game';
+import { PLAYERS } from '../data/players';
+
 const KEY = 'pd38_stickers_v1';
 
 export interface StickerBook {
@@ -62,4 +65,48 @@ export function recordTotw(ids: string[]) {
 
 export function isPulled(id: string) {
   return !!loadBook().pulled[id];
+}
+
+// ───────────────────────────── what goes in the album ─────────────────────────────
+
+
+/** The album holds rare pulls only: Elite (81+), gold, Prime Icons. Squad cards and secret rares (own pages) stay out. */
+export const inAlbum = (c: PlayerCard) => c.tier === 'ELITE' || c.tier === 'RISING_WORLD' || c.tier === 'PRIME_ICON';
+
+export const ALBUM_CARDS = PLAYERS.filter(inAlbum);
+
+export interface AlbumSection {
+  id: string;
+  title: string;
+  blurb: string;
+  /** Banner colour and finish. */
+  colour: string;
+  finish?: 'holo' | 'gold';
+}
+
+const DECADES: [string, string][] = [
+  ['1990s', 'THE 90s'],
+  ['2000s', 'THE 00s'],
+  ['2010s', 'THE 10s'],
+  ['2020s', 'THE 20s'],
+];
+
+/** Album sections in page order. Gold and Cult Heroes are big, so they're split by decade. */
+export const ALBUM_SECTIONS: AlbumSection[] = [
+  { id: 'holo', title: 'HOLO HEROES', blurb: 'Prime Icons, 91+. The shiniest stickers in the book.', colour: '#e62e2d', finish: 'holo' },
+  ...DECADES.map(([d, name]) => ({ id: `gold-${d}`, title: `GOLDEN GREATS: ${name}`, blurb: 'Gold foil, rated 86–90.', colour: '#a97a1f', finish: 'gold' as const })),
+  { id: 'WORLD CLASS', title: 'WORLD CLASS', blurb: 'Elite stickers at the top of their game.', colour: '#2563eb' },
+  { id: 'RISING STAR', title: 'RISING STARS', blurb: 'Elite stickers from breakthrough seasons.', colour: '#10b981' },
+  { id: 'PRIME', title: 'PRIME TIME', blurb: 'Elite stickers from career-best seasons.', colour: '#db2777' },
+  { id: 'LEGEND', title: 'LEGENDS', blurb: 'Elite stickers from the farewell tours.', colour: '#a0522d' },
+  { id: 'VETERAN', title: 'OLD HANDS', blurb: 'Elite veterans who still had it.', colour: '#8b5cf6' },
+  ...DECADES.map(([d, name]) => ({ id: `CULT HERO-${d}`, title: `CULT HEROES OF ${name}`, blurb: 'Elite stickers the fans still sing about.', colour: '#dc2626' })),
+  { id: 'SQUAD', title: 'SQUAD STALWARTS', blurb: 'Elite stickers from steady seasons.', colour: '#64748b' },
+];
+
+export function albumSection(c: PlayerCard): string {
+  if (c.tier === 'PRIME_ICON') return 'holo';
+  if (c.tier === 'RISING_WORLD') return `gold-${c.decade}`;
+  if (c.era === 'CULT HERO') return `CULT HERO-${c.decade}`;
+  return ALBUM_SECTIONS.some((s) => s.id === c.era) ? c.era : 'SQUAD';
 }
