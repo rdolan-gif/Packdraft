@@ -8,13 +8,8 @@ import { TIER_RANK } from '../engine/packGenerator';
 import { ALBUM_CARDS, ALBUM_SECTIONS, albumSection, loadBook, type AlbumSection } from '../engine/stickerBook';
 import { sfx } from '../engine/soundEffects';
 import type { PlayerCard, Tier } from '../types/game';
-import { PlayerCaricature } from './PlayerCaricature';
 import { PlayerCardUI } from './PlayerCardUI';
 import { Flag } from './Flag';
-import { collarForSeason, kitForCard } from '../data/kits';
-import { devTheme } from '../data/devThemes';
-import { DevScene } from './DevScene';
-import { portraitUrl } from '../data/portraits';
 
 // A retro football sticker album that always fits the screen. It holds rare pulls only (Elite, gold and
 // Prime Icons), in themed sections: Holo Heroes, Golden Greats by decade, then the Elite labels. Each
@@ -29,10 +24,10 @@ const SECRETS = PLAYERS.filter((p) => p.tier === 'SECRET_DEV');
 // Showcase switch: while true, every dev card shows in the Secret Files as if pulled. Set to false to hide them again.
 const SHOW_ALL_SECRETS = true;
 
-const PAPER = '#f3ead3';
-const INK = '#2b2118';
-const BASE_W = 78; // a sticker's design size; it's scaled to fit the page
-const BASE_H = 104;
+const PAPER = '#fff6e0';
+const INK = '#14183a';
+const BASE_W = 64; // a sticker's design size (the xs trading card); it's scaled to fit the page
+const BASE_H = 92;
 const GAP = 8;
 
 const pct = (a: number, b: number) => (b ? Math.floor((a / b) * 100) : 0);
@@ -240,8 +235,9 @@ export function StickerBookModal({ onClose }: { onClose: () => void }) {
       const cards = bySection.get(p.id)!;
       return (
         <PaperPage key={i} side={side} layout={layout} pageNo={pageNo}>
-          {p.part === 0 ? <SectionBanner section={sec} got={cards.filter(has).length} total={cards.length} /> : <RunningHeader title={sec.title} colour={sec.colour} part={p.part} parts={p.parts} />}
+          {p.part === 0 ? <SectionBanner section={sec} got={cards.filter(has).length} total={cards.length} pageNo={pageNo} /> : <RunningHeader title={sec.title} colour={sec.colour} part={p.part} parts={p.parts} />}
           <Grid layout={layout} cells={p.cells} has={has} drafted={book.drafted} numberOf={numberOf} onOpen={openProfile} />
+          <SparesStamp count={p.cells.reduce((n, c) => n + (c.kind === 'card' ? (book.spares[c.card.id] ?? 0) : 0), 0)} />
         </PaperPage>
       );
     }
@@ -267,22 +263,27 @@ export function StickerBookModal({ onClose }: { onClose: () => void }) {
   return (
     <div
       className="fixed inset-0 z-[95] flex flex-col overflow-hidden px-2 py-2 sm:px-4"
-      style={{ background: 'radial-gradient(ellipse at 50% 30%, #4a3424, #20140c 70%)' }}
+      style={{ background: 'repeating-conic-gradient(from 0deg at 50% 50%, rgba(255,255,255,.05) 0 8deg, transparent 8deg 16deg), #1e4fd8' }}
       onClick={onClose}
       role="dialog"
       aria-label="Sticker album"
     >
-      {/* wood grain */}
-      <div className="pointer-events-none fixed inset-0 opacity-[0.12]" style={{ background: 'repeating-linear-gradient(95deg, #000 0 2px, transparent 2px 9px, #000 9px 10px, transparent 10px 23px)' }} />
+
       <div className="relative mx-auto flex w-full max-w-[1260px] flex-1 flex-col" onClick={(e) => e.stopPropagation()}>
-        <div className="mb-2 flex items-center gap-2">
-          <button onClick={() => go(1)} className="rounded-lg bg-black/40 px-2 py-1.5 text-xs font-black uppercase tracking-wider text-amber-100 hover:bg-black/60 sm:px-3">
-            Contents
+        <div className="mb-3 flex flex-wrap items-center gap-2 sm:gap-3">
+          <button onClick={onClose} className="btn-cut bg-flare-500 px-3 py-1.5 text-base text-ink sm:px-4 sm:text-lg" aria-label="Close sticker album">
+            ‹ BACK
+          </button>
+          <h2 className="m-0 hidden font-display text-4xl leading-none md:block lg:text-5xl" style={{ color: '#ffd400', WebkitTextStroke: '3px #14183a', paintOrder: 'stroke fill', textShadow: '4px 4px 0 #14183a' }}>
+            MY STICKER ALBUM
+          </h2>
+          <button onClick={() => go(1)} className="hdr-btn flex">
+            CONTENTS
           </button>
           <select
             value={currentSection}
             onChange={(e) => goPage(firstPageOf[e.target.value])}
-            className="min-w-0 max-w-[34vw] rounded-lg border-0 bg-black/40 px-2 py-1.5 text-xs font-bold text-amber-100 sm:max-w-none"
+            className="min-w-0 max-w-[40vw] rounded-[10px] border-2 border-ink bg-album-cream px-2 py-1.5 text-xs font-black text-ink sm:max-w-none"
             aria-label="Jump to section"
           >
             <option value="" disabled>
@@ -294,15 +295,18 @@ export function StickerBookModal({ onClose }: { onClose: () => void }) {
               </option>
             ))}
           </select>
-          <button onClick={() => goPage(firstPageOf['__honours'])} className="rounded-lg bg-black/40 px-2 py-1.5 text-xs font-black uppercase tracking-wider text-amber-100 hover:bg-black/60 sm:px-3">
-            Honours
+          <button onClick={() => goPage(firstPageOf['__honours'])} className="hdr-btn hidden sm:flex">
+            HONOURS
           </button>
-          <span className="ml-auto hidden text-xs font-bold text-amber-100/70 sm:block">
-            {got} / {total} stuck in · {pct(got, total)}%
-          </span>
-          <button onClick={onClose} className="rounded-lg bg-black/50 p-2 text-white hover:bg-black/70" aria-label="Close sticker album">
-            <X className="h-5 w-5" />
-          </button>
+          <div className="ml-auto flex items-center gap-2">
+            <span className="hidden font-chunky text-sm text-album-cream sm:inline">COLLECTED</span>
+            <div className="hidden h-6 w-40 overflow-hidden rounded-full border-[3px] border-ink bg-album-cream sm:block lg:w-56">
+              <div className="h-full bg-album-red" style={{ width: `${pct(got, total)}%` }} />
+            </div>
+            <span className="font-display text-2xl leading-none text-album-cream sm:text-3xl">
+              {got} / {total}
+            </span>
+          </div>
         </div>
 
         <div
@@ -336,7 +340,7 @@ export function StickerBookModal({ onClose }: { onClose: () => void }) {
             </button>
           )}
         </div>
-        <div className="mt-1 text-center text-[11px] font-bold text-amber-100/60">
+        <div className="mt-1 text-center text-[11px] font-bold text-album-cream/80">
           {view === 0 ? 'Tap to open' : `${layout.twoUp ? 'Spread' : 'Page'} ${view} of ${views.length - 1}`} · tap a sticker for its card · <span className="hidden sm:inline">← → to turn pages</span>
           <span className="sm:hidden">swipe to turn</span>
         </div>
@@ -353,13 +357,12 @@ function Spread({ children, turn, layout }: { children: ReactNode; turn: { dir: 
   return (
     <div className="relative" style={{ width: layout.twoUp ? layout.pageW * 2 : layout.pageW }}>
       {/* page edges peeking out underneath */}
-      <div className="absolute inset-x-1 -bottom-1.5 top-1.5 rounded-md bg-[#d9cdb0]" />
-      <div className="absolute inset-x-2 -bottom-3 top-3 rounded-md bg-[#c9bc9c]" />
-      <div className={`relative grid overflow-hidden rounded-md shadow-[0_25px_60px_rgba(0,0,0,.6)] ${layout.twoUp ? 'grid-cols-2' : 'grid-cols-1'}`} style={{ background: PAPER }}>
-        {/* paper fibre + print dots */}
-        <div className="pointer-events-none absolute inset-0 opacity-50" style={{ background: 'radial-gradient(rgba(120,90,50,.08) 1px, transparent 1.2px) 0 0/6px 6px' }} />
+      <div className="absolute inset-0 translate-x-[10px] translate-y-[10px] rounded-[18px] bg-ink" />
+      <div className={`relative grid overflow-hidden rounded-[18px] border-[5px] border-ink ${layout.twoUp ? 'grid-cols-2' : 'grid-cols-1'}`} style={{ background: PAPER }}>
+        {/* comic halftone print dots */}
+        <div className="pointer-events-none absolute inset-0" style={{ background: 'radial-gradient(rgba(20,24,58,.13) 1.6px, transparent 1.8px) 0 0/11px 11px' }} />
         {layout.twoUp && (
-          <div className="pointer-events-none absolute inset-y-0 left-1/2 z-10 w-16 -translate-x-1/2" style={{ background: 'linear-gradient(90deg, transparent, rgba(60,40,20,.28) 45%, rgba(30,20,10,.45) 50%, rgba(60,40,20,.28) 55%, transparent)' }} />
+          <div className="pointer-events-none absolute inset-y-0 left-1/2 z-10 w-[18px] -translate-x-1/2 border-x-2 border-ink/40" style={{ background: 'linear-gradient(90deg, #c9bfa3, #fff6e0 45%, #fff6e0 55%, #c9bfa3)' }} />
         )}
         {children}
       </div>
@@ -389,24 +392,36 @@ function PaperPage({ children, side, pageNo, layout }: { children?: ReactNode; s
       }}
     >
       {children}
-      {pageNo !== undefined && <div className={`absolute bottom-2 font-display text-sm text-[#8a7a60] ${side === 'left' ? 'left-5' : 'right-5'}`}>{pageNo}</div>}
+      {pageNo !== undefined && <div className={`absolute bottom-2 font-display text-base text-ink/50 ${side === 'left' ? 'left-5' : 'right-5'}`}>{pageNo}</div>}
     </div>
   );
 }
 
-function SectionBanner({ section, got, total }: { section: AlbumSection; got: number; total: number }) {
+function SectionBanner({ section, got, total, pageNo }: { section: AlbumSection; got: number; total: number; pageNo: number }) {
   return (
-    <div className="relative mb-2 shrink-0 overflow-hidden rounded-md px-3 py-2 text-white" style={{ background: section.colour }}>
-      {section.finish && <div className={`${section.finish === 'holo' ? 'foil-holo' : 'foil-gold'} pointer-events-none absolute inset-0 opacity-45`} />}
-      <div className="pointer-events-none absolute inset-0 opacity-25" style={{ background: 'repeating-conic-gradient(from 0deg at 85% 50%, rgba(255,255,255,.5) 0 8deg, transparent 8deg 16deg)' }} />
-      <div className="pointer-events-none absolute inset-0 opacity-25" style={{ background: 'radial-gradient(rgba(0,0,0,.6) 1.2px, transparent 1.5px) 0 0/5px 5px' }} />
-      <div className="relative min-w-0">
-        <div className="truncate font-display text-3xl leading-[0.9] drop-shadow-[0_2px_0_rgba(0,0,0,.45)] sm:text-4xl">{section.title}</div>
-        <div className="mt-1 text-[11px] font-bold text-white/90">{section.blurb}</div>
-        <div className="mt-1 inline-block rounded bg-black/45 px-1.5 text-[11px] font-black tracking-wider">
-          {got} / {total} STICKERS {got === total && '· COMPLETE ★'}
-        </div>
+    <div className="relative mb-3 flex shrink-0 items-center gap-3 pr-24">
+      <span className={`shrink-0 -rotate-3 border-[3px] border-ink px-2.5 pb-0 pt-1 font-chunky text-sm text-white ${section.finish === 'holo' ? 'foil-holo !text-ink' : section.finish === 'gold' ? 'foil-gold !text-ink' : ''}`} style={section.finish ? undefined : { background: section.colour }}>
+        PAGE {pageNo}
+      </span>
+      <div className="min-w-0">
+        <div className="truncate font-display text-3xl leading-none text-ink sm:text-[40px]">{section.title}</div>
+        <div className="truncate text-[11px] font-bold text-ink/70">{section.blurb}</div>
       </div>
+      <div className="burst-clip absolute -right-1 -top-2 flex h-[84px] w-[84px] rotate-[10deg] flex-col items-center justify-center bg-flare-500 text-center font-chunky text-[13px] leading-none text-ink">
+        {got} / {total}
+        <br />
+        {got === total ? 'DONE!' : 'GOT!'}
+      </div>
+    </div>
+  );
+}
+
+/** "GOT GOT" rubber stamp: how many spares of this page's stickers you've pulled. */
+function SparesStamp({ count }: { count: number }) {
+  if (!count) return null;
+  return (
+    <div className="pointer-events-none absolute bottom-6 right-6 -rotate-[8deg] rounded-lg border-4 border-dashed border-album-red px-3 pb-0.5 pt-1.5 font-chunky text-lg text-album-red">
+      GOT GOT: {count} SPARE{count === 1 ? '' : 'S'}
     </div>
   );
 }
@@ -440,8 +455,8 @@ function RunningHeader({ title, colour, part, parts }: { title: string; colour: 
   return (
     <div className="mb-2 flex h-[26px] shrink-0 items-center gap-2 border-b-2 pb-1" style={{ borderColor: colour }}>
       <span className="h-3.5 w-3.5 rounded-sm border border-black/30" style={{ background: colour }} />
-      <span className="truncate font-display text-lg leading-none">{title}</span>
-      <span className="ml-auto shrink-0 text-[10px] font-bold uppercase tracking-widest text-[#8a7a60]">
+      <span className="truncate font-display text-xl leading-none">{title}</span>
+      <span className="ml-auto shrink-0 text-[10px] font-bold uppercase tracking-widest text-ink/50">
         Page {part + 1} of {parts}
       </span>
     </div>
@@ -484,7 +499,7 @@ function Scaled({ scale, children, label }: { scale: number; children: ReactNode
       <div style={{ width: BASE_W * scale, height: BASE_H * scale }}>
         <div style={{ width: BASE_W, height: BASE_H, transform: `scale(${scale})`, transformOrigin: 'top left' }}>{children}</div>
       </div>
-      <div className="h-3 text-center font-display text-[10px] leading-3 text-[#8a7a60]">{label ?? ''}</div>
+      <div className="h-3 text-center font-display text-[11px] leading-3 text-ink/50">{label ? `Nº ${label}` : ''}</div>
     </div>
   );
 }
@@ -500,8 +515,8 @@ function Cover({ got, total, book, height, onOpen }: { got: number; total: numbe
       <button onClick={onOpen} className="group relative block w-[560px] max-w-full text-left" style={{ transform: `scale(${k})`, transformOrigin: 'top center' }} aria-label="Open the album">
         <div className="absolute inset-x-2 -bottom-2 top-2 rounded-l-md rounded-r-2xl bg-[#d9cdb0]" />
         <div
-          className="relative overflow-hidden rounded-l-md rounded-r-2xl border-l-[14px] border-[#0c2d1b] px-6 pb-8 pt-6 shadow-[0_30px_70px_rgba(0,0,0,.7)] transition group-hover:-rotate-1"
-          style={{ background: 'linear-gradient(160deg, #0f5132 0%, #0b3b25 55%, #072617 100%)' }}
+          className="relative overflow-hidden rounded-l-md rounded-r-2xl border-[5px] border-l-[16px] border-ink px-6 pb-8 pt-6 shadow-[0_30px_70px_rgba(0,0,0,.7)] transition group-hover:-rotate-1"
+          style={{ background: 'repeating-conic-gradient(from 0deg at 80% 10%, rgba(255,212,0,.18) 0 8deg, transparent 8deg 16deg), #e62e2d' }}
         >
           <div className="pointer-events-none absolute -right-24 -top-24 h-96 w-96 opacity-25" style={{ background: 'repeating-conic-gradient(#facc15 0 6deg, transparent 6deg 18deg)', borderRadius: '50%' }} />
           <div className="pointer-events-none absolute inset-0 opacity-30" style={{ background: 'radial-gradient(rgba(255,255,255,.18) 1px, transparent 1.3px) 0 0/5px 5px' }} />
@@ -613,78 +628,42 @@ function ContentsPage({
 // ───────────────────────────── stickers ─────────────────────────────
 
 
-/** A collected sticker: white border, portrait on a club-colour panel, name strip, finish by rarity. */
+/** A collected sticker: the trading card itself, stuck in at a slight angle. */
 function Sticker({ card, drafted, totw, onClick }: { card: PlayerCard; drafted?: number; totw?: number; onClick?: () => void }) {
-  const theme = card.tier === 'SECRET_DEV' ? devTheme(card.basePlayerId) : undefined;
-  const club = theme ? getClub(theme.fanClub) : getClub(card.club);
-  const era = eraColour(card.era);
-  const finish = card.tier === 'SECRET_DEV' ? 'foil-holo' : totw ? 'foil-holo' : card.tier === 'PRIME_ICON' ? 'foil-holo' : card.tier === 'RISING_WORLD' ? 'foil-gold' : '';
-  const frame = totw || card.tier === 'PRIME_ICON' || card.tier === 'RISING_WORLD' || card.tier === 'SECRET_DEV' ? undefined : card.tier === 'ELITE' ? era.mid : '#ffffff';
   const Tag = onClick ? 'button' : 'div';
   return (
     <Tag
       onClick={onClick}
-      className={`group relative block text-left transition-transform hover:z-10 hover:!rotate-0 ${onClick ? 'cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500' : ''}`}
+      className={`group relative block text-left transition-transform hover:z-10 hover:!rotate-0 ${onClick ? 'cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-album-red' : ''}`}
       style={{ transform: `rotate(${tilt(card.id)}deg)` }}
       aria-label={`${card.season} ${card.name}`}
     >
-      <div className={`relative h-[104px] w-[78px] rounded-[4px] p-[3px] shadow-[1px_2px_3px_rgba(0,0,0,.35)] ${finish}`} style={frame ? { background: frame } : undefined}>
-        <div className="relative h-full w-full overflow-hidden rounded-[2px] bg-white">
-          {theme ? (
-            <div className="absolute inset-0 bg-black">
-              <DevScene scene={theme.scene} opacity={0.8} />
-            </div>
-          ) : (
-            <div className="absolute inset-0" style={{ background: `linear-gradient(180deg, ${club.primary} 0%, ${club.primary} 62%, ${club.secondary} 62%)` }} />
-          )}
-          <div className="absolute inset-0 opacity-25" style={{ background: 'radial-gradient(rgba(255,255,255,.6) 1px, transparent 1.3px) 0 0/4px 4px' }} />
-          {portraitUrl(card.id) ? (
-            <img src={portraitUrl(card.id)} alt="" draggable={false} className="absolute bottom-3 left-1/2 w-[64px] max-w-none -translate-x-1/2" />
-          ) : (
-          <div className="absolute left-1/2 top-2 -translate-x-1/2">
-            <PlayerCaricature traits={card.traits} kitPrimaryColor={club.primary} kitSecondaryColor={club.secondary} kitSleeveColor={club.sleeve} kitCollarColor={club.collar} collarStyle={collarForSeason(card.season)} kit={kitForCard(card, theme?.fanClub)} seed={card.id} size={60} />
-          </div>
-          )}
-          <div className="absolute left-0.5 top-0.5 rounded-sm bg-black/60 px-0.5 text-[7px] font-black leading-tight text-white">{theme ? theme.emoji : card.season}</div>
-          <div className="absolute right-0.5 top-0.5 rounded-sm bg-white/85 px-0.5 font-display text-[10px] leading-tight text-black">{card.ovr}</div>
-          <div className="absolute inset-x-0 bottom-0 bg-white px-0.5 py-[1px] text-center">
-            <div className="truncate font-display text-[11px] leading-tight text-black">{card.shortName.toUpperCase()}</div>
-            <div className="text-[6px] font-black uppercase leading-tight text-black/60">
-              {card.positions[0]} · {club.short}
-            </div>
-          </div>
-          <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-white/35 via-transparent to-transparent" />
-        </div>
-        <div className="absolute bottom-0 right-0 h-3 w-3 rounded-tl-[4px]" style={{ background: 'linear-gradient(135deg, #fff 40%, #d8cfbd 50%, rgba(0,0,0,.15))' }} />
+      <div className={totw ? 'rounded-[10px] ring-4 ring-album-blue' : undefined}>
+        <PlayerCardUI card={card} size="xs" tilt={false} />
       </div>
-      {drafted ? <span className="absolute -right-1.5 -top-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-red-600 text-[11px] font-black text-yellow-300 shadow">★</span> : null}
+      {drafted ? <span className="absolute -right-1.5 -top-1.5 z-10 flex h-5 w-5 items-center justify-center rounded-full border-2 border-ink bg-album-red text-[11px] font-black text-flare-500">★</span> : null}
       {totw ? (
-        <span className="absolute -top-2 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-black px-1.5 text-[8px] font-black uppercase tracking-wider text-cyan-200 ring-1 ring-cyan-300">TOTW ×{totw}</span>
+        <span className="absolute -top-2 left-1/2 z-10 -translate-x-1/2 whitespace-nowrap rounded-full border-2 border-ink bg-album-blue px-1.5 font-chunky text-[8px] text-white">TOTW ×{totw}</span>
       ) : null}
     </Tag>
   );
 }
 
-/** A printed slot waiting for its sticker, like the real thing: number, name, position. */
 function EmptySlot({ card, number, onClick }: { card: PlayerCard; number: number; onClick: () => void }) {
-  const rare = card.tier === 'PRIME_ICON' || card.tier === 'RISING_WORLD';
+  const shiny = card.tier === 'PRIME_ICON' || card.tier === 'RISING_WORLD';
+  const club = getClub(card.club);
   return (
     <button
       onClick={onClick}
-      className={`flex h-[104px] w-[78px] flex-col items-center justify-center rounded-[4px] border text-center hover:bg-[#ece2c8] focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 ${rare ? 'border-[#c9a227]' : 'border-[#c4b594]'}`}
-      style={{ background: '#e7dcc2', boxShadow: 'inset 0 1px 3px rgba(0,0,0,.12)' }}
+      className={`flex h-[92px] w-[64px] flex-col items-center justify-center gap-0.5 rounded-[8px] border-2 border-dashed px-1 text-center hover:bg-white/60 focus:outline-none focus-visible:ring-2 focus-visible:ring-album-red ${shiny ? 'border-album-red' : 'border-ink/45'}`}
+      style={shiny ? { background: 'repeating-linear-gradient(135deg, rgba(230,46,45,.08) 0 6px, transparent 6px 12px)' } : undefined}
       aria-label={`Sticker ${number}: ${card.name} ${card.season}, not collected yet`}
     >
-      <svg viewBox="0 0 24 24" className="h-8 w-8 opacity-25" aria-hidden="true">
-        <circle cx="12" cy="8" r="4.2" fill={INK} />
-        <path d="M3.5 22c0-5 3.8-8 8.5-8s8.5 3 8.5 8z" fill={INK} />
-      </svg>
-      <div className="font-display text-xl leading-none text-[#9b8a6c]">{number}</div>
-      <div className="mt-0.5 w-full truncate px-1 text-[8px] font-black uppercase leading-tight text-[#7d6d52]">{card.shortName}</div>
-      <div className="text-[7px] font-bold leading-tight text-[#9b8a6c]">
-        {card.positions[0]} · {card.season}
+      <div className={`font-display text-lg leading-none ${shiny ? 'text-album-red' : 'text-ink/75'}`}>Nº {number}</div>
+      <div className="w-full truncate text-[8px] font-black uppercase leading-tight text-ink">{card.shortName}</div>
+      <div className="w-full truncate text-[7px] font-semibold leading-tight text-ink/70">
+        {club.short} {card.season}
       </div>
-      {rare && <div className="mt-0.5 text-[6px] font-black uppercase tracking-wider text-[#a8862a]">{card.tier === 'PRIME_ICON' ? 'Holo' : 'Gold'} foil</div>}
     </button>
   );
 }

@@ -91,6 +91,7 @@ export default function App() {
   const [managerInfoOpen, setManagerInfoOpen] = useState(false);
   const [bookOpen, setBookOpen] = useState(false);
   const [newIds, setNewIds] = useState<Set<string>>(new Set());
+  const [gotIds, setGotIds] = useState<Set<string>>(new Set());
   // Daily Draft: the date this run is seeded from (null = a normal random run).
   const [dailyDay, setDailyDay] = useState<string | null>(null);
   const [dailyInfo, setDailyInfo] = useState<{ number: number; streak: number; text: string } | null>(null);
@@ -124,6 +125,7 @@ export default function App() {
     (num: number, lu: Lineup, draftedIds: Set<string>, f: FormationId, rng: () => number = Math.random) => {
       const cards = generatePack({ packNumber: num, pool: PLAYERS, draftedBaseIds: draftedIds, formationId: f, lineup: lu, rng });
       setNewIds(new Set(cards.filter((c) => inAlbum(c) && !isPulled(c.id)).map((c) => c.id)));
+      setGotIds(new Set(cards.filter((c) => inAlbum(c) && isPulled(c.id)).map((c) => c.id)));
       setPackCards(cards);
       setPackKey((k) => k + 1);
       setSelected(null);
@@ -493,6 +495,7 @@ export default function App() {
                       showTrophies(checkTrophies());
                     }}
                     newIds={newIds}
+                    gotIds={gotIds}
                     wrapper={dailyDay ? 'daily' : undefined}
                     onReroll={reroll}
                   />

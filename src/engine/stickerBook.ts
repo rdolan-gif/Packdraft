@@ -2,6 +2,7 @@
 // - "pulled": the card appeared in a pack you opened (that's what fills the book)
 // - "drafted": you picked it into your XI (earns a gold star on the sticker)
 // - "totw": Team of the Week honours (a separate bonus page, not part of completion)
+// - "spares": album stickers pulled again after you'd already got them ("got got")
 
 import type { PlayerCard } from '../types/game';
 import { PLAYERS } from '../data/players';
@@ -12,18 +13,19 @@ export interface StickerBook {
   pulled: Record<string, string>; // card id -> first pulled (ISO date)
   drafted: Record<string, number>; // card id -> times drafted
   totw: Record<string, { count: number; first: string }>; // card id -> Team of the Week honours
+  spares: Record<string, number>; // card id -> duplicates pulled
 }
 
-const EMPTY: StickerBook = { pulled: {}, drafted: {}, totw: {} };
+const EMPTY: StickerBook = { pulled: {}, drafted: {}, totw: {}, spares: {} };
 
 export function loadBook(): StickerBook {
   try {
     const raw = localStorage.getItem(KEY);
-    if (!raw) return { ...EMPTY, pulled: {}, drafted: {}, totw: {} };
+    if (!raw) return { ...EMPTY, pulled: {}, drafted: {}, totw: {}, spares: {} };
     const b = JSON.parse(raw);
-    return { pulled: b.pulled ?? {}, drafted: b.drafted ?? {}, totw: b.totw ?? {} };
+    return { pulled: b.pulled ?? {}, drafted: b.drafted ?? {}, totw: b.totw ?? {}, spares: b.spares ?? {} };
   } catch {
-    return { pulled: {}, drafted: {}, totw: {} };
+    return { pulled: {}, drafted: {}, totw: {}, spares: {} };
   }
 }
 
@@ -35,13 +37,16 @@ function save(b: StickerBook) {
   }
 }
 
-/** Stick in every card from an opened pack. Returns the ids that were new. */
+/** Stick in every card from an opened pack; album stickers you already had become spares. Returns the new ids. */
 export function recordPulled(ids: string[]): string[] {
   const b = loadBook();
   const now = new Date().toISOString();
   const fresh = ids.filter((id) => !b.pulled[id]);
+  ids.forEach((id) => {
+    if (b.pulled[id] && ALBUM_IDS.has(id)) b.spares[id] = (b.spares[id] ?? 0) + 1;
+  });
   fresh.forEach((id) => (b.pulled[id] = now));
-  if (fresh.length) save(b);
+  save(b);
   return fresh;
 }
 
@@ -74,6 +79,7 @@ export function isPulled(id: string) {
 export const inAlbum = (c: PlayerCard) => c.tier === 'ELITE' || c.tier === 'RISING_WORLD' || c.tier === 'PRIME_ICON';
 
 export const ALBUM_CARDS = PLAYERS.filter(inAlbum);
+const ALBUM_IDS = new Set(ALBUM_CARDS.map((c) => c.id));
 
 export interface AlbumSection {
   id: string;

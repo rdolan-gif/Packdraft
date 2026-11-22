@@ -32,6 +32,8 @@ interface Props {
   onRip?: () => void;
   /** Cards never pulled before get a NEW STICKER ribbon. */
   newIds?: Set<string>;
+  /** Album stickers you already have: they land as spares ("GOT GOT"). */
+  gotIds?: Set<string>;
 }
 
 const FLASH: Record<Tier, { color: string; max: number }> = {
@@ -75,7 +77,7 @@ function raysFor(tier: Tier, accent?: string) {
   return `conic-gradient(from 0deg at 50% 50%, ${stops.join(', ')}, transparent 360deg)`;
 }
 
-export function PackOpener({ packNumber, cards, packKey, selectedId, onSelect, rerollAvailable, onReroll, onRevealed, title, subtitle, packLabel, onRip, newIds, wrapper }: Props) {
+export function PackOpener({ packNumber, cards, packKey, selectedId, onSelect, rerollAvailable, onReroll, onRevealed, title, subtitle, packLabel, onRip, newIds, gotIds, wrapper }: Props) {
   const [stage, setStage] = useState<Stage>('sealed');
   const [flipped, setFlipped] = useState<Set<number>>(new Set());
   const [tearProgress, setTearProgress] = useState(0);
@@ -600,8 +602,13 @@ export function PackOpener({ packNumber, cards, packKey, selectedId, onSelect, r
                       />
                     </div>
                     {isFlipped && newIds?.has(card.id) && (
-                      <span className="pointer-events-none absolute -top-2.5 left-1/2 z-30 -translate-x-1/2 animate-pop whitespace-nowrap rounded-full bg-amber-300 px-2 py-0.5 text-[9px] font-black uppercase tracking-wider text-black shadow-[0_0_12px_rgba(252,211,77,.8)]" style={{ backfaceVisibility: 'hidden' }}>
-                        New sticker
+                      <span className="burst-clip pointer-events-none absolute -right-4 -top-4 z-30 flex h-[52px] w-[52px] animate-pop items-center justify-center bg-album-red font-chunky text-[13px] text-white" style={{ backfaceVisibility: 'hidden' }}>
+                        NEW!
+                      </span>
+                    )}
+                    {isFlipped && gotIds?.has(card.id) && (
+                      <span className="pointer-events-none absolute left-1/2 top-[38%] z-30 -translate-x-1/2 -rotate-12 animate-stamp whitespace-nowrap rounded-md border-[3px] border-dashed border-album-red bg-album-cream/85 px-2 pb-0 pt-1 font-chunky text-[15px] text-album-red" style={{ backfaceVisibility: 'hidden' }}>
+                        GOT GOT
                       </span>
                     )}
                     <div className="absolute inset-0" style={{ backfaceVisibility: 'hidden', transform: 'rotateY(180deg)', pointerEvents: isFlipped ? 'none' : 'auto' }}>
