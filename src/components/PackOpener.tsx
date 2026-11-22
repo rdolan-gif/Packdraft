@@ -2,8 +2,8 @@ import { useEffect, useMemo, useRef, useState, type PointerEvent as RPointerEven
 import { RefreshCw, Scissors, Sparkles } from 'lucide-react';
 import type { PlayerCard, Tier } from '../types/game';
 import { eraColour } from '../data/eraColours';
-import { getClub } from '../data/clubs';
 import { Flag } from './Flag';
+import { ClubIcon } from './ClubIcon';
 import { highestTier, TOTAL_PACKS, tierRates } from '../engine/packGenerator';
 import { sfx } from '../engine/soundEffects';
 import { burstAt, goldConfetti, rainbowConfetti, shakeScreen } from '../engine/fx';
@@ -92,7 +92,7 @@ export function PackOpener({ packNumber, cards, packKey, selectedId, onSelect, r
   const best = useMemo(() => [...cards].sort((a, b) => Number(b.tier === 'SECRET_DEV') - Number(a.tier === 'SECRET_DEV') || b.ovr - a.ovr)[0], [cards]);
   const secret = top === 'SECRET_DEV';
   const bestEra = best ? eraColour(best.era) : eraColour('SQUAD');
-  // 86+ pulls: three fireworks, left to right, each bursting into a tile (flag, position, club).
+  // 86+ pulls: three fireworks, left to right, each bursting into a tile (position, club icon, flag).
   const [rockets, setRockets] = useState(0);
   const [tiles, setTiles] = useState(0);
   const fireworksFor = !!best && (best.ovr >= 86 || best.tier === 'SECRET_DEV');
@@ -341,7 +341,6 @@ export function PackOpener({ packNumber, cards, packKey, selectedId, onSelect, r
             const left = `${[20, 50, 80][i]}%`;
             const prime = walkoutTier(best.tier);
             const ring = best.tier === 'SECRET_DEV' ? RAINBOW[i] : prime ? '#ffffff' : bestEra.mid;
-            const club = getClub(best.club);
             return (
               <div key={i} className="absolute" style={{ left, top: `${TILE_Y * 100}%` }}>
                 {rockets > i && tiles <= i && (
@@ -356,20 +355,13 @@ export function PackOpener({ packNumber, cards, packKey, selectedId, onSelect, r
                       className="flex h-[92px] w-[92px] animate-pop flex-col items-center justify-center gap-1 rounded-2xl bg-zinc-950/95 sm:h-[110px] sm:w-[110px]"
                       style={{ border: `3px solid ${ring}`, boxShadow: `0 0 28px 4px ${ring}88, inset 0 0 0 2px ${prime ? '#facc15' : '#facc15aa'}` }}
                     >
-                      {i === 0 && (
+                      {i === 0 && <span className="font-display text-5xl leading-none text-white sm:text-6xl">{best.positions[0]}</span>}
+                      {i === 1 && <ClubIcon code={best.club} size={70} />}
+                      {i === 2 && (
                         <>
                           <Flag nation={best.nation} width={66} className="rounded-sm" />
                           <span className="max-w-[86px] truncate text-[9px] font-black uppercase tracking-wider text-white/80">{best.nation}</span>
                         </>
-                      )}
-                      {i === 1 && <span className="font-display text-5xl leading-none text-white sm:text-6xl">{best.positions[0]}</span>}
-                      {i === 2 && (
-                        <span
-                          className="rounded-lg px-2 py-1 font-display text-4xl leading-none sm:text-5xl"
-                          style={{ background: club.primary, color: club.secondary === club.primary ? '#fff' : club.secondary, border: `2px solid ${club.accent}` }}
-                        >
-                          {club.short}
-                        </span>
                       )}
                     </div>
                   </div>
