@@ -1,0 +1,194 @@
+/* The PackDraft trading card: a 230×336 design, scaled to each card size by PlayerCardUI. */
+.tc {
+  --ink: #161c2b;
+  --paper: #f5f0e4;
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 230px;
+  height: 336px;
+  border-radius: 13px;
+  font-family: 'Saira Extra Condensed', 'Inter', sans-serif;
+  color: var(--ink);
+  overflow: hidden;
+  transform-origin: top left;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.45);
+}
+.tc-frame {
+  position: relative;
+  height: 100%;
+  padding: 10px 10px 0;
+  background: var(--frame);
+  border: 3px solid var(--ink);
+  border-radius: 13px;
+  display: flex;
+  flex-direction: column;
+}
+.tc-ELITE .tc-frame { background: linear-gradient(160deg, var(--e1), var(--e2) 50%, var(--e3)); }
+.tc-RISING_WORLD .tc-frame,
+.tc-RISING_WORLD .tc-photo.tc-foil {
+  background: linear-gradient(120deg, #8a6416, #f3d47a 22%, #fff3c4 30%, #d9a93c 42%, #a97a1f 60%, #f6dc8c 78%, #9b7019);
+  background-size: 220% 220%;
+  animation: tc-foil 5s linear infinite;
+}
+.tc-PRIME_ICON .tc-frame,
+.tc-PRIME_ICON .tc-photo.tc-foil {
+  background: linear-gradient(115deg, #ffd6e8, #d4f1ff 18%, #fff8d1 34%, #e1d7ff 50%, #c9fff0 66%, #ffd9c2 82%, #ffd6e8);
+  background-size: 260% 260%;
+  animation: tc-foil 4s linear infinite;
+}
+.tc-PRIME_ICON .tc-frame { box-shadow: inset 0 0 0 3px #ff6a2b; }
+.tc-SECRET_DEV .tc-frame {
+  background: linear-gradient(90deg, #ff4d6d, #ffb703, #f7f052, #3ddc97, #3aa0ff, #a46bff, #ff4d6d);
+  background-size: 300% 100%;
+  animation: tc-foil 3s linear infinite;
+}
+.tc-SECRET_DEV .tc-photo.tc-foil {
+  background:
+    radial-gradient(circle at 20% 30%, rgba(164, 107, 255, 0.45), transparent 40%),
+    radial-gradient(circle at 80% 70%, rgba(58, 160, 255, 0.35), transparent 45%),
+    radial-gradient(rgba(255, 255, 255, 0.5) 0.8px, transparent 1px) 0 0 / 13px 13px,
+    #0b0e16;
+}
+@keyframes tc-foil {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 100% 50%; }
+}
+
+/* photo window: club-colour sunburst */
+.tc-photo {
+  position: relative;
+  height: 212px;
+  flex: none;
+  border: 3px solid var(--ink);
+  border-radius: 10px 30px 10px 10px;
+  overflow: hidden;
+  outline: 3px solid #fff;
+  outline-offset: -6px;
+  background:
+    repeating-conic-gradient(from 0deg at 50% 62%, rgba(255, 255, 255, 0.2) 0 9deg, transparent 9deg 18deg),
+    radial-gradient(circle at 50% 62%, color-mix(in srgb, var(--bg) 55%, white), var(--bg) 75%);
+}
+.tc-tiny .tc-photo { height: 268px; }
+.tc-portrait { position: absolute; left: 50%; bottom: 0; transform: translateX(-50%); line-height: 0; }
+.tc-portrait img { display: block; width: 172px; max-width: none; height: auto; }
+
+.tc-star {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  z-index: 2;
+  width: 62px;
+  height: 62px;
+  background: #ffd23f;
+  clip-path: polygon(50% 0, 61% 18%, 82% 10%, 80% 32%, 100% 40%, 85% 56%, 96% 76%, 74% 78%, 68% 100%, 50% 88%, 32% 100%, 26% 78%, 4% 76%, 15% 56%, 0 40%, 20% 32%, 18% 10%, 39% 18%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  line-height: 0.8;
+}
+.tc-star b { font-size: 27px; font-weight: 800; }
+.tc-star span { font-size: 11px; font-weight: 800; }
+.tc-tiny .tc-star { transform: scale(1.35); transform-origin: top left; }
+.tc-side {
+  position: absolute;
+  right: 3px;
+  top: 52px;
+  z-index: 2;
+  writing-mode: vertical-rl;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  color: #fff;
+  background: var(--ink);
+  padding: 6px 1px;
+  text-transform: uppercase;
+  max-height: 150px;
+  overflow: hidden;
+  white-space: nowrap;
+}
+.tc-tiny .tc-side { display: none; }
+.tc-badge { position: absolute; top: 6px; right: 6px; z-index: 2; line-height: 0; }
+.tc-tiny .tc-badge { transform: scale(1.4); transform-origin: top right; }
+
+.tc-ribbon {
+  position: relative;
+  z-index: 3;
+  margin: -14px -14px 0 -6px;
+  transform: rotate(-5deg);
+  background: var(--paper);
+  border: 3px solid var(--ink);
+  box-shadow: 4px 4px 0 var(--ink);
+  text-align: center;
+  padding: 0 6px;
+  white-space: nowrap;
+  overflow: hidden;
+}
+.tc-ribbon b { font-size: 29px; font-weight: 800; text-transform: uppercase; line-height: 1.05; letter-spacing: 0.03em; }
+.tc-tiny .tc-ribbon b { font-size: 36px; }
+.tc-sub {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 9px;
+  font-family: 'Inter', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  color: #fff;
+  text-shadow: 0 1px 0 var(--ink);
+  white-space: nowrap;
+  overflow: hidden;
+}
+.tc-sub svg { flex: none; border: 1.5px solid var(--ink); border-radius: 2px; }
+.tc-RISING_WORLD .tc-sub, .tc-PRIME_ICON .tc-sub { color: var(--ink); text-shadow: none; }
+.tc-stats { display: grid; grid-template-columns: repeat(var(--cols, 6), 1fr); gap: 3px; margin-top: 4px; }
+.tc-stats div { background: var(--ink); color: #fff; border-radius: 4px; text-align: center; line-height: 0.95; padding: 2px 0 3px; }
+.tc-stats b { display: block; font-size: 16px; font-weight: 800; }
+.tc-stats span { font-size: 9px; font-weight: 700; opacity: 0.75; }
+.tc-extra { margin-top: 4px; }
+
+/* shine, sparkles, tilt glare, selection */
+.tc-sheen {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(115deg, transparent 30%, rgba(255, 255, 255, 0.55) 45%, transparent 58%);
+  background-size: 260% 100%;
+  mix-blend-mode: soft-light;
+  animation: tc-sweep 3.2s ease-in-out infinite;
+}
+@keyframes tc-sweep {
+  0% { background-position: 120% 0; }
+  60%, 100% { background-position: -40% 0; }
+}
+.tc-sparkles i {
+  position: absolute;
+  z-index: 3;
+  width: 12px;
+  height: 12px;
+  background: #fff;
+  clip-path: polygon(50% 0, 60% 40%, 100% 50%, 60% 60%, 50% 100%, 40% 60%, 0 50%, 40% 40%);
+  animation: tc-twinkle 1.9s ease-in-out infinite;
+  opacity: 0;
+}
+@keyframes tc-twinkle {
+  0%, 100% { opacity: 0; transform: scale(0.3) rotate(0deg); }
+  50% { opacity: 0.95; transform: scale(1) rotate(45deg); }
+}
+.tc-glare {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 6;
+  opacity: var(--go, 0);
+  transition: opacity 0.2s;
+  background: radial-gradient(circle at var(--gx, 50%) var(--gy, 30%), rgba(255, 255, 255, 0.35), transparent 55%);
+}
+.tc-selected { position: absolute; inset: 0; z-index: 7; pointer-events: none; border-radius: 13px; box-shadow: inset 0 0 0 6px #ff6a2b, inset 0 0 24px 4px rgba(255, 106, 43, 0.6); }
+
+html.lite .tc-sheen,
+html.lite .tc-sparkles { display: none; }
+html.lite .tc .tc-frame,
+html.lite .tc .tc-photo { animation: none; }

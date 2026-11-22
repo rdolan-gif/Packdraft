@@ -1,5 +1,4 @@
 import { useRef, type CSSProperties, type PointerEvent } from 'react';
-import { Crown, Star } from 'lucide-react';
 import type { PlayerCard, Tier } from '../types/game';
 import { getClub } from '../data/clubs';
 import { PlayerCaricature } from './PlayerCaricature';
@@ -9,6 +8,10 @@ import { eraColour } from '../data/eraColours';
 import { devTheme } from '../data/devThemes';
 import { DevScene } from './DevScene';
 import { Crest } from './Crest';
+import { ClubIcon } from './ClubIcon';
+import { Flag } from './Flag';
+import { portraitUrl } from '../data/portraits';
+import './tradingCard.css';
 
 export const TIER_LABEL: Record<Tier, string> = {
   STANDARD: 'Squad Regular',
@@ -68,6 +71,19 @@ const GK_STAT_KEYS: [keyof PlayerCard['stats'], string][] = [
   ['phy', 'POS'],
 ];
 
+// The trading card is drawn at 230×336 and scaled to each size (all sizes share its shape).
+const BASE_W = 230;
+
+const lum = (c: string) => {
+  const [r, g, b] = [1, 3, 5].map((i) => parseInt(c.slice(i, i + 2), 16) / 255);
+  return 0.299 * r + 0.587 * g + 0.114 * b;
+};
+/** Sunburst behind the player: the club's second colour, or a tint of its main colour when that would be near-white. */
+function burst(primary: string, secondary: string) {
+  if (lum(secondary) < 0.85) return secondary;
+  return lum(primary) < 0.2 ? '#8b93a3' : `color-mix(in srgb, ${primary} 55%, white)`;
+}
+
 export function PlayerCardUI({ card, size = 'md', onClick, selected, dimmed, showStats, tilt = true, className = '', style, footer }: Props) {
   const ref = useRef<HTMLDivElement>(null);
   const d = DIM[size];
@@ -76,11 +92,13 @@ export function PlayerCardUI({ card, size = 'md', onClick, selected, dimmed, sho
   const secret = card.tier === 'SECRET_DEV';
   // Secret dev cards can carry a personal theme: a background scene, a banner and their club's kit.
   const theme = secret ? devTheme(card.basePlayerId) : undefined;
-  const kit = theme ? getClub(theme.fanClub) : club;
   const era = eraColour(card.era);
   const world = card.tier === 'RISING_WORLD';
+  const shiny = world || prime || secret;
   const isGK = card.positions[0] === 'GK';
   const tiny = size === 'xs' || size === 'sm';
+  const photo = portraitUrl(card.id);
+  const stats = isGK ? GK_STAT_KEYS : STAT_KEYS;
 
   const onMove = (e: PointerEvent) => {
     if (!tilt || !ref.current || e.pointerType !== 'mouse') return;
@@ -99,127 +117,123 @@ export function PlayerCardUI({ card, size = 'md', onClick, selected, dimmed, sho
     ref.current.style.setProperty('--go', '0');
   };
 
+  const vars = {
+    ['--frame' as string]: lum(club.primary) > 0.85 ? club.secondary : club.primary,
+    ['--bg' as string]: burst(club.primary, club.secondary),
+    ['--e1' as string]: era.light,
+    ['--e2' as string]: era.mid,
+    ['--e3' as string]: era.dark,
+    ['--cols' as string]: stats.length,
+    transform: `scale(${d.w / BASE_W})`,
+  } as CSSProperties;
+
   return (
     <div
       ref={ref}
       role={onClick ? 'button' : undefined}
       tabIndex={onClick ? 0 : undefined}
+      aria-label={`${card.name}, ${card.ovr} ${card.positions[0]}, ${club.name} ${card.season}`}
       onClick={onClick}
       onKeyDown={(e) => onClick && (e.key === 'Enter' || e.key === ' ') && (e.preventDefault(), onClick())}
       onPointerMove={onMove}
       onPointerEnter={(e) => onClick && e.pointerType === 'mouse' && sfx.hover()}
       onPointerLeave={onLeave}
       onPointerCancel={onLeave}
-      className={`card-base card-cut tier-${card.tier} ${card.tier === 'ELITE' ? 'sweep' : ''} ${prime ? 'aura' : ''} ${
-        selected ? '-translate-y-1' : ''
-      } ${dimmed ? 'opacity-40 grayscale' : ''} ${onClick ? 'cursor-pointer' : ''} select-none shrink-0 ${className}`}
-      // Era label colour: paints Elite (81–85) cards and gives gold (86–90) cards their glow.
-      style={{ width: d.w, height: d.h, ['--cut' as string]: `${Math.round(d.w * 0.13)}px`, ['--e1' as string]: era.light, ['--e2' as string]: era.mid, ['--e3' as string]: era.dark, ['--eb' as string]: era.border, ...style }}
+      className={`relative select-none shrink-0 rounded-[10px] transition-transform ${prime ? 'aura' : ''} ${selected ? '-translate-y-1' : ''} ${
+        dimmed ? 'opacity-40 grayscale' : ''
+      } ${onClick ? 'cursor-pointer' : ''} ${className}`}
+      style={{ width: d.w, height: d.h, ...style }}
     >
-      {/* floodlight band behind the player */}
-      <div className="card-band" style={{ background: prime ? 'rgba(255,255,255,.55)' : world ? 'rgba(255,255,255,.28)' : 'rgba(255,255,255,.06)' }} />
-      {theme && <DevScene scene={theme.scene} />}
-      {/* the Flare notch along the torn corner */}
-      <div
-        className="card-notch"
-        style={{ background: secret ? 'conic-gradient(#ff6a2b, #ffd23f, #3ddc97, #3da9ff, #b26bff, #ff4fa3, #ff6a2b)' : world ? '#1b1405' : '#ff6a2b' }}
-      />
-      {selected && <div className="pointer-events-none absolute inset-0 z-20" style={{ boxShadow: 'inset 0 0 0 4px #ff8248, inset 0 0 18px 2px rgba(255,106,43,.6)' }} />}
-      {(prime || secret) && <div className="holo" />}
-      <div className="glare" />
-      {(world || prime || secret) && (
-        <div className="sparkles absolute inset-0 pointer-events-none">
-          {Array.from({ length: prime || secret ? 8 : 5 }).map((_, i) => (
-            <i key={i} style={{ left: `${(i * 37 + 11) % 90 + 5}%`, top: `${(i * 53 + 7) % 85 + 5}%`, animationDelay: `${(i * 0.37) % 2.4}s` }} />
-          ))}
-        </div>
-      )}
-
-      {/* club colour sash */}
-      <div className="absolute -right-6 top-0 h-full w-10 rotate-12 opacity-40" style={{ background: `linear-gradient(${kit.primary}, ${kit.secondary})` }} />
-
-      {/* top-left: OVR + position */}
-      <div className={`absolute left-1.5 top-1 z-10 flex flex-col items-center leading-none ${prime || world ? 'text-ink [text-shadow:0_1px_0_rgba(255,255,255,.7)]' : 'text-shadow'}`}>
-        <span className={`font-display italic ${d.ovr}`} style={{ fontWeight: 900 }}>{card.ovr}</span>
-        <span className={`font-bold ${tiny ? 'text-[8px]' : 'text-xs'} tracking-wider`}>{card.positions[0]}</span>
-        {!tiny && card.positions.length > 1 && <span className="mt-0.5 text-[8px] opacity-80">{card.positions.slice(1).join('/')}</span>}
-        {prime && <Crown className={`${tiny ? 'h-3 w-3' : 'h-4 w-4'} mt-1 text-amber-400`} fill="currentColor" />}
-        {world && !tiny && <Star className="mt-1 h-3.5 w-3.5 text-white" fill="currentColor" />}
-      </div>
-
-      {/* top-right: season era badge */}
-      <div className="absolute right-1 top-1 z-10 flex flex-col items-end gap-0.5">
-        <span
-          className={`rounded px-1 py-[1px] font-black ${theme && size === 'md' ? 'text-[7px] tracking-normal' : `${d.small} tracking-wider`} uppercase text-white`}
-          style={{ background: card.tier === 'ELITE' || world ? era.dark : 'rgba(0,0,0,.6)', boxShadow: card.tier === 'ELITE' || world ? `inset 0 0 0 1px ${era.light}` : undefined }}
-        >
-          {theme ? (tiny ? theme.emoji : `${theme.emoji} ${theme.banner}`) : tiny ? card.season : `${card.season} ${card.era}`}
-        </span>
-        {!tiny && (
-          <span className="rounded px-1 text-[9px] font-black" style={{ background: kit.primary, color: kit.secondary === kit.primary ? '#fff' : kit.secondary, border: `1px solid ${kit.accent}` }}>
-            {kit.short}
-          </span>
-        )}
-      </div>
-
-      {/* portrait */}
-      <div className={`absolute left-1/2 z-[5] -translate-x-1/2 ${prime ? 'rim-prime' : world ? 'rim-gold' : ''}`} style={{ top: tiny ? d.h * 0.1 : d.h * 0.085 }}>
-        <PlayerCaricature traits={card.traits} kitPrimaryColor={kit.primary} kitSecondaryColor={kit.secondary} kitSleeveColor={kit.sleeve} kitCollarColor={kit.collar} collarStyle={collarForSeason(card.season)} kit={kitForCard(card, theme?.fanClub)} seed={card.id} size={Math.round(d.face * 1.06)} />
-      </div>
-
-      {/* name panel */}
-      <div className="absolute inset-x-0 bottom-0 z-10 bg-gradient-to-t from-ink via-ink/85 to-ink/0 px-1.5 pb-[7px] pt-3 text-center text-white">
-        <div className={`font-display italic ${d.name} leading-none truncate ${world ? 'text-[#f8de8c]' : ''}`} style={{ fontWeight: 900 }}>
-          {card.shortName.toUpperCase()}
-        </div>
-        {!tiny && (
-          <>
-            {/* one short line: playing style and nation (the club is the badge in the corner) */}
-            <div className="mt-0.5 truncate text-[9px] font-semibold opacity-80" title={`${club.name} · ${card.archetype} · ${card.nation}`}>
-              {theme ? `Dev Team · ${theme.fanLabel}` : `${card.archetype} · ${card.nation}`}
-            </div>
-            {showStats && (
-              <div className={`mt-0.5 grid ${isGK ? 'grid-cols-5' : 'grid-cols-6'} gap-0.5 text-[8px] leading-tight`}>
-                {(isGK ? GK_STAT_KEYS : STAT_KEYS).map(([k, label]) => (
-                  <div key={k} className="flex flex-col">
-                    <span className="font-black">{card.stats[k]}</span>
-                    <span className="opacity-70">{label}</span>
-                  </div>
+      <div className={`tc tc-${card.tier} ${tiny ? 'tc-tiny' : ''}`} style={vars}>
+        <div className="tc-frame">
+          <div className={`tc-photo ${shiny ? 'tc-foil' : ''}`}>
+            {theme && <DevScene scene={theme.scene} />}
+            {shiny && (
+              <div className="tc-sparkles">
+                {[[18, 22], [78, 14], [64, 46], [24, 60], [86, 70]].map(([x, y], i) => (
+                  <i key={i} style={{ left: `${x}%`, top: `${y}%`, animationDelay: `${i * 0.37}s` }} />
                 ))}
               </div>
             )}
-          </>
-        )}
-        {footer}
-        {/* club colours under the name */}
-        <div aria-hidden="true" className="absolute inset-x-0 bottom-0 flex h-[3px]">
-          <span className="flex-1" style={{ background: kit.primary }} />
-          <span className="flex-1" style={{ background: kit.secondary }} />
+            <div className="tc-portrait">
+              {photo ? (
+                <img src={photo} alt="" draggable={false} />
+              ) : (
+                <PlayerCaricature
+                  traits={card.traits}
+                  kitPrimaryColor={club.primary}
+                  kitSecondaryColor={club.secondary}
+                  kitSleeveColor={club.sleeve}
+                  kitCollarColor={club.collar}
+                  collarStyle={collarForSeason(card.season)}
+                  kit={kitForCard(card, theme?.fanClub)}
+                  seed={card.id}
+                  size={186}
+                />
+              )}
+            </div>
+            <div className="tc-star">
+              <b>{card.ovr}</b>
+              <span>{card.positions[0]}</span>
+            </div>
+            <div className="tc-side">{theme ? theme.banner : `${card.season} · ${secret ? 'Secret rare' : card.era}`}</div>
+            <div className="tc-badge">
+              <ClubIcon code={card.club} size={40} />
+            </div>
+          </div>
+          <div className="tc-ribbon">
+            <b>{card.shortName}</b>
+          </div>
+          {!tiny && (
+            <>
+              <div className="tc-sub" title={`${club.name} · ${card.archetype} · ${card.nation}`}>
+                <Flag nation={card.nation} width={20} />
+                <span>{theme ? `Dev Team · ${theme.fanLabel}` : card.archetype}</span>
+              </div>
+              {showStats && (
+                <div className="tc-stats">
+                  {stats.map(([k, label]) => (
+                    <div key={k}>
+                      <b>{card.stats[k]}</b>
+                      <span>{label}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+              {footer && <div className="tc-extra">{footer}</div>}
+            </>
+          )}
         </div>
+        {shiny && <div className="tc-sheen" />}
+        <div className="tc-glare" />
+        {selected && <div className="tc-selected" />}
       </div>
     </div>
   );
 }
 
-/** Card back used during the face-down fan-out. */
+/** Card back used during the face-down fan-out: navy frame, sunburst, the crest. */
 export function CardBack({ size = 'md', glow, className = '', style }: { size?: Size; glow?: boolean; className?: string; style?: CSSProperties }) {
   const d = DIM[size];
   return (
-    <div
-      className={`card-base card-cut shrink-0 ${glow ? 'aura animate-vibrate' : ''} ${className}`}
-      style={{
-        width: d.w,
-        height: d.h,
-        ['--cut' as string]: `${Math.round(d.w * 0.13)}px`,
-        background: 'repeating-linear-gradient(115deg, #151a26 0 12px, #0f131d 12px 24px)',
-        boxShadow: glow ? 'inset 0 0 0 3px #fff, inset 0 0 24px 4px #ff6a2b' : 'inset 0 0 0 3px #ff6a2b',
-        ...style,
-      }}
-    >
-      <div className="card-notch" style={{ background: '#ff6a2b' }} />
-      <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
-        <Crest size={Math.round(d.w * 0.46)} />
-        {d.w >= 120 && <div className="font-display text-[10px] tracking-[0.35em] text-white/50">RIP · DRAFT · SURVIVE</div>}
+    <div className={`relative shrink-0 rounded-[10px] ${glow ? 'aura animate-vibrate' : ''} ${className}`} style={{ width: d.w, height: d.h, ...style }}>
+      <div className="tc" style={{ transform: `scale(${d.w / BASE_W})`, boxShadow: glow ? '0 0 0 4px #fff, 0 0 32px 8px #ff6a2b' : undefined }}>
+        <div className="tc-frame" style={{ background: '#151a26', padding: 10 }}>
+          <div
+            className="tc-photo"
+            style={{
+              height: '100%',
+              borderRadius: 10,
+              background: 'repeating-conic-gradient(from 0deg at 50% 45%, rgba(255,106,43,.22) 0 9deg, transparent 9deg 18deg), radial-gradient(circle at 50% 45%, #2a3350, #151a26 75%)',
+            }}
+          >
+            <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
+              <Crest size={110} />
+              <div style={{ fontSize: 30, fontWeight: 800, color: '#f5f0e4', letterSpacing: '0.06em', lineHeight: 1 }}>PACKDRAFT 38</div>
+              <div style={{ fontSize: 13, fontWeight: 800, color: '#ff6a2b', letterSpacing: '0.3em' }}>RIP · DRAFT · SURVIVE</div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

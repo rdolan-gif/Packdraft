@@ -18,6 +18,7 @@ ap.add_argument('out')
 ap.add_argument('--cols', type=int, default=4)
 ap.add_argument('--rows', type=int, default=2)
 ap.add_argument('--names', default='')
+ap.add_argument('--webp', type=int, default=0, help='save as WebP this many pixels wide (for src/assets/portraits)')
 a = ap.parse_args()
 
 A = np.asarray(Image.open(a.image).convert('RGB')).astype(float)
@@ -97,7 +98,15 @@ for y0, y1 in ys:
                     seen[ny, nx] = True
                     q.append((ny, nx))
         clear = seen | (pink(c) & (np.abs(c[..., 0] - c[..., 2]) < 60))
+        # magenta fringe on the outline and stray gap lines: anything still clearly pink goes too
+        r_, g_, b_ = c[..., 0], c[..., 1], c[..., 2]
+        clear |= (r_ > 120) & (b_ > 120) & (r_ - g_ > 60) & (b_ - g_ > 60)
         alpha = np.where(clear, 0, 255).astype(np.uint8)
-        Image.fromarray(np.dstack([c.astype(np.uint8), alpha]), 'RGBA').save(Path(a.out) / f'{names[k]}.png')
+        img = Image.fromarray(np.dstack([c.astype(np.uint8), alpha]), 'RGBA')
+        if a.webp:
+            img = img.resize((a.webp, round(img.height * a.webp / img.width)), Image.LANCZOS)
+            img.save(Path(a.out) / f'{names[k]}.webp', quality=88, method=6)
+        else:
+            img.save(Path(a.out) / f'{names[k]}.png')
         k += 1
 print(f'{k} cells from {a.image} -> {a.out} (cols at {xs}, rows at {ys})')
