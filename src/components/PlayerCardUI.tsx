@@ -1,4 +1,4 @@
-import { useRef, type CSSProperties, type PointerEvent } from 'react';
+import { useRef, useState, type CSSProperties, type PointerEvent } from 'react';
 import type { PlayerCard, Tier } from '../types/game';
 import { getClub } from '../data/clubs';
 import { PlayerCaricature } from './PlayerCaricature';
@@ -97,7 +97,8 @@ export function PlayerCardUI({ card, size = 'md', onClick, selected, dimmed, sho
   const shiny = world || prime || secret;
   const isGK = card.positions[0] === 'GK';
   const tiny = size === 'xs' || size === 'sm';
-  const photo = portraitUrl(card.id);
+  const [broken, setBroken] = useState(false);
+  const photo = broken ? undefined : portraitUrl(card.id);
   const stats = isGK ? GK_STAT_KEYS : STAT_KEYS;
 
   const onMove = (e: PointerEvent) => {
@@ -157,7 +158,7 @@ export function PlayerCardUI({ card, size = 'md', onClick, selected, dimmed, sho
             )}
             <div className="tc-portrait">
               {photo ? (
-                <img src={photo} alt="" draggable={false} />
+                <img src={photo} alt="" draggable={false} decoding="async" onError={() => setBroken(true)} />
               ) : (
                 <PlayerCaricature
                   traits={card.traits}

@@ -10,6 +10,7 @@ import { burstAt, goldConfetti, rainbowConfetti, shakeScreen } from '../engine/f
 import { Crest } from './Crest';
 import { CardBack, PlayerCardUI } from './PlayerCardUI';
 import { ComicTell } from './ComicTell';
+import { preloadPortraits } from '../data/portraits';
 
 /** Comic-book rarity tells (flat, outlined, a sound-effect word) instead of the old glowing flashes. */
 export const COMIC_FX = true;
@@ -144,6 +145,8 @@ export function PackOpener({ packNumber, cards, packKey, selectedId, onSelect, r
   }, [packKey]);
 
   useEffect(() => () => timers.current.forEach(clearTimeout), []);
+  // Fetch this pack's portraits while it's still sealed, so faces are there the moment cards flip.
+  useEffect(() => preloadPortraits(cards.map((c) => c.id)), [cards]);
 
   const later = (ms: number, fn: () => void) => {
     timers.current.push(window.setTimeout(fn, ms));
