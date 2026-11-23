@@ -106,7 +106,7 @@ for y0, y1 in ys:
         img = Image.fromarray(np.dstack([c.astype(np.uint8), alpha]), 'RGBA')
         if a.webp:
             img = img.resize((a.webp, round(img.height * a.webp / img.width)), Image.LANCZOS)
-            img.save(Path(a.out) / f'{names[k]}.webp', quality=88, method=6)
+            img.save(Path(a.out) / f'{names[k]}.webp', quality=80, method=4)
         else:
             img.save(Path(a.out) / f'{names[k]}.png')
         k += 1

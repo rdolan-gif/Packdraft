@@ -22,6 +22,7 @@ import { inAlbum, isPulled, recordDrafted, recordPulled } from './engine/sticker
 import { MANAGERS, MANAGERS_BY_ID } from './data/managers';
 import { FORMATIONS } from './data/formations';
 import { PLAYERS, PLAYERS_BY_ID } from './data/players';
+import { preloadAllPortraits } from './data/portraits';
 import { bestSlotFor, computeTeamRating, fitFor } from './engine/chemistry';
 import { generatePack, TOTAL_PACKS } from './engine/packGenerator';
 import { buildLeague, buildSummary, ordinal, pickEra, SeasonSim, USER_TEAM_ID } from './engine/seasonSimulator';
@@ -109,6 +110,7 @@ export default function App() {
     setDealing(false);
   };
   useEffect(() => () => cancelDeal(), []);
+  useEffect(() => preloadAllPortraits(), []);
 
   const rating = useMemo(() => computeTeamRating(formationId, lineup, managerId), [formationId, lineup, managerId]);
   const picksMade = Object.values(lineup).filter(Boolean).length;
