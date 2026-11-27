@@ -681,3 +681,7 @@ html.lite .comic-rays, html.lite .comic-glitch::before, html.lite .comic-glitch:
   paint-order: stroke fill;
   text-shadow: 5px 5px 0 #0b0e24;
 }
+
+/* Nothing (a pop-up mid-bounce, a ticker) may make the page scroll sideways on phones.
+   `clip` rather than `hidden` keeps the sticky header working. */
+html, body { overflow-x: clip; }
