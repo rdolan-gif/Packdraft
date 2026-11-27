@@ -49,7 +49,7 @@ export function Header({ phase, packNumber, picksMade, vaultCount, onOpenVault, 
 
   return (
     <header className="sticky top-0 z-50 border-b-4 border-flare-500 bg-ink">
-      <div className="mx-auto flex max-w-7xl items-center gap-3 px-4 py-2">
+      <div className="mx-auto flex max-w-7xl items-center gap-2 px-3 py-2 sm:gap-3 sm:px-4">
         <button onClick={requestNewRun} className="flex items-center gap-2" aria-label="PackDraft 38 home">
           <Crest size={34} variant="full" />
           <Wordmark className="hidden text-2xl sm:inline-flex" />
@@ -59,9 +59,9 @@ export function Header({ phase, packNumber, picksMade, vaultCount, onOpenVault, 
         )}
 
         {phase === 'draft' && (
-          <div className="ml-2 flex flex-1 items-center gap-2">
+          <div className="ml-1 flex min-w-0 flex-1 items-center gap-2 sm:ml-2">
             <div className="hidden text-[10px] font-black uppercase tracking-widest text-white/50 md:block">Draft</div>
-            <div className="flex flex-1 gap-1">
+            <div className="flex min-w-0 flex-1 gap-[3px] sm:gap-1">
               {Array.from({ length: TOTAL_PACKS }).map((_, i) => (
                 <span
                   key={i}

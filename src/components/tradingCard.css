@@ -26,23 +26,43 @@
   flex-direction: column;
 }
 .tc-ELITE .tc-frame { background: linear-gradient(160deg, var(--e1), var(--e2) 50%, var(--e3)); }
-.tc-RISING_WORLD .tc-frame,
-.tc-RISING_WORLD .tc-photo.tc-foil {
-  background: linear-gradient(120deg, #8a6416, #f3d47a 22%, #fff3c4 30%, #d9a93c 42%, #a97a1f 60%, #f6dc8c 78%, #9b7019);
-  background-size: 220% 220%;
-  animation: tc-foil 5s linear infinite;
+/* Foil frames: the gradient sits on a wide layer that slides with transform, so phones move it
+   on the GPU instead of repainting the card every frame. */
+.tc-RISING_WORLD .tc-frame, .tc-PRIME_ICON .tc-frame, .tc-SECRET_DEV .tc-frame,
+.tc-RISING_WORLD .tc-photo.tc-foil, .tc-PRIME_ICON .tc-photo.tc-foil { isolation: isolate; }
+.tc-RISING_WORLD .tc-frame::before, .tc-PRIME_ICON .tc-frame::before, .tc-SECRET_DEV .tc-frame::before,
+.tc-RISING_WORLD .tc-photo.tc-foil::before, .tc-PRIME_ICON .tc-photo.tc-foil::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  top: -3px;
+  bottom: -3px;
+  left: -3px;
+  width: var(--fw);
+  background: var(--foil);
+  background-size: 50% 100%;
+  will-change: transform;
+  animation: tc-foil var(--fs) linear infinite;
+  pointer-events: none;
 }
-.tc-PRIME_ICON .tc-frame,
-.tc-PRIME_ICON .tc-photo.tc-foil {
-  background: linear-gradient(115deg, #ffd6e8, #d4f1ff 18%, #fff8d1 34%, #e1d7ff 50%, #c9fff0 66%, #ffd9c2 82%, #ffd6e8);
-  background-size: 260% 260%;
-  animation: tc-foil 4s linear infinite;
+.tc-RISING_WORLD .tc-frame, .tc-RISING_WORLD .tc-photo.tc-foil {
+  --foil: linear-gradient(120deg, #8a6416, #f3d47a 22%, #fff3c4 30%, #d9a93c 42%, #a97a1f 60%, #f6dc8c 78%, #9b7019);
+  --fw: 440%;
+  --fs: 9s;
+  background: #d9a93c;
+}
+.tc-PRIME_ICON .tc-frame, .tc-PRIME_ICON .tc-photo.tc-foil {
+  --foil: linear-gradient(115deg, #ffd6e8, #d4f1ff 18%, #fff8d1 34%, #e1d7ff 50%, #c9fff0 66%, #ffd9c2 82%, #ffd6e8);
+  --fw: 520%;
+  --fs: 8s;
+  background: #e1d7ff;
 }
 .tc-PRIME_ICON .tc-frame { box-shadow: inset 0 0 0 3px #ff6a2b; }
 .tc-SECRET_DEV .tc-frame {
-  background: linear-gradient(90deg, #ff4d6d, #ffb703, #f7f052, #3ddc97, #3aa0ff, #a46bff, #ff4d6d);
-  background-size: 300% 100%;
-  animation: tc-foil 3s linear infinite;
+  --foil: linear-gradient(90deg, #ff4d6d, #ffb703, #f7f052, #3ddc97, #3aa0ff, #a46bff, #ff4d6d);
+  --fw: 600%;
+  --fs: 6s;
+  background: #a46bff;
 }
 .tc-SECRET_DEV .tc-photo.tc-foil {
   background:
@@ -52,8 +72,8 @@
     #0b0e16;
 }
 @keyframes tc-foil {
-  0% { background-position: 0% 50%; }
-  100% { background-position: 100% 50%; }
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
 }
 
 /* photo window: club-colour sunburst */
@@ -164,15 +184,24 @@
 .tc-sheen {
   position: absolute;
   inset: 0;
+  overflow: hidden;
   pointer-events: none;
-  background: linear-gradient(115deg, transparent 30%, rgba(255, 255, 255, 0.55) 45%, transparent 58%);
-  background-size: 260% 100%;
-  mix-blend-mode: soft-light;
+  border-radius: 13px;
+}
+.tc-sheen::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 60%;
+  background: linear-gradient(115deg, transparent 20%, rgba(255, 255, 255, 0.32) 50%, transparent 80%);
+  will-change: transform;
   animation: tc-sweep 3.2s ease-in-out infinite;
 }
 @keyframes tc-sweep {
-  0% { background-position: 120% 0; }
-  60%, 100% { background-position: -40% 0; }
+  0% { transform: translateX(-110%); }
+  60%, 100% { transform: translateX(190%); }
 }
 .tc-sparkles i {
   position: absolute;
@@ -201,5 +230,5 @@
 
 html.lite .tc-sheen,
 html.lite .tc-sparkles { display: none; }
-html.lite .tc .tc-frame,
-html.lite .tc .tc-photo { animation: none; }
+html.lite .tc .tc-frame::before,
+html.lite .tc .tc-photo::before { animation: none; }

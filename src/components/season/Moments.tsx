@@ -85,7 +85,7 @@ export function MidSeasonAwards({ sim, onContinue }: { sim: SeasonSim; onContinu
   ].filter(Boolean) as { title: string; card?: import('../../types/game').PlayerCard; line: string }[];
 
   return (
-    <div className="fixed inset-0 z-[91] overflow-y-auto overscroll-contain bg-ink/95" role="dialog" aria-label="Mid-season awards">
+    <div className="fixed inset-0 z-[91] overflow-y-auto overflow-x-hidden overscroll-contain bg-ink/95" role="dialog" aria-label="Mid-season awards">
       <div className="flex min-h-full items-center justify-center p-3 sm:p-5">
         <div className="w-full max-w-3xl animate-pop overflow-hidden rounded-3xl border-[5px] border-ink bg-ink-800 shadow-[10px_10px_0_#0b0e24]">
           <div className="border-b-[4px] border-ink bg-flare-500 px-5 py-2 text-center font-chunky text-base text-ink">MID-SEASON AWARDS!</div>

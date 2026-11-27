@@ -13,9 +13,10 @@ const STAR = 'polygon(50% 0, 62% 36%, 100% 38%, 70% 60%, 80% 100%, 50% 76%, 20% 
 
 function Word({ text, size, fill, tilt = -6, delay = 0, glitch }: { text: string; size: number; fill: string; tilt?: number; delay?: number; glitch?: boolean }) {
   const style: CSSProperties = {
-    fontSize: size,
+    // Shrink long words on narrow phones so they always fit the screen (Bangers is ~0.48em per letter).
+    fontSize: `min(${size}px, ${(86 / (0.48 * text.length)).toFixed(1)}vw)`,
     color: fill,
-    WebkitTextStroke: `${Math.max(3, size / 16)}px ${INK}`,
+    WebkitTextStroke: `${Math.max(3, size / 18)}px ${INK}`,
     paintOrder: 'stroke fill',
     textShadow: `${Math.max(4, size / 12)}px ${Math.max(4, size / 12)}px 0 ${INK}`,
     ['--tilt' as string]: `${tilt}deg`,
@@ -60,11 +61,14 @@ function Stars({ colours, count = 14 }: { colours: string[]; count?: number }) {
 }
 
 /** Flat sunburst rays with hard edges, spinning slowly. */
-function Rays({ a, b, size = 160 }: { a: string; b: string; size?: number }) {
+function Rays({ a, b }: { a: string; b: string }) {
+  // Sized in pixels from the real screen: a square a little wider than the screen's diagonal always
+  // covers it while it spins (viewport units misreport on some phones and left a corner uncovered).
+  const size = Math.ceil(Math.hypot(window.innerWidth, window.innerHeight) * 1.08);
   return (
     <div
       className="comic-rays absolute left-1/2 top-1/2"
-      style={{ width: `${size}vmax`, height: `${size}vmax`, background: `repeating-conic-gradient(from 0deg, ${a} 0 9deg, ${b} 9deg 18deg)` }}
+      style={{ width: size, height: size, background: `repeating-conic-gradient(from 0deg, ${a} 0 9deg, ${b} 9deg 18deg)` }}
     />
   );
 }

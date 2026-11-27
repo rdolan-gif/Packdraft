@@ -47,7 +47,7 @@ export function TransferWindow({ formationId, lineup, managerId, position, point
   const delta = after ? after.overall - before.overall : 0;
 
   return (
-    <div className="fixed inset-0 z-[92] overflow-y-auto overscroll-contain bg-ink/95" role="dialog" aria-label="January transfer window">
+    <div className="fixed inset-0 z-[92] overflow-y-auto overflow-x-hidden overscroll-contain bg-ink/95" role="dialog" aria-label="January transfer window">
       <div className="mx-auto flex min-h-full max-w-6xl flex-col p-3 sm:p-5">
         <div className="mb-3 overflow-hidden rounded-2xl border-[4px] border-ink bg-album-blue shadow-[6px_6px_0_#0b0e24]">
           <div className="border-b-[4px] border-ink bg-flare-500 px-4 py-1.5 text-center font-chunky text-sm text-ink">JANUARY TRANSFER WINDOW!</div>

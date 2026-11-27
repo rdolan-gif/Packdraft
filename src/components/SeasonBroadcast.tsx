@@ -665,7 +665,7 @@ function DecisionOverlay({ d, sim, onChoose }: { d: DecisionContext; sim: Season
   ];
   return (
     // Scrollable so every choice stays reachable on short screens or with enlarged text.
-    <div className="fixed inset-0 z-[90] overflow-y-auto overscroll-contain bg-ink/95">
+    <div className="fixed inset-0 z-[90] overflow-y-auto overflow-x-hidden overscroll-contain bg-ink/95">
       <div className="flex min-h-full items-center justify-center p-3 sm:p-4">
       <div className="w-full max-w-3xl animate-pop overflow-hidden rounded-3xl border-[5px] border-ink bg-ink-800 shadow-[10px_10px_0_#0b0e24]">
         <div className="border-b-[4px] border-ink bg-flare-500 px-5 py-2 text-center font-chunky text-base text-ink">TOUCHLINE TACTICAL DECISION!</div>

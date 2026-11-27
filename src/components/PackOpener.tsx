@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type PointerEvent as RPointerEvent } from 'react';
+import { createPortal } from 'react-dom';
 import { RefreshCw, Scissors } from 'lucide-react';
 import type { PlayerCard, Tier } from '../types/game';
 import { eraColour } from '../data/eraColours';
@@ -317,7 +318,10 @@ export function PackOpener({ packNumber, cards, packKey, selectedId, onSelect, r
 
   return (
     <div className="relative flex min-h-[420px] w-full flex-col items-center">
-      {/* Fullscreen tells */}
+      {/* Fullscreen tells: portalled to <body> so a transformed parent (the pack panel) can't trap
+          them; on phones that clipped the burst to the panel instead of covering the screen. */}
+      {createPortal(
+        <>
       {stage === 'dimming' && <div className="pointer-events-none fixed inset-0 z-[80] bg-ink/95 transition-opacity" />}
       {flash && COMIC_FX && (
         <div key={flash.key} className="pointer-events-none fixed inset-0 z-[81]">
@@ -374,9 +378,13 @@ export function PackOpener({ packNumber, cards, packKey, selectedId, onSelect, r
       {fireworksFor && best && (stage === 'tell' || stage === 'dimming') && tiles > 0 && (
         <div className="pointer-events-none fixed inset-0 z-[83]" aria-live="polite">
           {[0, 1, 2].map((i) => {
-            const left = `${[20, 50, 80][i]}%`;
+            // Phones: position and club side by side, the flag centred under them (a row of three
+            // ran off narrow screens).
+            const narrow = window.innerWidth < 640;
+            const left = `${(narrow ? [27, 73, 50] : [20, 50, 80])[i]}%`;
+            const top = `${narrow ? [TILE_Y * 100, TILE_Y * 100, TILE_Y * 100 + 22][i] : TILE_Y * 100}%`;
             return (
-              <div key={i} className="absolute" style={{ left, top: `${TILE_Y * 100}%` }}>
+              <div key={i} className="absolute" style={{ left, top }}>
                 {tiles > i && (
                   <div className="absolute -translate-x-1/2 -translate-y-1/2">
                     <div className="comic-pop" style={{ ['--tilt' as string]: `${[-8, 5, -4][i]}deg` }}>
@@ -415,6 +423,10 @@ export function PackOpener({ packNumber, cards, packKey, selectedId, onSelect, r
             );
           })}
         </div>
+      )}
+
+        </>,
+        document.body,
       )}
 
       {/* header */}
@@ -567,8 +579,14 @@ export function PackOpener({ packNumber, cards, packKey, selectedId, onSelect, r
         </div>
       )}
 
-      {showCards && (
-        <div data-shake-zone className="flex w-full flex-1 flex-col items-center">
+      {/* The cards are built while the pack is still sealed (hidden), so the reveal doesn't stall
+          the animation while five cards and their portraits are created. */}
+      {(
+        <div
+          data-shake-zone={showCards ? '' : undefined}
+          aria-hidden={!showCards}
+          className={showCards ? 'flex w-full flex-1 flex-col items-center' : 'pointer-events-none invisible absolute inset-x-0 top-0 flex flex-col items-center'}
+        >
           <div className="flex w-full flex-wrap items-start justify-center gap-2 sm:gap-3">
             {cards.map((card, i) => {
               const isFlipped = flipped.has(i);
@@ -576,7 +594,7 @@ export function PackOpener({ packNumber, cards, packKey, selectedId, onSelect, r
               return (
                 <div
                   key={card.id}
-                  className="animate-pop"
+                  className={showCards ? 'animate-pop' : ''}
                   style={{ animationDelay: `${i * 70}ms`, perspective: 1000 }}
                   onClick={() => {
                     if (isFlipped || stage !== 'fanned') return;
